@@ -115,3 +115,4 @@ Hệ thống quản lý Thực tập sinh có thể được nhóm thành các m
 Hệ thống quản lý Thực tập sinh là một hệ thống nghiệp vụ hỗ trợ quản lý toàn bộ quy trình thực tập của sinh viên từ khi đăng ký, theo dõi, đánh giá đến báo cáo kết quả. Hệ thống này tập trung vào việc giải quyết các vấn đề về quản lý thông tin, đồng bộ dữ liệu, kiểm soát tiến độ và nâng cao hiệu quả công tác giám sát thực tập.
 
 Với các actor chính là sinh viên, giảng viên, người hướng dẫn, đơn vị thực tập và quản trị viên, hệ thống đáp ứng nhu cầu quản lý thực tập trong môi trường giáo dục và doanh nghiệp, đồng thời tạo nền tảng cho việc ra quyết định và báo cáo quản lý một cách chính xác, kịp thời và minh bạch.
+
