@@ -1,0 +1,543 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f6f8;
+  color: #222;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  height: 70px;
+  background: #1677ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 35px;
+}
+
+.header h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.user-info {
+  font-size: 14px;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 70px);
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+  width: 230px;
+  background: white;
+  border-right: 1px solid #ddd;
+  padding: 25px 10px;
+  flex-shrink: 0;
+  text-align: left;
+}
+
+.sidebar h3 {
+  font-size: 14px;
+  color: #777;
+  margin: 0 10px 20px;
+  text-align: left;
+}
+
+.menu-item {
+  padding: 13px 10px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 16px;
+}
+
+.menu-item:hover {
+  background: #f0f5ff;
+}
+
+.menu-item.active {
+  background: #e6f4ff;
+  color: #1677ff;
+  font-weight: bold;
+}
+
+/* ================= CONTENT ================= */
+
+.content {
+  flex: 1;
+  padding: 35px;
+  min-width: 0;
+}
+
+.page-title {
+  margin-bottom: 25px;
+}
+
+.page-title h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.page-title p {
+  margin: 0;
+  color: #777;
+}
+
+/* ================= PROFILE ================= */
+
+.profile-card {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ================= PROFILE HEADER ================= */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 25px;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #1677ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.profile-header h2 {
+  margin: 0 0 8px;
+}
+
+.profile-header p {
+  margin: 0;
+  color: #777;
+}
+
+/* ================= THÔNG TIN ================= */
+
+.profile-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 35px;
+}
+
+.info-item {
+  min-width: 0;
+}
+
+.info-item label {
+  display: block;
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+.info-item p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.info-item.full {
+  grid-column: 1 / 3;
+}
+
+/* ================= BUTTON ================= */
+
+.profile-actions {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #eee;
+}
+
+.btn-primary {
+  border: none;
+  background: #1677ff;
+  color: white;
+  padding: 11px 22px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #0958d9;
+}
+
+/* ================= FORM CHỈNH SỬA ================= */
+
+.edit-form {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #eee;
+  max-width: 800px;
+}
+
+.edit-form h3 {
+  margin: 0 0 25px;
+  font-size: 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-item.full {
+  grid-column: 1 / 3;
+}
+
+.form-item label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.form-item input,
+.form-item select {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  background: white;
+}
+
+.form-item input:focus,
+.form-item select:focus {
+  outline: none;
+  border-color: #1677ff;
+}
+
+.form-item input:disabled {
+  background: #f1f1f1;
+  color: #777;
+}
+
+/* ================= NÚT FORM ================= */
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn-secondary {
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  padding: 11px 22px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+/* ================= UPLOAD HỒ SƠ THỰC TẬP ================= */
+
+.upload-section {
+  padding: 25px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.upload-section:first-child {
+  padding-top: 0;
+}
+
+.upload-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.upload-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.upload-header h3 {
+  margin: 0 0 7px;
+  font-size: 19px;
+}
+
+.upload-header p {
+  margin: 0;
+  color: #777;
+  font-size: 14px;
+}
+
+.status {
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: #f5f5f5;
+  color: #777;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.status.success {
+  background: #e6f7e6;
+  color: #237804;
+}
+
+.upload-box {
+  width: 100%;
+  min-height: 120px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 15px;
+  background: #fafafa;
+}
+
+.upload-box input[type="file"] {
+  width: 100%;
+  font-size: 14px;
+}
+
+.file-name {
+  margin: 15px 0 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.file-name strong {
+  color: #1677ff;
+}
+
+/* ================= ĐĂNG KÝ TÀI KHOẢN ================= */
+
+.register-form {
+  max-width: 800px;
+}
+
+/* ================= NỘP HỒ SƠ ================= */
+
+.application-summary {
+  max-width: 800px;
+}
+
+.application-summary h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-item span {
+  color: #666;
+}
+
+.summary-item strong {
+  color: #222;
+}
+
+.application-warning {
+  margin-top: 25px;
+  padding: 18px;
+  border: 1px solid #ffe58f;
+  border-radius: 8px;
+  background: #fffbe6;
+}
+
+.application-warning strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #ad6800;
+}
+
+.application-warning p {
+  margin: 0;
+  line-height: 1.6;
+  color: #665200;
+}
+
+/* ================= TRẠNG THÁI HỒ SƠ ================= */
+
+.status-card {
+  text-align: left;
+  max-width: 700px;
+}
+
+.status-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #e6f7e6;
+  color: #237804;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.status-card h2 {
+  margin: 0 0 10px;
+}
+
+.status-card > p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.status-detail {
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.status-detail > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.status-detail span {
+  color: #666;
+}
+
+.email-status-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.email-recipient {
+  margin-top: 15px;
+  color: #666;
+}
+
+/* ================= MODAL ================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-modal {
+  width: 450px;
+  max-width: calc(100% - 40px);
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-modal h2 {
+  margin: 0 0 15px;
+}
+
+.confirm-modal p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.modal-warning {
+  padding: 12px;
+  border-radius: 6px;
+  background: #fff7e6;
+  color: #ad6800 !important;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 800px) {
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .content {
+    padding: 25px;
+  }
+
+  .profile-info,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item.full,
+  .form-item.full {
+    grid-column: 1;
+  }
+
+  .header {
+    padding: 0 20px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+  }
+
+  .user-info {
+    display: none;
+  }
+}
