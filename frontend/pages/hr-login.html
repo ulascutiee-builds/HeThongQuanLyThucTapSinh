@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f7f3" />
+    <title>Đăng nhập HR | Career Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f8f7f3;
+        --surface: #fffefa;
+        --ink: #20332e;
+        --muted: #7d8983;
+        --green: #194c40;
+        --orange: #e36b48;
+        --line: #dce1dc;
+        --serif: Georgia, "Times New Roman", serif;
+        --sans: "Segoe UI", "Helvetica Neue", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        min-height: 100svh;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 100vh;
+        min-height: 100svh;
+      }
+
+      .content-shell {
+        display: flex;
+        min-height: 100vh;
+        min-height: 100svh;
+        flex-direction: column;
+        padding: 0 clamp(24px, 7vw, 68px);
+      }
+
+      .login-panel {
+        width: min(100%, 356px);
+        margin: auto;
+        padding: 54px 0 42px;
+        animation: arrive 500ms ease both;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--orange);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: clamp(29px, 5vw, 32px);
+        font-weight: 400;
+        line-height: 1.2;
+      }
+
+      .intro {
+        margin: 9px 0 29px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .field {
+        margin-bottom: 17px;
+      }
+
+      .field-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      label,
+      .field-heading label {
+        font-size: 10px;
+        font-weight: 650;
+      }
+
+      .text-input {
+        width: 100%;
+        height: 41px;
+        padding: 0 11px;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        outline: none;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-size: 11px;
+        transition:
+          border-color 150ms ease,
+          box-shadow 150ms ease;
+      }
+
+      .text-input::placeholder {
+        color: #a2aaa5;
+        opacity: 1;
+      }
+      .text-input:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px #194c4014;
+      }
+
+      .text-input-wrap {
+        position: relative;
+      }
+      .text-input-wrap .text-input {
+        padding-right: 52px;
+      }
+
+      .text-button {
+        border: 0;
+        background: transparent;
+        color: var(--orange);
+        cursor: pointer;
+        font: inherit;
+        font-size: 10px;
+      }
+
+      .password-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: grid;
+        width: 45px;
+        height: 41px;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .remember-row {
+        display: flex;
+        width: fit-content;
+        align-items: center;
+        gap: 8px;
+        margin: -1px 0 19px;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 10px;
+      }
+
+      .remember-row input {
+        width: 13px;
+        height: 13px;
+        margin: 0;
+        accent-color: var(--green);
+      }
+
+      .submit-button {
+        display: flex;
+        width: 100%;
+        height: 42px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--green);
+        color: white;
+        cursor: pointer;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        transition:
+          background 150ms ease,
+          transform 150ms ease;
+      }
+
+      .submit-button:hover {
+        background: #123d33;
+      }
+      .submit-button:active {
+        transform: translateY(1px);
+      }
+      .submit-arrow {
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .demo-note {
+        min-height: 32px;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .demo-note[data-state="success"] {
+        color: var(--green);
+      }
+
+      footer {
+        display: flex;
+        min-height: 41px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        color: var(--muted);
+        font-size: 8px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      footer a {
+        color: inherit;
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--green);
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--orange);
+        outline-offset: 3px;
+      }
+
+      @keyframes arrive {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .content-shell {
+          padding-right: 22px;
+          padding-left: 22px;
+        }
+        .login-panel {
+          padding-top: 36px;
+          padding-bottom: 26px;
+        }
+        footer {
+          font-size: 7px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="content-shell">
+        <main class="login-panel">
+          <p class="eyebrow">Cổng đăng nhập</p>
+          <h1>Chào mừng, nhân sự HR</h1>
+          <p class="intro">
+            Đăng nhập để quản lý chương trình và hồ sơ thực tập.
+          </p>
+
+          <form id="login-form" novalidate>
+            <div class="field">
+              <div class="field-heading">
+                <label for="username">Email công việc</label>
+              </div>
+              <input
+                class="text-input"
+                id="username"
+                name="username"
+                type="email"
+                autocomplete="username"
+                placeholder="Ví dụ: hr@congty.vn"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <div class="field-heading">
+                <label for="password">Mật khẩu</label>
+                <button class="text-button" id="forgot-button" type="button">
+                  Quên mật khẩu?
+                </button>
+              </div>
+              <div class="text-input-wrap">
+                <input
+                  class="text-input"
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Nhập mật khẩu"
+                  required
+                />
+                <button
+                  class="text-button password-toggle"
+                  id="password-toggle"
+                  type="button"
+                  aria-label="Hiện mật khẩu"
+                  aria-pressed="false"
+                >
+                  Hiện
+                </button>
+              </div>
+            </div>
+
+            <label class="remember-row" for="remember">
+              <input id="remember" name="remember" type="checkbox" />
+              <span>Duy trì đăng nhập trên thiết bị này</span>
+            </label>
+
+            <button class="submit-button" type="submit">
+              <span>Đăng nhập</span
+              ><span class="submit-arrow" aria-hidden="true">→</span>
+            </button>
+            <p
+              class="demo-note"
+              id="form-message"
+              role="status"
+              aria-live="polite"
+            >
+              Bản demo: đăng nhập để mở khu vực quản lý HR.
+            </p>
+          </form>
+        </main>
+
+        <footer>
+          <span>© 2026 Career Portal</span>
+          <a href="mailto:support@career-portal.vn">Hỗ trợ đăng nhập</a>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      const form = document.querySelector("#login-form");
+      const password = document.querySelector("#password");
+      const passwordToggle = document.querySelector("#password-toggle");
+      const message = document.querySelector("#form-message");
+
+      passwordToggle.addEventListener("click", () => {
+        const showPassword = password.type === "password";
+        password.type = showPassword ? "text" : "password";
+        passwordToggle.textContent = showPassword ? "Ẩn" : "Hiện";
+        passwordToggle.setAttribute(
+          "aria-label",
+          showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu",
+        );
+        passwordToggle.setAttribute("aria-pressed", String(showPassword));
+      });
+
+      document.querySelector("#forgot-button").addEventListener("click", () => {
+        message.textContent =
+          "Vui lòng liên hệ bộ phận hỗ trợ để đặt lại mật khẩu.";
+        message.dataset.state = "success";
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        window.location.href = "hr-dashboard.html";
+      });
+    </script>
+  </body>
+</html>
