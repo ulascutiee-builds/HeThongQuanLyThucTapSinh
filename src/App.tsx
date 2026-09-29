@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import './App.css'
 
 type Page =
@@ -9,13 +9,14 @@ type Page =
   | 'status'
 
 function App() {
-  const [page, setPage] = useState<Page>('profile')
+  const [page, setPage] = useState<Page>('register')
 
   const [isEditing, setIsEditing] = useState(false)
 
   const [profile, setProfile] = useState({
     name: 'Nguyễn Văn A',
     studentId: 'SV001',
+    school: 'Đại học Công nghệ Thông tin và Truyền thông - ĐHTN',
     birthDate: '2004-01-01',
     gender: 'Nam',
     email: 'nguyenvana@gmail.com',
@@ -28,7 +29,8 @@ function App() {
   const [form, setForm] = useState(profile)
 
   const [cvFile, setCvFile] = useState<File | null>(null)
-  const [applicationFile, setApplicationFile] = useState<File | null>(null)
+  const [applicationFile, setApplicationFile] =
+    useState<File | null>(null)
 
   const [account, setAccount] = useState({
     email: '',
@@ -40,9 +42,19 @@ function App() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  const [emailStatus, setEmailStatus] = useState('Chưa gửi')
+  const [emailStatus, setEmailStatus] =
+    useState('Chưa gửi')
 
   const [message, setMessage] = useState('')
+
+  // ================= CHUYỂN TRANG =================
+
+  const changePage = (newPage: Page) => {
+    setPage(newPage)
+    setMessage('')
+  }
+
+  // ================= CẬP NHẬT FORM =================
 
   const updateForm = (
     field: keyof typeof form,
@@ -74,13 +86,23 @@ function App() {
       return
     }
 
+    if (!form.school.trim()) {
+      setMessage('Vui lòng nhập tên trường.')
+      return
+    }
+
     if (!form.email.trim() || !form.email.includes('@')) {
       setMessage('Email không hợp lệ.')
       return
     }
 
-    if (!form.phone.trim() || !/^[0-9]{10}$/.test(form.phone)) {
-      setMessage('Số điện thoại phải gồm 10 chữ số.')
+    if (
+      !form.phone.trim() ||
+      !/^[0-9]{10}$/.test(form.phone)
+    ) {
+      setMessage(
+        'Số điện thoại phải gồm 10 chữ số.'
+      )
       return
     }
 
@@ -97,14 +119,14 @@ function App() {
   // ================= UPLOAD FILE =================
 
   const handleCvChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0] || null
     setCvFile(file)
   }
 
   const handleApplicationChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0] || null
     setApplicationFile(file)
@@ -119,17 +141,32 @@ function App() {
     }
 
     if (account.password.length < 6) {
-      setMessage('Mật khẩu phải có ít nhất 6 ký tự.')
+      setMessage(
+        'Mật khẩu phải có ít nhất 6 ký tự.'
+      )
       return
     }
 
-    if (account.password !== account.confirmPassword) {
-      setMessage('Mật khẩu xác nhận không khớp.')
+    if (
+      account.password !==
+      account.confirmPassword
+    ) {
+      setMessage(
+        'Mật khẩu xác nhận không khớp.'
+      )
       return
     }
 
     setRegistered(true)
-    setMessage('Đăng ký tài khoản thành công.')
+
+    setProfile({
+      ...profile,
+      email: account.email,
+    })
+
+    setMessage(
+      'Đăng ký tài khoản thành công.'
+    )
   }
 
   // ================= NỘP HỒ SƠ =================
@@ -141,12 +178,16 @@ function App() {
     }
 
     if (!applicationFile) {
-      setMessage('Bạn chưa tải đơn xin thực tập lên.')
+      setMessage(
+        'Bạn chưa tải đơn xin thực tập lên.'
+      )
       return
     }
 
     if (!registered) {
-      setMessage('Bạn cần đăng ký tài khoản trước khi nộp hồ sơ.')
+      setMessage(
+        'Bạn cần đăng ký tài khoản trước khi nộp hồ sơ.'
+      )
       return
     }
 
@@ -162,33 +203,36 @@ function App() {
     setMessage('Nộp hồ sơ thành công.')
   }
 
-  // ================= MENU =================
-
-  const changePage = (newPage: Page) => {
-    setPage(newPage)
-    setMessage('')
-  }
-
-  // ================= NỘI DUNG PROFILE =================
+  // ================= HỒ SƠ THỰC TẬP SINH =================
 
   const renderProfile = () => (
     <>
-      <div className="page-title">
-        <h2>Thông tin cá nhân</h2>
-        <p>Chi tiết hồ sơ thực tập sinh</p>
+      <div className="page-header">
+        <div>
+          <h2>Hồ sơ thực tập sinh</h2>
+
+          <p>
+            Thông tin cá nhân và hồ sơ của thực tập sinh
+          </p>
+        </div>
       </div>
 
       <div className="profile-card">
 
         <div className="profile-header">
+
           <div className="avatar">
             {profile.name.charAt(0)}
           </div>
 
           <div>
             <h2>{profile.name}</h2>
-            <p>Mã sinh viên: {profile.studentId}</p>
+
+            <p>
+              Mã sinh viên: {profile.studentId}
+            </p>
           </div>
+
         </div>
 
         {!isEditing ? (
@@ -203,6 +247,11 @@ function App() {
               <div className="info-item">
                 <label>Mã sinh viên</label>
                 <p>{profile.studentId}</p>
+              </div>
+
+              <div className="info-item">
+                <label>Trường</label>
+                <p>{profile.school}</p>
               </div>
 
               <div className="info-item">
@@ -243,12 +292,14 @@ function App() {
             </div>
 
             <div className="profile-actions">
+
               <button
                 className="btn-primary"
                 onClick={startEdit}
               >
                 Chỉnh sửa hồ sơ
               </button>
+
             </div>
           </>
         ) : (
@@ -260,39 +311,68 @@ function App() {
 
               <div className="form-item">
                 <label>Họ và tên</label>
+
                 <input
                   value={form.name}
                   onChange={(e) =>
-                    updateForm('name', e.target.value)
+                    updateForm(
+                      'name',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item">
                 <label>Mã sinh viên</label>
+
                 <input
                   value={form.studentId}
                   disabled
                 />
               </div>
 
+              <div className="form-item full">
+                <label>Tên trường</label>
+
+                <input
+                  type="text"
+                  placeholder="Nhập tên trường"
+                  value={form.school}
+                  onChange={(e) =>
+                    updateForm(
+                      'school',
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
               <div className="form-item">
                 <label>Ngày sinh</label>
+
                 <input
                   type="date"
                   value={form.birthDate}
                   onChange={(e) =>
-                    updateForm('birthDate', e.target.value)
+                    updateForm(
+                      'birthDate',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item">
                 <label>Giới tính</label>
+
                 <select
                   value={form.gender}
                   onChange={(e) =>
-                    updateForm('gender', e.target.value)
+                    updateForm(
+                      'gender',
+                      e.target.value
+                    )
                   }
                 >
                   <option>Nam</option>
@@ -303,50 +383,70 @@ function App() {
 
               <div className="form-item">
                 <label>Email</label>
+
                 <input
                   value={form.email}
                   onChange={(e) =>
-                    updateForm('email', e.target.value)
+                    updateForm(
+                      'email',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item">
                 <label>Số điện thoại</label>
+
                 <input
                   value={form.phone}
                   onChange={(e) =>
-                    updateForm('phone', e.target.value)
+                    updateForm(
+                      'phone',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item">
                 <label>Lớp</label>
+
                 <input
                   value={form.className}
                   onChange={(e) =>
-                    updateForm('className', e.target.value)
+                    updateForm(
+                      'className',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item">
                 <label>Ngành</label>
+
                 <input
                   value={form.major}
                   onChange={(e) =>
-                    updateForm('major', e.target.value)
+                    updateForm(
+                      'major',
+                      e.target.value
+                    )
                   }
                 />
               </div>
 
               <div className="form-item full">
                 <label>Địa chỉ</label>
+
                 <input
                   value={form.address}
                   onChange={(e) =>
-                    updateForm('address', e.target.value)
+                    updateForm(
+                      'address',
+                      e.target.value
+                    )
                   }
                 />
               </div>
@@ -354,6 +454,7 @@ function App() {
             </div>
 
             <div className="form-actions">
+
               <button
                 className="btn-primary"
                 onClick={saveProfile}
@@ -367,6 +468,7 @@ function App() {
               >
                 Hủy
               </button>
+
             </div>
 
           </div>
@@ -382,13 +484,20 @@ function App() {
     </>
   )
 
-  // ================= HỒ SƠ THỰC TẬP =================
+  // ================= HỒ SƠ =================
 
   const renderInternship = () => (
     <>
-      <div className="page-title">
-        <h2>Hồ sơ thực tập</h2>
-        <p>Quản lý CV và đơn xin thực tập</p>
+      <div className="page-header">
+
+        <div>
+          <h2>Hồ sơ</h2>
+
+          <p>
+            Quản lý CV và đơn xin thực tập
+          </p>
+        </div>
+
       </div>
 
       <div className="profile-card">
@@ -396,17 +505,31 @@ function App() {
         <div className="upload-section">
 
           <div className="upload-header">
+
             <div>
+
               <h3>CV thực tập</h3>
-              <p>Tải lên CV để sử dụng trong hồ sơ thực tập.</p>
+
+              <p>
+                Tải lên CV để sử dụng trong hồ sơ thực tập.
+              </p>
+
             </div>
 
-            <span className={`status ${cvFile ? 'success' : ''}`}>
-              {cvFile ? 'Đã tải lên' : 'Chưa tải lên'}
+            <span
+              className={`status ${
+                cvFile ? 'success' : ''
+              }`}
+            >
+              {cvFile
+                ? 'Đã tải lên'
+                : 'Chưa tải lên'}
             </span>
+
           </div>
 
           <div className="upload-box">
+
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -419,6 +542,7 @@ function App() {
                 <strong>{cvFile.name}</strong>
               </p>
             )}
+
           </div>
 
         </div>
@@ -426,33 +550,50 @@ function App() {
         <div className="upload-section">
 
           <div className="upload-header">
+
             <div>
+
               <h3>Đơn xin thực tập</h3>
-              <p>Tải lên đơn xin thực tập của bạn.</p>
+
+              <p>
+                Tải lên đơn xin thực tập của bạn.
+              </p>
+
             </div>
 
             <span
               className={`status ${
-                applicationFile ? 'success' : ''
+                applicationFile
+                  ? 'success'
+                  : ''
               }`}
             >
-              {applicationFile ? 'Đã tải lên' : 'Chưa tải lên'}
+              {applicationFile
+                ? 'Đã tải lên'
+                : 'Chưa tải lên'}
             </span>
+
           </div>
 
           <div className="upload-box">
+
             <input
               type="file"
               accept=".pdf,.doc,.docx"
-              onChange={handleApplicationChange}
+              onChange={
+                handleApplicationChange
+              }
             />
 
             {applicationFile && (
               <p className="file-name">
                 Tệp đã chọn:{' '}
-                <strong>{applicationFile.name}</strong>
+                <strong>
+                  {applicationFile.name}
+                </strong>
               </p>
             )}
+
           </div>
 
         </div>
@@ -461,42 +602,91 @@ function App() {
     </>
   )
 
-  // ================= ĐĂNG KÝ =================
+  // ================= ĐĂNG KÝ TÀI KHOẢN =================
 
   const renderRegister = () => (
     <>
-      <div className="page-title">
-        <h2>Đăng ký tài khoản</h2>
-        <p>Tạo tài khoản để nộp hồ sơ thực tập</p>
+      <div className="page-header">
+
+        <div>
+
+          <h2>Đăng ký tài khoản</h2>
+
+          <p>
+            Sprint 1 - User Story đăng ký và nộp hồ sơ
+          </p>
+
+        </div>
+
       </div>
 
-      <div className="profile-card">
+      <div className="register-wrapper">
 
-        {registered ? (
-          <div className="status-card">
-            <div className="status-icon">✓</div>
-            <h2>Đăng ký thành công</h2>
+        <div className="register-card">
+
+          <div className="register-heading">
+
+            <h1>Đăng ký tài khoản</h1>
+
             <p>
-              Tài khoản của bạn đã được tạo.
+              Thực tập sinh đăng ký và nộp hồ sơ trực tuyến
             </p>
 
-            <button
-              className="btn-primary"
-              onClick={() => changePage('application')}
-            >
-              Tiếp tục nộp hồ sơ
-            </button>
           </div>
-        ) : (
-          <div className="register-form">
 
-            <div className="form-grid">
+          {registered ? (
+            <div className="status-card">
 
-              <div className="form-item full">
-                <label>Email</label>
+              <div className="status-icon">
+                ✓
+              </div>
+
+              <h2>
+                Đăng ký thành công
+              </h2>
+
+              <p>
+                Tài khoản của bạn đã được tạo thành công.
+              </p>
+
+              <button
+                className="btn-primary"
+                onClick={() =>
+                  changePage('application')
+                }
+              >
+                Tiếp tục nộp hồ sơ
+              </button>
+
+            </div>
+          ) : (
+            <div className="register-form">
+
+              <div className="form-item">
+
+                <label>Họ và tên *</label>
+
+                <input
+                  type="text"
+                  placeholder="Nguyễn Văn A"
+                  value={profile.name}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      name: e.target.value,
+                    })
+                  }
+                />
+
+              </div>
+
+              <div className="form-item">
+
+                <label>Email *</label>
+
                 <input
                   type="email"
-                  placeholder="Nhập email"
+                  placeholder="nguyenvana@gmail.com"
                   value={account.email}
                   onChange={(e) =>
                     setAccount({
@@ -505,13 +695,16 @@ function App() {
                     })
                   }
                 />
+
               </div>
 
               <div className="form-item">
-                <label>Mật khẩu</label>
+
+                <label>Mật khẩu *</label>
+
                 <input
                   type="password"
-                  placeholder="Ít nhất 6 ký tự"
+                  placeholder="••••••••••"
                   value={account.password}
                   onChange={(e) =>
                     setAccount({
@@ -520,41 +713,54 @@ function App() {
                     })
                   }
                 />
+
               </div>
 
               <div className="form-item">
-                <label>Xác nhận mật khẩu</label>
+
+                <label>
+                  Xác nhận mật khẩu *
+                </label>
+
                 <input
                   type="password"
-                  value={account.confirmPassword}
+                  placeholder="••••••••••"
+                  value={
+                    account.confirmPassword
+                  }
                   onChange={(e) =>
                     setAccount({
                       ...account,
-                      confirmPassword: e.target.value,
+                      confirmPassword:
+                        e.target.value,
                     })
                   }
                 />
+
               </div>
 
-            </div>
-
-            <div className="form-actions">
               <button
-                className="btn-primary"
+                className="register-button"
                 onClick={handleRegister}
               >
-                Đăng ký tài khoản
+                Đăng ký & xác thực email
               </button>
-            </div>
 
-            {message && (
-              <div className="message">
-                {message}
+              <div className="login-link">
+                Đã có tài khoản?{' '}
+                <span>Đăng nhập</span>
               </div>
-            )}
 
-          </div>
-        )}
+              {message && (
+                <div className="message">
+                  {message}
+                </div>
+              )}
+
+            </div>
+          )}
+
+        </div>
 
       </div>
     </>
@@ -564,9 +770,18 @@ function App() {
 
   const renderApplication = () => (
     <>
-      <div className="page-title">
-        <h2>Nộp hồ sơ</h2>
-        <p>Kiểm tra thông tin trước khi xác nhận</p>
+      <div className="page-header">
+
+        <div>
+
+          <h2>Nộp hồ sơ</h2>
+
+          <p>
+            Kiểm tra thông tin trước khi xác nhận
+          </p>
+
+        </div>
+
       </div>
 
       <div className="profile-card">
@@ -576,53 +791,92 @@ function App() {
           <h3>Thông tin hồ sơ</h3>
 
           <div className="summary-item">
+
             <span>Họ và tên</span>
-            <strong>{profile.name}</strong>
-          </div>
 
-          <div className="summary-item">
-            <span>Mã sinh viên</span>
-            <strong>{profile.studentId}</strong>
-          </div>
-
-          <div className="summary-item">
-            <span>Email</span>
-            <strong>{profile.email}</strong>
-          </div>
-
-          <div className="summary-item">
-            <span>CV</span>
             <strong>
-              {cvFile ? cvFile.name : 'Chưa tải lên'}
+              {profile.name}
             </strong>
+
           </div>
 
           <div className="summary-item">
+
+            <span>Mã sinh viên</span>
+
+            <strong>
+              {profile.studentId}
+            </strong>
+
+          </div>
+
+          <div className="summary-item">
+
+            <span>Trường</span>
+
+            <strong>
+              {profile.school}
+            </strong>
+
+          </div>
+
+          <div className="summary-item">
+
+            <span>Email</span>
+
+            <strong>
+              {profile.email}
+            </strong>
+
+          </div>
+
+          <div className="summary-item">
+
+            <span>CV</span>
+
+            <strong>
+              {cvFile
+                ? cvFile.name
+                : 'Chưa tải lên'}
+            </strong>
+
+          </div>
+
+          <div className="summary-item">
+
             <span>Đơn xin thực tập</span>
+
             <strong>
               {applicationFile
                 ? applicationFile.name
                 : 'Chưa tải lên'}
             </strong>
+
           </div>
 
           <div className="application-warning">
+
             <strong>⚠ Lưu ý</strong>
+
             <p>
-              Vui lòng kiểm tra kỹ thông tin và các tệp
-              đính kèm trước khi xác nhận nộp hồ sơ.
-              Sau khi xác nhận, hồ sơ sẽ được chuyển sang
-              trạng thái đã nộp.
+              Vui lòng kiểm tra kỹ thông tin
+              và các tệp đính kèm trước khi
+              xác nhận nộp hồ sơ.
+              Sau khi xác nhận, hồ sơ sẽ được
+              chuyển sang trạng thái đã nộp.
             </p>
+
           </div>
 
           <div className="form-actions">
+
             <button
               className="btn-primary"
               onClick={openConfirm}
             >
               Xác nhận nộp hồ sơ
             </button>
+
           </div>
 
           {message && (
@@ -637,13 +891,22 @@ function App() {
     </>
   )
 
-  // ================= TRẠNG THÁI =================
+  // ================= TRẠNG THÁI HỒ SƠ =================
 
   const renderStatus = () => (
     <>
-      <div className="page-title">
-        <h2>Trạng thái hồ sơ</h2>
-        <p>Theo dõi tình trạng hồ sơ thực tập</p>
+      <div className="page-header">
+
+        <div>
+
+          <h2>Trạng thái hồ sơ</h2>
+
+          <p>
+            Theo dõi tình trạng hồ sơ thực tập
+          </p>
+
+        </div>
+
       </div>
 
       <div className="profile-card">
@@ -669,26 +932,39 @@ function App() {
           <div className="status-detail">
 
             <div>
-              <span>Trạng thái hồ sơ:</span>
+
+              <span>
+                Trạng thái hồ sơ:
+              </span>
 
               <strong>
                 {submitted
                   ? 'Đã xác nhận'
                   : 'Chưa nộp'}
               </strong>
+
             </div>
 
             <div className="email-status-row">
-              <span>Email thông báo:</span>
+
+              <span>
+                Email thông báo:
+              </span>
 
               <strong>
                 {emailStatus}
               </strong>
+
             </div>
 
             <p className="email-recipient">
+
               Người nhận:{' '}
-              <strong>{profile.email}</strong>
+
+              <strong>
+                {profile.email}
+              </strong>
+
             </p>
 
           </div>
@@ -699,105 +975,202 @@ function App() {
     </>
   )
 
-  // ================= RENDER =================
+  // ================= GIAO DIỆN CHÍNH =================
 
   return (
     <div className="app">
 
-      <header className="header">
-        <h1>HỆ THỐNG QUẢN LÝ THỰC TẬP SINH</h1>
+      {/* SIDEBAR */}
 
-        <div className="user-info">
-          Xin chào, {profile.name}
+      <aside className="sidebar">
+
+        <div className="sidebar-logo">
+
+          <h1>TTS MANAGER</h1>
+
+          <span>
+            THỰC TẬP SINH
+          </span>
+
         </div>
-      </header>
 
-      <div className="layout">
+        {/* CHỈ CÓ 5 MỤC */}
 
-        <aside className="sidebar">
-
-          <h3>MENU</h3>
+        <nav className="sidebar-menu">
 
           <div
             className={`menu-item ${
-              page === 'profile' ? 'active' : ''
+              page === 'profile'
+                ? 'active'
+                : ''
             }`}
-            onClick={() => changePage('profile')}
+            onClick={() =>
+              changePage('profile')
+            }
           >
-            Hồ sơ cá nhân
+            <span className="menu-icon">
+              ▣
+            </span>
+
+            Hồ sơ thực tập sinh
           </div>
 
           <div
             className={`menu-item ${
-              page === 'internship' ? 'active' : ''
+              page === 'internship'
+                ? 'active'
+                : ''
             }`}
-            onClick={() => changePage('internship')}
+            onClick={() =>
+              changePage('internship')
+            }
           >
-            Hồ sơ thực tập
+            <span className="menu-icon">
+              □
+            </span>
+
+            Hồ sơ
           </div>
 
           <div
             className={`menu-item ${
-              page === 'register' ? 'active' : ''
+              page === 'register'
+                ? 'active'
+                : ''
             }`}
-            onClick={() => changePage('register')}
+            onClick={() =>
+              changePage('register')
+            }
           >
+            <span className="menu-icon">
+              +
+            </span>
+
             Đăng ký tài khoản
           </div>
 
           <div
             className={`menu-item ${
-              page === 'application' ? 'active' : ''
+              page === 'application'
+                ? 'active'
+                : ''
             }`}
-            onClick={() => changePage('application')}
+            onClick={() =>
+              changePage('application')
+            }
           >
+            <span className="menu-icon">
+              ↑
+            </span>
+
             Nộp hồ sơ
           </div>
 
           <div
             className={`menu-item ${
-              page === 'status' ? 'active' : ''
+              page === 'status'
+                ? 'active'
+                : ''
             }`}
-            onClick={() => changePage('status')}
+            onClick={() =>
+              changePage('status')
+            }
           >
+            <span className="menu-icon">
+              ●
+            </span>
+
             Trạng thái hồ sơ
           </div>
 
-        </aside>
+        </nav>
+
+      </aside>
+
+      {/* PHẦN BÊN PHẢI */}
+
+      <div className="main-area">
+
+        {/* TOP BAR */}
+
+        <header className="topbar">
+
+          <div className="topbar-left">
+
+            <span className="breadcrumb">
+
+              {page === 'register'
+                ? 'Đăng ký tài khoản'
+                : page === 'profile'
+                ? 'Hồ sơ thực tập sinh'
+                : page === 'internship'
+                ? 'Hồ sơ'
+                : page === 'application'
+                ? 'Nộp hồ sơ'
+                : 'Trạng thái hồ sơ'}
+
+            </span>
+
+          </div>
+
+          <div className="topbar-right">
+
+            <span className="notification">
+              ♧
+            </span>
+
+            <span className="user-avatar">
+              HR
+            </span>
+
+          </div>
+
+        </header>
+
+        {/* CONTENT */}
 
         <main className="content">
 
-          {page === 'profile' && renderProfile()}
+          {page === 'profile' &&
+            renderProfile()}
 
-          {page === 'internship' && renderInternship()}
+          {page === 'internship' &&
+            renderInternship()}
 
-          {page === 'register' && renderRegister()}
+          {page === 'register' &&
+            renderRegister()}
 
-          {page === 'application' && renderApplication()}
+          {page === 'application' &&
+            renderApplication()}
 
-          {page === 'status' && renderStatus()}
+          {page === 'status' &&
+            renderStatus()}
 
         </main>
 
       </div>
 
-      {/* ================= MODAL XÁC NHẬN ================= */}
+      {/* MODAL XÁC NHẬN */}
 
       {showConfirm && (
+
         <div className="modal-overlay">
 
           <div className="confirm-modal">
 
-            <h2>Xác nhận nộp hồ sơ</h2>
+            <h2>
+              Xác nhận nộp hồ sơ
+            </h2>
 
             <p>
-              Bạn có chắc chắn muốn xác nhận nộp hồ sơ
-              thực tập không?
+              Bạn có chắc chắn muốn xác nhận
+              nộp hồ sơ thực tập không?
             </p>
 
             <p className="modal-warning">
-              Vui lòng kiểm tra lại thông tin, CV và đơn
-              xin thực tập trước khi xác nhận.
+              Vui lòng kiểm tra lại thông tin,
+              CV và đơn xin thực tập trước khi
+              xác nhận.
             </p>
 
             <div className="modal-actions">
@@ -811,7 +1184,9 @@ function App() {
 
               <button
                 className="btn-secondary"
-                onClick={() => setShowConfirm(false)}
+                onClick={() =>
+                  setShowConfirm(false)
+                }
               >
                 Hủy
               </button>
@@ -821,6 +1196,7 @@ function App() {
           </div>
 
         </div>
+
       )}
 
     </div>
