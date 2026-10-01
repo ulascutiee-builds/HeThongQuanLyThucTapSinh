@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Đăng nhập | Career Portal</title>
+
+  <style>
+    /* =====================================================
+       RESET
+    ===================================================== */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background: #f5f7f6;
+      color: #183d35;
+
+      line-height: 1.5;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+
+    /* =====================================================
+       PAGE
+    ===================================================== */
+
+    .page {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 30px 20px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f5f8f7 0%,
+          #eef4f1 100%
+        );
+    }
+
+
+    /* =====================================================
+       LOGIN CARD
+    ===================================================== */
+
+    .login-card {
+      width: 100%;
+      max-width: 470px;
+
+      background: #ffffff;
+
+      border: 1px solid #e2e9e6;
+
+      border-radius: 12px;
+
+      box-shadow:
+        0 12px 35px rgba(25, 60, 53, 0.07);
+
+      overflow: hidden;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .card-header {
+      padding: 30px 34px 24px;
+
+      border-bottom: 1px solid #edf1ef;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+
+      margin-bottom: 24px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 8px;
+
+      background: #e8f1ee;
+
+      color: #17564a;
+
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .brand-text strong {
+      display: block;
+
+      color: #16483e;
+
+      font-size: 16px;
+      letter-spacing: 0.8px;
+    }
+
+    .brand-text span {
+      display: block;
+
+      margin-top: 1px;
+
+      color: #8a9692;
+
+      font-size: 10px;
+
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .eyebrow {
+      margin-bottom: 7px;
+
+      color: #d26749;
+
+      font-size: 11px;
+      font-weight: 700;
+
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    h1 {
+      margin-bottom: 7px;
+
+      color: #183d35;
+
+      font-size: 25px;
+      line-height: 1.25;
+    }
+
+    .intro {
+      color: #7c8b86;
+
+      font-size: 13px;
+    }
+
+
+    /* =====================================================
+       FORM
+    ===================================================== */
+
+    .login-form {
+      padding: 28px 34px 30px;
+    }
+
+    .field {
+      margin-bottom: 19px;
+    }
+
+    .field-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 10px;
+
+      margin-bottom: 7px;
+    }
+
+    .field-heading label {
+      color: #334f48;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .text-button {
+      padding: 0;
+
+      border: 0;
+      background: transparent;
+
+      color: #286a5b;
+
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .text-button:hover {
+      color: #16483e;
+      text-decoration: underline;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 44px;
+
+      padding: 0 13px;
+
+      border: 1px solid #d9e2df;
+
+      border-radius: 6px;
+
+      background: #ffffff;
+
+      color: #243f38;
+
+      font-size: 13px;
+
+      outline: none;
+
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .text-input::placeholder {
+      color: #a2ada9;
+    }
+
+    .text-input:focus {
+      border-color: #347968;
+
+      box-shadow:
+        0 0 0 3px rgba(52, 121, 104, 0.09);
+    }
+
+    .password-input {
+      padding-right: 70px;
+    }
+
+    .password-toggle {
+      position: absolute;
+
+      right: 12px;
+      top: 50%;
+
+      transform: translateY(-50%);
+    }
+
+
+    /* =====================================================
+       REMEMBER
+    ===================================================== */
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+
+      gap: 8px;
+
+      margin: 3px 0 20px;
+
+      color: #6f7f79;
+
+      font-size: 12px;
+
+      cursor: pointer;
+    }
+
+    .remember-row input {
+      width: 15px;
+      height: 15px;
+
+      accent-color: #1d6254;
+
+      cursor: pointer;
+    }
+
+
+    /* =====================================================
+       LOGIN BUTTON
+    ===================================================== */
+
+    .submit-button {
+      width: 100%;
+      height: 45px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 15px;
+
+      border: none;
+      border-radius: 6px;
+
+      background: #17564a;
+      color: #ffffff;
+
+      font-size: 13px;
+      font-weight: 700;
+
+      transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+    }
+
+    .submit-button:hover {
+      background: #12483e;
+    }
+
+    .submit-button:active {
+      transform: translateY(1px);
+    }
+
+    .submit-button:disabled {
+      background: #91aaa3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .submit-arrow {
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+
+    /* =====================================================
+       REGISTER
+    ===================================================== */
+
+    .register-box {
+      margin-top: 17px;
+
+      padding-top: 17px;
+
+      border-top: 1px solid #edf1ef;
+
+      text-align: center;
+    }
+
+    .register-box p {
+      margin-bottom: 7px;
+
+      color: #87938f;
+
+      font-size: 11px;
+    }
+
+    .register-link {
+      color: #216656;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .register-link:hover {
+      text-decoration: underline;
+    }
+
+
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
+
+    .message {
+      min-height: 42px;
+
+      margin-top: 17px;
+      padding: 11px 12px;
+
+      border: 1px solid transparent;
+
+      border-radius: 6px;
+
+      font-size: 11px;
+
+      line-height: 1.5;
+    }
+
+    .message:empty {
+      display: none;
+    }
+
+    .message.error {
+      background: #fff5f2;
+
+      border-color: #f0d5cd;
+
+      color: #a84934;
+    }
+
+    .message.success {
+      background: #f0f8f5;
+
+      border-color: #d2e8df;
+
+      color: #276652;
+    }
+
+    .message.warning {
+      background: #fff9ed;
+
+      border-color: #efdfba;
+
+      color: #986817;
+    }
+
+    .message.info {
+      background: #f2f6f5;
+
+      border-color: #dce7e4;
+
+      color: #526c64;
+    }
+
+
+    /* =====================================================
+       ACCOUNT STATE
+    ===================================================== */
+
+    .account-state {
+      display: none;
+
+      margin-top: 12px;
+
+      padding: 12px;
+
+      border-radius: 6px;
+
+      background: #f8faf9;
+
+      border: 1px solid #e6ece9;
+    }
+
+    .account-state.show {
+      display: block;
+    }
+
+    .account-state-title {
+      margin-bottom: 4px;
+
+      color: #36564e;
+
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .account-state-text {
+      color: #778681;
+
+      font-size: 11px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    .footer {
+      padding: 16px 34px;
+
+      border-top: 1px solid #edf1ef;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 15px;
+
+      color: #98a29f;
+
+      font-size: 10px;
+    }
+
+    .footer a {
+      color: #6d817a;
+    }
+
+    .footer a:hover {
+      color: #17564a;
+    }
+
+
+    /* =====================================================
+       HELP BOX
+    ===================================================== */
+
+    .help-note {
+      margin-top: 17px;
+
+      padding: 12px 13px;
+
+      background: #fafcfa;
+
+      border-left: 3px solid #d56b4d;
+
+      color: #778681;
+
+      font-size: 10px;
+
+      line-height: 1.6;
+    }
+
+    .help-note strong {
+      color: #4b625b;
+    }
+
+
+    /* =====================================================
+       ACCESSIBILITY
+    ===================================================== */
+
+    :focus-visible {
+      outline: 2px solid #d56b4d;
+      outline-offset: 3px;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 520px) {
+
+      .page {
+        padding: 15px;
+      }
+
+      .card-header {
+        padding: 25px 23px 21px;
+      }
+
+      .login-form {
+        padding: 24px 23px 25px;
+      }
+
+      .footer {
+        padding: 15px 23px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <div class="page">
+
+    <section class="login-card">
+
+      <!-- =================================================
+           HEADER
+      ================================================== -->
+
+      <header class="card-header">
+
+        <div class="brand">
+
+          <div class="brand-mark">
+            CP
+          </div>
+
+          <div class="brand-text">
+
+            <strong>
+              CAREER PORTAL
+            </strong>
+
+            <span>
+              Hồ sơ thực tập
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <p class="eyebrow">
+          Cổng đăng nhập
+        </p>
+
+        <h1>
+          Chào bạn, thực tập sinh
+        </h1>
+
+        <p class="intro">
+          Đăng nhập để quản lý hồ sơ và quá trình ứng tuyển thực tập.
+        </p>
+
+      </header>
+
+
+      <!-- =================================================
+           LOGIN FORM
+      ================================================== -->
+
+      <main class="login-form">
+
+        <form
+          id="login-form"
+          novalidate
+        >
+
+          <!-- MÃ SINH VIÊN / EMAIL -->
+
+          <div class="field">
+
+            <div class="field-heading">
+
+              <label for="username">
+                Mã sinh viên hoặc email
+              </label>
+
+            </div>
+
+            <input
+              class="text-input"
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              placeholder="Ví dụ: SV001 hoặc email@truong.edu.vn"
+              required
+            />
+
+          </div>
+
+
+          <!-- MẬT KHẨU -->
+
+          <div class="field">
+
+            <div class="field-heading">
+
+              <label for="password">
+                Mật khẩu
+              </label>
+
+              <button
+                class="text-button"
+                id="forgot-button"
+                type="button"
+              >
+                Quên mật khẩu?
+              </button>
+
+            </div>
+
+
+            <div class="input-wrap">
+
+              <input
+                class="text-input password-input"
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Nhập mật khẩu"
+                required
+              />
+
+              <button
+                class="text-button password-toggle"
+                id="password-toggle"
+                type="button"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                Hiện
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- GHI NHỚ -->
+
+          <label
+            class="remember-row"
+            for="remember"
+          >
+
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+            />
+
+            <span>
+              Duy trì đăng nhập trên thiết bị này
+            </span>
+
+          </label>
+
+
+          <!-- BUTTON -->
+
+          <button
+            class="submit-button"
+            id="submit-button"
+            type="submit"
+          >
+
+            <span id="submit-text">
+              Đăng nhập
+            </span>
+
+            <span
+              class="submit-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+          </button>
+
+
+          <!-- REGISTER -->
+
+          <div class="register-box">
+
+            <p>
+              Chưa có tài khoản thực tập sinh?
+            </p>
+
+            <a
+              class="register-link"
+              href="intern-register.html"
+            >
+              Tạo tài khoản mới →
+            </a>
+
+          </div>
+
+
+          <!-- MESSAGE -->
+
+          <div
+            class="message"
+            id="form-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+
+
+          <!-- ACCOUNT STATE -->
+
+          <div
+            class="account-state"
+            id="account-state"
+          >
+
+            <div
+              class="account-state-title"
+              id="account-state-title"
+            ></div>
+
+            <div
+              class="account-state-text"
+              id="account-state-text"
+            ></div>
+
+          </div>
+
+
+          <!-- HELP -->
+
+          <div class="help-note">
+
+            <strong>
+              Cần hỗ trợ?
+            </strong>
+
+            Nếu không thể đăng nhập, hãy kiểm tra
+            mã sinh viên/email và mật khẩu hoặc liên hệ
+            bộ phận hỗ trợ.
+
+          </div>
+
+        </form>
+
+      </main>
+
+
+      <!-- =================================================
+           FOOTER
+      ================================================== -->
+
+      <footer class="footer">
+
+        <span>
+          © 2026 Career Portal
+        </span>
+
+        <a
+          href="mailto:support@career-portal.vn"
+        >
+          Hỗ trợ đăng nhập
+        </a>
+
+      </footer>
+
+    </section>
+
+  </div>
+
+
+  <script>
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const form =
+      document.querySelector("#login-form");
+
+    const username =
+      document.querySelector("#username");
+
+    const password =
+      document.querySelector("#password");
+
+    const remember =
+      document.querySelector("#remember");
+
+    const passwordToggle =
+      document.querySelector("#password-toggle");
+
+    const forgotButton =
+      document.querySelector("#forgot-button");
+
+    const message =
+      document.querySelector("#form-message");
+
+    const accountState =
+      document.querySelector("#account-state");
+
+    const accountStateTitle =
+      document.querySelector("#account-state-title");
+
+    const accountStateText =
+      document.querySelector("#account-state-text");
+
+    const submitButton =
+      document.querySelector("#submit-button");
+
+    const submitText =
+      document.querySelector("#submit-text");
+
+
+    /* =====================================================
+       MESSAGE FUNCTION
+    ===================================================== */
+
+    function showMessage(text, type) {
+
+      message.textContent = text;
+
+      message.className =
+        "message " + type;
+
+    }
+
+
+    function clearMessage() {
+
+      message.textContent = "";
+
+      message.className =
+        "message";
+
+    }
+
+
+    /* =====================================================
+       ACCOUNT STATE
+    ===================================================== */
+
+    function showAccountState(title, text) {
+
+      accountStateTitle.textContent =
+        title;
+
+      accountStateText.textContent =
+        text;
+
+      accountState.classList.add("show");
+    }
+
+
+    function hideAccountState() {
+
+      accountState.classList.remove("show");
+
+      accountStateTitle.textContent = "";
+
+      accountStateText.textContent = "";
+    }
+
+
+    /* =====================================================
+       PASSWORD SHOW / HIDE
+    ===================================================== */
+
+    passwordToggle.addEventListener(
+      "click",
+      () => {
+
+        const showPassword =
+          password.type === "password";
+
+        password.type =
+          showPassword
+            ? "text"
+            : "password";
+
+        passwordToggle.textContent =
+          showPassword
+            ? "Ẩn"
+            : "Hiện";
+
+        passwordToggle.setAttribute(
+          "aria-label",
+          showPassword
+            ? "Ẩn mật khẩu"
+            : "Hiện mật khẩu"
+        );
+
+        passwordToggle.setAttribute(
+          "aria-pressed",
+          String(showPassword)
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       FORGOT PASSWORD
+    ===================================================== */
+
+    forgotButton.addEventListener(
+      "click",
+      () => {
+
+        clearMessage();
+
+        hideAccountState();
+
+        const value =
+          username.value.trim();
+
+        if (!value) {
+
+          showMessage(
+            "Vui lòng nhập mã sinh viên hoặc email trước khi yêu cầu hỗ trợ mật khẩu.",
+            "warning"
+          );
+
+          username.focus();
+
+          return;
+        }
+
+
+        /*
+          Đây là trạng thái giao diện demo.
+
+          Khi có backend thật:
+          - gửi yêu cầu reset password
+          - backend gửi email
+          - frontend nhận kết quả thành công/thất bại
+        */
+
+        showMessage(
+          "Yêu cầu đặt lại mật khẩu đã được ghi nhận. Trong hệ thống thật, email hướng dẫn sẽ được gửi đến địa chỉ đã đăng ký.",
+          "success"
+        );
+
+        showAccountState(
+          "Yêu cầu hỗ trợ mật khẩu",
+          "Nếu email tồn tại trong hệ thống, người dùng sẽ nhận được hướng dẫn đặt lại mật khẩu."
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       LOAD LOCAL DATA
+    ===================================================== */
+
+    function getPortalData() {
+
+      try {
+
+        return JSON.parse(
+          localStorage.getItem(
+            "careerPortal.demo.v1"
+          ) || "{}"
+        );
+
+      } catch {
+
+        return {};
+
+      }
+
+    }
+
+
+    /* =====================================================
+       FIND ACCOUNT
+    ===================================================== */
+
+    function findAccount(data, identifier) {
+
+      const accounts =
+        Array.isArray(data.accounts)
+          ? data.accounts
+          : [];
+
+
+      const normalized =
+        identifier
+          .trim()
+          .toLocaleLowerCase("vi");
+
+
+      return accounts.find(
+        (item) => {
+
+          const email =
+            String(item.email || "")
+              .toLocaleLowerCase("vi");
+
+          const id =
+            String(item.id || "")
+              .toLocaleLowerCase("vi");
+
+          return (
+            email === normalized ||
+            id === normalized
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       SHA-256
+    ===================================================== */
+
+    async function createPasswordHash(
+      salt,
+      passwordValue
+    ) {
+
+      const bytes =
+        new TextEncoder().encode(
+          `${salt}:${passwordValue}`
+        );
+
+      const digest =
+        await crypto.subtle.digest(
+          "SHA-256",
+          bytes
+        );
+
+      return [...new Uint8Array(digest)]
+        .map(
+          byte =>
+            byte
+              .toString(16)
+              .padStart(2, "0")
+        )
+        .join("");
+
+    }
+
+
+    /* =====================================================
+       CHECK PASSWORD
+    ===================================================== */
+
+    async function verifyPassword(
+      account,
+      passwordValue
+    ) {
+
+      /*
+        Cách mới:
+        passwordSalt + passwordHash
+      */
+
+      if (
+        account.passwordHash &&
+        account.passwordSalt
+      ) {
+
+        const hash =
+          await createPasswordHash(
+            account.passwordSalt,
+            passwordValue
+          );
+
+        return (
+          hash === account.passwordHash
+        );
+
+      }
+
+
+      /*
+        Fallback cho dữ liệu demo cũ.
+
+        Không nên dùng plaintext password
+        trong hệ thống thật.
+      */
+
+      if (
+        typeof account.password === "string"
+      ) {
+
+        return (
+          account.password ===
+          passwordValue
+        );
+
+      }
+
+
+      return false;
+
+    }
+
+
+    /* =====================================================
+       ACCOUNT STATUS
+    ===================================================== */
+
+    function normalizeStatus(account) {
+
+      return String(
+        account.status ||
+        account.accountStatus ||
+        "active"
+      ).toLowerCase();
+
+    }
+
+
+    /* =====================================================
+       LOGIN
+    ===================================================== */
+
+    form.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        hideAccountState();
+
+
+        /* -----------------------------------------------
+           VALIDATE EMPTY
+        ------------------------------------------------ */
+
+        const identifier =
+          username.value.trim();
+
+        const passwordValue =
+          password.value;
+
+
+        if (!identifier) {
+
+          showMessage(
+            "Vui lòng nhập mã sinh viên hoặc email.",
+            "error"
+          );
+
+          username.focus();
+
+          return;
+        }
+
+
+        if (!passwordValue) {
+
+          showMessage(
+            "Vui lòng nhập mật khẩu.",
+            "error"
+          );
+
+          password.focus();
+
+          return;
+        }
+
+
+        /* -----------------------------------------------
+           LOADING
+        ------------------------------------------------ */
+
+        submitButton.disabled = true;
+
+        submitText.textContent =
+          "Đang kiểm tra...";
+
+
+        try {
+
+          /* ---------------------------------------------
+             READ DATA
+          ---------------------------------------------- */
+
+          const data =
+            getPortalData();
+
+
+          /* ---------------------------------------------
+             FIND ACCOUNT
+          ---------------------------------------------- */
+
+          const account =
+            findAccount(
+              data,
+              identifier
+            );
+
+
+          if (!account) {
+
+            showMessage(
+              "Không tìm thấy tài khoản. Vui lòng kiểm tra lại mã sinh viên/email hoặc đăng ký tài khoản mới.",
+              "error"
+            );
+
+            showAccountState(
+              "Tài khoản không tồn tại",
+              "Bạn có thể tạo tài khoản thực tập sinh bằng liên kết bên dưới."
+            );
+
+            return;
+          }
+
+
+          /* ---------------------------------------------
+             ACCOUNT STATUS
+          ---------------------------------------------- */
+
+          const status =
+            normalizeStatus(account);
+
+
+          if (
+            status === "locked" ||
+            status === "blocked"
+          ) {
+
+            showMessage(
+              "Tài khoản hiện đang bị khóa. Vui lòng liên hệ bộ phận hỗ trợ.",
+              "error"
+            );
+
+            showAccountState(
+              "Tài khoản bị khóa",
+              "Hệ thống không cho phép đăng nhập cho đến khi tài khoản được mở khóa."
+            );
+
+            return;
+          }
+
+
+          if (
+            status === "disabled" ||
+            status === "inactive"
+          ) {
+
+            showMessage(
+              "Tài khoản hiện đang bị vô hiệu hóa. Vui lòng liên hệ bộ phận hỗ trợ.",
+              "error"
+            );
+
+            showAccountState(
+              "Tài khoản bị vô hiệu hóa",
+              "Vui lòng liên hệ quản trị viên để kiểm tra trạng thái tài khoản."
+            );
+
+            return;
+          }
+
+
+          if (
+            status === "pending" ||
+            status === "pending_activation" ||
+            status === "unverified"
+          ) {
+
+            showMessage(
+              "Tài khoản chưa được kích hoạt.",
+              "warning"
+            );
+
+            showAccountState(
+              "Chờ kích hoạt",
+              "Bạn cần hoàn tất bước kích hoạt tài khoản trước khi đăng nhập."
+            );
+
+            return;
+          }
+
+
+          /* ---------------------------------------------
+             PASSWORD
+          ---------------------------------------------- */
+
+          const validPassword =
+            await verifyPassword(
+              account,
+              passwordValue
+            );
+
+
+          if (!validPassword) {
+
+            showMessage(
+              "Mật khẩu chưa chính xác. Vui lòng kiểm tra lại.",
+              "error"
+            );
+
+            showAccountState(
+              "Đăng nhập thất bại",
+              "Nếu bạn quên mật khẩu, hãy sử dụng chức năng Quên mật khẩu."
+            );
+
+            return;
+          }
+
+
+          /* ---------------------------------------------
+             CREATE PROFILE
+          ---------------------------------------------- */
+
+          const {
+            passwordHash,
+            passwordSalt,
+            password: oldPassword,
+            ...profile
+          } = account;
+
+
+          /*
+            Không lưu mật khẩu vào profile.
+          */
+
+          data.internProfile =
+            profile;
+
+
+          /* ---------------------------------------------
+             SESSION
+          ---------------------------------------------- */
+
+          const now =
+            new Date().toISOString();
+
+
+          const session = {
+
+            accountId:
+              account.id || null,
+
+            email:
+              account.email || null,
+
+            loginAt:
+              now,
+
+            remember:
+              remember.checked
+
+          };
+
+
+          data.loginSession =
+            session;
+
+
+          /* ---------------------------------------------
+             UPDATE LAST LOGIN
+          ---------------------------------------------- */
+
+          if (Array.isArray(data.accounts)) {
+
+            const accountIndex =
+              data.accounts.findIndex(
+                item =>
+                  item === account
+              );
+
+
+            if (accountIndex >= 0) {
+
+              data.accounts[
+                accountIndex
+              ].lastLogin = now;
+
+            }
+
+          }
+
+
+          /* ---------------------------------------------
+             SAVE
+          ---------------------------------------------- */
+
+          localStorage.setItem(
+            "careerPortal.demo.v1",
+            JSON.stringify(data)
+          );
+
+
+          /* ---------------------------------------------
+             SUCCESS
+          ---------------------------------------------- */
+
+          showMessage(
+            "Đăng nhập thành công. Đang chuyển đến khu vực thực tập sinh...",
+            "success"
+          );
+
+
+          showAccountState(
+            "Đăng nhập thành công",
+            "Thông tin đăng nhập đã được xác thực."
+          );
+
+
+          /*
+            Chờ một chút để người dùng
+            nhìn thấy trạng thái thành công.
+          */
+
+          setTimeout(
+            () => {
+
+              window.location.href =
+                "intern-dashboard.html";
+
+            },
+            500
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Login error:",
+            error
+          );
+
+
+          showMessage(
+            "Không thể hoàn tất đăng nhập do xảy ra lỗi hệ thống demo. Vui lòng thử lại.",
+            "error"
+          );
+
+          showAccountState(
+            "Xác thực thất bại",
+            "Hệ thống không thể hoàn tất quá trình kiểm tra tài khoản."
+          );
+
+
+        } finally {
+
+          /*
+            Chỉ bật lại button nếu
+            chưa chuyển trang.
+          */
+
+          setTimeout(
+            () => {
+
+              submitButton.disabled = false;
+
+              submitText.textContent =
+                "Đăng nhập";
+
+            },
+            700
+          );
+
+        }
+
+      }
+    );
+
+
+    /* =====================================================
+       CLEAR ERROR WHEN USER STARTS TYPING
+    ===================================================== */
+
+    username.addEventListener(
+      "input",
+      () => {
+
+        if (
+          message.classList.contains("error")
+        ) {
+
+          clearMessage();
+
+        }
+
+        hideAccountState();
+
+      }
+    );
+
+
+    password.addEventListener(
+      "input",
+      () => {
+
+        if (
+          message.classList.contains("error")
+        ) {
+
+          clearMessage();
+
+        }
+
+        hideAccountState();
+
+      }
+    );
+
+
+    /* =====================================================
+       ENTER KEY
+    ===================================================== */
+
+    password.addEventListener(
+      "keydown",
+      event => {
+
+        if (event.key === "Enter") {
+
+          form.requestSubmit();
+
+        }
+
+      }
+    );
+
+
+    /* =====================================================
+       AUTO LOAD REMEMBERED ACCOUNT
+    ===================================================== */
+
+    (function loadRememberedSession() {
+
+      try {
+
+        const data =
+          getPortalData();
+
+        const session =
+          data.loginSession;
+
+
+        if (
+          session &&
+          session.remember &&
+          session.email
+        ) {
+
+          username.value =
+            session.email;
+
+          remember.checked =
+            true;
+
+        }
+
+      } catch {
+
+        // Không làm gián đoạn màn hình login.
+
+      }
+
+    })();
+
+  </script>
+
+</body>
+</html>
