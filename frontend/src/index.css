@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Font gần với bản demo */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap");
+
+body {
+  margin: 0;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: #f3f4ef;
+  color: #25332d;
+}
