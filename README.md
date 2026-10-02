@@ -1,50 +1,60 @@
-# Mã nguồn tách theo các chức năng được yêu cầu
+# Tài Liệu Chức Năng (User Stories)
 
-Đây là bản sao backend được tách file từ demo hiện tại. Không sửa dự án đang chạy và không thay đổi database. Các class partial giữ chung tên và phụ thuộc, nên cần build cả project, không chạy từng file .cs riêng lẻ. Đây không phải bản cam kết đã bổ sung mọi yêu cầu còn thiếu.
+Dự án này là một hệ thống quản lý thực tập sinh (Backend) được tách từ một dự án lớn hơn. Tài liệu này mô tả các chức năng (User Stories) đã được yêu cầu và cách chúng được triển khai trong mã nguồn. Cần build cả project vì các class liên kết với nhau, không chạy được từng file .cs riêng lẻ.
 
-## Tìm mã nguồn
+## Danh Sách User Stories và File Triển Khai
 
-Các đường dẫn bên dưới tương đối với `backend/Mã nguồn/CareerPortal.Api/Features/`.
+Dưới đây là 12 user story theo yêu cầu và các tệp mã nguồn tương ứng. 
+(Các đường dẫn bên dưới tương đối với `backend/Mã nguồn/CareerPortal.Api/Features/`):
 
-| Mục yêu cầu | File/nhóm code |
-|---|---|
-| 1. Tạo hồ sơ, test hợp lệ/không hợp lệ và lưu DB | `01_TaoHoSo/CreateProfile.cs`; project test riêng tại `profile-tests/` ở thư mục gốc |
-| 2–3. PUT cập nhật, validate và trùng email | `02_03_CapNhatHoSo/UpdateIntern.cs`, `HrUpdateProfile.cs`; `00_ValidateDTO/ApiContracts.cs`; `00_PhanQuyen/PortalSecurity.cs` |
-| 4–5. Upload, tên/đuôi/dung lượng/lưu file | `04_05_UploadTaiLieu/UploadDocument.cs`, `DownloadDocument.cs`; hằng số dùng chung trong InternEndpoints.cs |
-| 6. Danh sách và duyệt tài liệu | `06_DanhSachTaiLieu/Workspace.cs`, `HrDashboard.cs`; `06_DuyetTaiLieu/DocumentDecision.cs` |
-| 7. Đăng ký, hash mật khẩu, xác thực email | `07_DangKy/Registration.cs`, `Login.cs`, `EmailVerification.cs` |
-| 8. Nộp, duyệt/từ chối hồ sơ | `08_NopVaDuyetHoSo/SubmitApplication.cs`; `08_09_DuyetVaLichSu/ApplicationDecision.cs` |
-| 9. Trạng thái, lý do và thời gian | `09_TrangThaiVaLichSu/Entities.cs`; `ApplicationDecision.cs`; nhật ký API trong PortalSecurity.cs |
-| 10. Job email | `10_JobEmail/PortalJobs.cs`; hàm Notify trong PortalWorkflow.cs; MailJob trong PortalModels.cs |
-| 11. Upload hợp đồng | `11_UploadHopDong/UploadContract.cs` |
-| 12. Xác nhận hợp đồng | `12_XacNhanHopDong/ConfirmContract.cs`; kiểm tra quyền trong PortalSecurity.cs |
+| STT | User Story | File/Nhóm Code |
+|:---|:---|:---|
+| 1 | Viết test tạo hồ sơ hợp lệ/không hợp lệ và kiểm tra dữ liệu lưu xuống database. | `01_TaoHoSo/CreateProfile.cs`, project test `profile-tests/` tại thư mục gốc |
+| 2 | Tạo API PUT/PATCH `/api/interns/{id}` và kiểm tra quyền HR. | `02_03_CapNhatHoSo/UpdateIntern.cs`, `HrUpdateProfile.cs`, `00_PhanQuyen/PortalSecurity.cs` |
+| 3 | Xử lý validate dữ liệu khi cập nhật và kiểm tra trùng email/số điện thoại. | `02_03_CapNhatHoSo/UpdateIntern.cs`, `00_ValidateDTO/ApiContracts.cs` |
+| 4 | Tạo API POST `/api/interns/{id}/documents` và cơ chế lưu file. | `04_05_UploadTaiLieu/UploadDocument.cs`, `InternEndpoints.cs` |
+| 5 | Kiểm tra định dạng, dung lượng và tên file; chống upload file không hợp lệ. | `04_05_UploadTaiLieu/UploadDocument.cs`, `DownloadDocument.cs` |
+| 6 | Tạo API GET `/api/interns/{id}/documents` và API duyệt/từ chối tài liệu. | `06_DanhSachTaiLieu/Workspace.cs`, `HrDashboard.cs`, `06_DuyetTaiLieu/DocumentDecision.cs` |
+| 7 | Tạo API đăng ký, mã hóa mật khẩu và xác thực email. | `07_DangKy/Registration.cs`, `Login.cs`, `EmailVerification.cs` |
+| 8 | Tạo API duyệt/từ chối hồ sơ và kiểm tra quyền HR. | `08_NopVaDuyetHoSo/SubmitApplication.cs`, `08_09_DuyetVaLichSu/ApplicationDecision.cs` |
+| 9 | Thêm trạng thái hồ sơ và lưu lý do từ chối, người xử lý, thời gian xử lý. | `09_TrangThaiVaLichSu/Entities.cs`, `ApplicationDecision.cs`, nhật ký API trong `PortalSecurity.cs` |
+| 10 | Tạo event/job gửi email khi trạng thái hồ sơ thay đổi. | `10_JobEmail/PortalJobs.cs`, hàm Notify trong `PortalWorkflow.cs`, `PortalModels.cs` |
+| 11 | Tạo API upload và lưu trữ hợp đồng theo hồ sơ. | `11_UploadHopDong/UploadContract.cs` |
+| 12 | Tạo API POST `/api/contracts/{id}/confirm` và kiểm tra quyền sở hữu. | `12_XacNhanHopDong/ConfirmContract.cs`, kiểm tra quyền trong `PortalSecurity.cs` |
 
-CareerDbContext.cs, ApiMapping.cs, Migrations/, Program.cs, PortalModels.cs và các file Portal* còn lại là phụ thuộc của backend hiện tại, được giữ để project build được. Không kèm frontend, database, khóa hoặc thư thật. Đoạn phục vụ frontend trong Program.cs đã bỏ cho bản backend-only này.
+## Những Điểm Cần Lưu Ý (Độ Lệch So Với Yêu Cầu)
 
-## Những điểm chưa khớp hoàn toàn với danh sách yêu cầu
+- **Kiểm tra số điện thoại (Story 3)**: Chưa có trường Phone/số điện thoại nên chưa có kiểm tra trùng.
+- **Quyền cập nhật hồ sơ (Story 2)**: API hiện tại có đường dẫn PUT `/api/interns/{profileId}`, nhưng chưa có PATCH. Quyền hiện tại cho phép cả HR, Admin và thực tập sinh tự sửa hồ sơ của mình, chưa bó hẹp chỉ dành cho HR.
+- **API Lấy danh sách tài liệu (Story 6)**: Hiện danh sách được trả về thông qua GET `/api/interns/{profileId}/workspace`; chưa có API `/api/interns/{id}/documents` độc lập.
+- **API Xác nhận hợp đồng (Story 12)**: Đang sử dụng endpoint POST `/api/interns/{profileId}/documents/{documentId}/confirm-contract` thay vì POST `/api/contracts/{id}/confirm`.
+- **Lịch sử xử lý (Story 9)**: Đã có trạng thái, ghi chú và thời gian xử lý. Tuy nhiên, thông tin người thao tác nằm trong nhật ký API riêng chứ chưa kết nối trực tiếp vào từng bản ghi xét duyệt.
+- **Bảo mật Upload File (Story 5)**: Hiện đang kiểm tra phần mở rộng (PDF/DOC/DOCX), độ lớn (< 10 MB) và tên file. File được lưu dưới dạng `byte[]` trong SQL Server, không lưu vào thư mục công khai. Tuy nhiên chưa có quét virus hay kiểm tra chữ ký/nội dung để chống giả mạo hoàn toàn.
+- **Event/Job Email (Story 10)**: Việc gửi email đang được đưa vào hàng đợi (queue) khi ra quyết định đơn ứng tuyển; chưa phải là cơ chế bắt event chung cho mọi thay đổi trạng thái từ mọi API.
 
-- Chưa có trường Phone/số điện thoại, nên chưa có kiểm tra trùng số điện thoại.
-- Có PUT `/api/interns/{profileId}`, chưa có PATCH tại đường dẫn này. Quyền hiện tại cho phép HR/Admin và thực tập sinh sửa hồ sơ của chính mình, không phải chỉ HR.
-- PUT thực tập sinh kiểm tra email trùng rõ ràng; PUT HR dựa vào ràng buộc database/middleware, chưa có kiểm tra trước riêng.
-- Danh sách tài liệu nằm trong GET `/api/interns/{profileId}/workspace`; chưa có GET `/api/interns/{id}/documents` độc lập.
-- Xác nhận hợp đồng dùng POST `/api/interns/{profileId}/documents/{documentId}/confirm-contract`; chưa có alias POST `/api/contracts/{id}/confirm`.
-- Lịch sử xét duyệt có trạng thái, ghi chú và thời gian. Người thao tác nằm trong nhật ký API riêng; chưa có cột người xử lý liên kết trực tiếp từng bản ghi xét duyệt.
-- Upload hiện kiểm tra đuôi PDF/DOC/DOCX, tên bằng Path.GetFileName, giới hạn 10 MB và không rỗng. Chưa kiểm tra chữ ký nội dung file/virus; không coi đây là chống mọi file giả mạo. File được lưu byte[] trong SQL Server, không lưu vào thư mục công khai.
-- Email được xếp hàng khi quyết định đơn ứng tuyển; chưa có cơ chế chung bắt mọi thay đổi trạng thái hồ sơ từ mọi API.
-- Mật khẩu được hash bằng PasswordHasher, không mã hóa có thể giải ngược.
+## Hướng Dẫn Build và Test
 
-## Build
+### 1. Build Project
 
 ```powershell
 dotnet build ".\backend\Mã nguồn\CareerPortal.Api\CareerPortal.Api.csproj"
 dotnet build ".\profile-tests\ProfileCreationTests.csproj"
 ```
 
-## Test tạo hồ sơ mới
+### 2. Test Tạo Hồ Sơ Mới (User Story 1)
 
-`profile-tests/Program.cs` là test mới dành riêng cho mục 1: không đăng nhập bị 401, HR tạo hợp lệ được 201, dữ liệu không hợp lệ được 400 và không lưu DB, trùng email/mã sinh viên được 409, đối chiếu trực tiếp các trường đã lưu xuống SQL Server. Không tự xóa dữ liệu sau test; mỗi lần tạo một hồ sơ TEST-... để kiểm tra lại. Dùng database thử riêng có chữ Test trong tên, không dùng database thật và không chạy đồng thời tác vụ khác vì có kiểm tra số lượng bản ghi.
+Project `profile-tests/Program.cs` là test mới dành riêng cho Story 1:
+- Không đăng nhập sẽ bị lỗi 401.
+- HR tạo hợp lệ sẽ trả về mã 201.
+- Dữ liệu không hợp lệ trả về 400 và không lưu xuống DB.
+- Trùng email/mã sinh viên trả về 409.
+- Chứa đối chiếu các trường đã lưu xuống SQL Server.
 
-API và test phải trỏ tới cùng database thử đã migrate; cần tài khoản HR có sẵn trong database thử. Đặt các biến môi trường sau bằng giá trị của môi trường thử của bạn:
+**Lưu ý khi test**: 
+Mỗi lần chạy sẽ tạo một hồ sơ bắt đầu bằng chữ `TEST-...` để tiện kiểm tra. Dữ liệu sẽ **không** được tự động xóa sau khi test xong. Hãy dùng database test riêng (ví dụ có chữ "Test" trong tên DB) và không chạy song song các test khác vì có thể gây sai lệch bộ đếm bản ghi.
+
+**Cấu hình và chạy Test**:
+Cần một tài khoản HR đã có trong database test để chạy lệnh. Thiết lập các biến môi trường sau:
 
 ```powershell
 $env:STORY_TEST_URL = 'http://localhost:5148'
@@ -52,9 +62,7 @@ $env:STORY_TEST_CONNECTION = 'Server=(localdb)\MSSQLLocalDB;Database=CareerPorta
 $env:STORY_TEST_HR_EMAIL = 'email-tai-khoan-HR-thu'
 $env:STORY_TEST_HR_PASSWORD = 'mat-khau-tai-khoan-HR-thu'
 $env:STORY_TEST_ALLOW_WRITE = 'YES'
+
 dotnet run --project .\profile-tests\ProfileCreationTests.csproj
 ```
-
-Chạy API thử với ConnectionStrings__CareerPortal bằng chuỗi kết nối thử, ASPNETCORE_ENVIRONMENT=Development; cấu hình BootstrapToken nếu cần khởi tạo Admin qua API, rồi tạo HR qua `/api/accounts`. Không có tài khoản/mật khẩu dùng thật trong gói.
-
-Test mới được kiểm tra build, chưa chạy với database của bạn. `tests/` giữ các kiểm tra tích hợp cũ để tham khảo (đăng ký, xét duyệt, tài liệu, hợp đồng, phân quyền, phục hồi); chúng cần môi trường thử riêng theo phần đầu mỗi file và không phải bộ test riêng đã đầy đủ cho mọi mục trên.
+*(Thay thế email và mật khẩu bằng tài khoản HR thực tế trong môi trường test)*
