@@ -98,8 +98,12 @@
           button.onclick = () => {
             const p = getProfile(a.profileId);
             detail.replaceChildren(el("h2", p.name));
+            const dateOfBirth = p.dateOfBirth
+              ? p.dateOfBirth.split("-").reverse().join("/")
+              : "Chưa cập nhật";
             for (const [label, value] of [
               ["Mã sinh viên", p.studentId],
+              ["Ngày sinh", dateOfBirth],
               ["Email", p.email],
               ["Điện thoại", p.phone || "Chưa cung cấp"],
               ["Trường", p.school],
