@@ -11,6 +11,17 @@ public static class Applications
             var a=await db.InternApplications.Include(x=>x.Profile).SingleOrDefaultAsync(x=>x.Id==id);if(a is null)return Results.NotFound();if(a.Status!="Chờ duyệt")return Results.Conflict(new{message="Hồ sơ không còn chờ duyệt."});
             a.Status=input.Status;a.Note=input.Note?.Trim();a.ReviewedAt=DateTimeOffset.UtcNow;a.ReviewedBy=c.User.Identity!.Name;
             a.Profile!.Status=input.Status=="Đã duyệt"?"Đang thực tập":"Từ chối";
+            if(input.Status=="Đã duyệt")
+            {
+                var applicationDocument=await db.InternDocuments.SingleOrDefaultAsync(x=>x.ProfileId==a.ProfileId&&x.Type=="Đơn xin thực tập"&&x.IsCurrent);
+                if(applicationDocument is not null&&applicationDocument.Status=="Chờ duyệt")
+                {
+                    applicationDocument.Status="Đã duyệt";
+                    applicationDocument.ReviewedBy=a.ReviewedBy;
+                    applicationDocument.ReviewedAt=a.ReviewedAt;
+                    db.InternReviewHistories.Add(new(){ProfileId=a.ProfileId,TargetType="Tài liệu",TargetId=applicationDocument.Id,TargetLabel=applicationDocument.Type,Status=applicationDocument.Status,ReviewedBy=applicationDocument.ReviewedBy!});
+                }
+            }
             db.InternReviewHistories.Add(new(){ProfileId=a.ProfileId,TargetType="Hồ sơ",TargetId=a.Id,TargetLabel="Hồ sơ đăng ký",Status=a.Status,Note=a.Note,ReviewedBy=a.ReviewedBy!});
             db.MailJobs.Add(new(){EventKey=$"decision:{a.Id}:{a.SubmissionVersion}",Recipient=a.Profile.Email,Subject="Kết quả xét duyệt hồ sơ thực tập",Body=$"Xin chào {a.Profile.Name},\nHồ sơ thực tập của bạn: {a.Status}.\n"+(a.Status=="Từ chối"?$"Lý do: {a.Note}\nBạn có thể bổ sung tài liệu và nộp lại.":"Vui lòng đăng nhập để xem thông tin và hợp đồng thực tập.")});
             await db.SaveChangesAsync();await tx.CommitAsync();return Results.Ok(a.ToResponse());
