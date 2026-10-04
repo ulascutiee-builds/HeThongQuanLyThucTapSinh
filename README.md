@@ -1,118 +1,62 @@
-# Hệ thống quản lý Thực tập sinh
+# Demo riêng — Sprint 1
 
-## 1. Tổng quan dự án
+Bản này chỉ chứa 10 user story ở sheet **Sprint 1** của Excel phân công. Giữ bố cục, màu sắc, logo và các màn hình HR/thực tập sinh của demo gốc; bổ sung các trường và thao tác cần cho Sprint 1. Không chứa module của Sprint 2–4: chương trình, công việc/đánh giá, chấm công, hỗ trợ/quyền lợi, mentor/phòng ban, báo cáo, quản trị hệ thống.
 
-Hệ thống quản lý Thực tập sinh là một hệ thống thông tin hỗ trợ quá trình tổ chức và quản lý thực tập cho sinh viên, giảng viên, cơ sở thực tập và các đơn vị liên quan. Hệ thống được xây dựng nhằm tập trung hóa dữ liệu, kiểm soát quá trình thực tập và hỗ trợ công tác theo dõi, đánh giá và báo cáo kết quả thực tập trong một môi trường thống nhất.
+## Chạy trong VS Code
 
-Về bản chất, đây là hệ thống quản lý nghiệp vụ theo hướng quản trị quy trình thực tập, giúp:
-- Lưu trữ và quản lý thông tin sinh viên tham gia thực tập;
-- Theo dõi tiến độ và trạng thái thực tập;
-- Quản lý thông tin đơn vị/thực tập và người hướng dẫn;
-- Hỗ trợ giao nhiệm vụ, đánh giá và tổng hợp báo cáo.
+1. Giải nén ra thư mục mới; **không chép đè bản demo đầy đủ**. Open Folder thư mục có `start.ps1`.
+2. Cần .NET SDK 10, SQL Server LocalDB hoạt động và công cụ `dotnet-ef` phiên bản 10. Nếu chưa có công cụ: `dotnet tool install --global dotnet-ef --version 10.0.12`.
+3. Trong Terminal PowerShell:
 
-Hệ thống hướng tới việc giảm độ trùng lặp thông tin, tăng tính minh bạch trong quản lý và nâng cao hiệu quả điều hành các đợt thực tập.
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\start.ps1
+```
 
-## 2. Bối cảnh và vấn đề
+Mở **http://localhost:5135**. Script tự restore NuGet, áp dụng migration, rồi chạy API và giao diện cùng nguồn. Database riêng **CareerPortalSprint1**, không dùng database bản đầy đủ. Script ASCII, tương thích Windows PowerShell 5.1 để tránh lỗi tên thư mục tiếng Việt trước đây.
 
-Trong quá trình tổ chức thực tập sinh, các đơn vị quản lý thường phải xử lý nhiều loại thông tin liên quan đến sinh viên, đợt thực tập, địa điểm thực tập, người hướng dẫn, tiến độ công việc và kết quả đánh giá. Nếu dữ liệu được quản lý rời rạc, theo cách thủ công hoặc phân tán trên nhiều nguồn khác nhau, sẽ dễ phát sinh các vấn đề như:
-- Thông tin sinh viên không đồng nhất hoặc bị thiếu;
-- Khó kiểm tra tiến độ thực tập theo từng cá nhân hoặc từng đợt;
-- Khó theo dõi tiến độ nhiệm vụ và đánh giá đầu ra;
-- Thiếu cơ chế báo cáo tổng hợp cho quản lý;
-- Khó giám sát các đơn vị thực tập và người hướng dẫn;
-- Chậm trễ trong cập nhật trạng thái và kết quả thực tập.
+Chọn tab **Nhân sự HR**; email và mật khẩu được in trong terminal. Mật khẩu HR sinh ngẫu nhiên trong lần chạy đầu, giữ cục bộ tại `backend/CareerPortal.Api/App_Data/hr-password.txt`; không đưa file này lên Git/chia sẻ. HR là tài khoản demo cần cho xét duyệt, không phải module quản trị tài khoản.
 
-Hệ thống quản lý thực tập sinh ra đời để giải quyết các vấn đề trên bằng cách xây dựng một nền tảng quản lý tập trung, cho phép các bên liên quan cập nhật, tra cứu và theo dõi thông tin một cách có hệ thống.
+Nếu LocalDB không khởi động: chạy `sqllocaldb info MSSQLLocalDB` rồi `sqllocaldb start MSSQLLocalDB` và xem log LocalDB. Script không xóa/tạo lại instance hoặc database đang có. Không có dữ liệu mẫu hoặc tài khoản cá nhân đóng gói sẵn.
 
-## 3. Mục tiêu dự án
+## Luồng trình diễn
 
-### 3.1. Mục tiêu tổng quát
-Mục tiêu chung của dự án là xây dựng một hệ thống quản lý thực tập sinh hiệu quả, giúp tối ưu hóa quy trình quản lý thực tập từ đầu đến cuối, nâng cao tính minh bạch, dễ theo dõi và hỗ trợ ra quyết định trong công tác quản lý thực tập.
+1. Thực tập sinh chọn **Đăng ký**, nhập thông tin và mật khẩu ít nhất 8 ký tự.
+2. Mặc định thư được ghi dạng `.eml` vào `backend/CareerPortal.Api/App_Data/mail`, không gửi Internet. Mở thư và liên kết xác thực, sau đó đăng nhập.
+3. Upload CV và đơn xin thực tập PDF/DOCX, tối đa 10 MB/tệp, rồi nộp hồ sơ.
+4. Đăng nhập HR để tạo/sửa/tìm/lọc/phân trang hồ sơ; xem và duyệt/từ chối tài liệu, đơn xin. Từ chối bắt buộc nhập lý do. Lịch sử lưu người xử lý, thời điểm, lý do.
+5. Email kết quả duyệt/từ chối được xếp hàng tự động. HR xem nút **Trạng thái email thông báo** trong Đơn xin.
+6. HR upload hợp đồng, chọn ngày hết hiệu lực (bỏ trống = 90 ngày). Mỗi lần upload giữ phiên bản cũ, metadata người tải/thời gian; thực tập sinh chỉ xác nhận phiên bản hiện hành, còn hiệu lực, một lần.
 
-### 3.2. Mục tiêu cụ thể
+Hồ sơ do HR tạo trực tiếp không tự tạo mật khẩu đăng nhập cho sinh viên. Muốn trình diễn luồng sinh viên, đăng ký từ màn hình công khai trước. File PDF xem trước trong cửa sổ tài liệu HR, DOCX tải về bằng Word. File được lưu trong database cùng metadata, không lưu tên tệp người dùng thành đường dẫn máy chủ.
 
-| Mục tiêu | Cơ sở từ Product Backlog |
-|---|---|
-| Quản lý thông tin sinh viên tham gia thực tập | Epic/User Story liên quan đến hồ sơ và thông tin cá nhân của thực tập sinh |
-| Quản lý thông tin đợt thực tập | Epic/User Story về thiết lập, theo dõi và quản lý từng đợt thực tập |
-| Quản lý đơn vị thực tập và người hướng dẫn | Epic/User Story về cơ sở thực tập, địa điểm và người phụ trách |
-| Theo dõi tiến độ thực tập | Epic/User Story về cập nhật tiến độ, trạng thái và lịch thực hiện |
-| Quản lý nhiệm vụ/hoạt động thực tập | Epic/User Story về phân công, theo dõi và hoàn thành công việc |
-| Đánh giá kết quả thực tập | Epic/User Story về đánh giá thực tập sinh theo tiêu chí đã định trước |
-| Tổng hợp báo cáo và thống kê | Epic/User Story về báo cáo, thống kê và giám sát kết quả thực tập |
+## SMTP tùy chọn
 
-> Các mục tiêu trên là những yếu tố có thể xác định trực tiếp từ Product Backlog. Những nội dung không có cơ sở rõ ràng trong backlog sẽ được ghi nhận là chưa xác định thay vì suy diễn.
+Đặt biến môi trường trước khi chạy script nếu muốn gửi thư thật:
 
-## 4. Đối tượng sử dụng
+```powershell
+$env:Email__SmtpHost = 'smtp.example.com'
+$env:Email__Port = '587'
+$env:Email__EnableSsl = 'true'
+$env:Email__Username = 'username'
+$env:Email__Password = 'app-password'
+$env:Email__From = 'noreply@example.com'
+```
 
-Dựa trên các actor và user story trong Product Backlog, các đối tượng chính của hệ thống bao gồm:
+Không điền bí mật vào source. Worker retry tối đa 5 lần, giãn cách tăng dần, ghi trạng thái/lỗi và log từng lần gửi. EventKey duy nhất chống xếp hàng trùng cho cùng lần xét duyệt. SMTP có thể giao thư trùng trong tình huống tiến trình chết ngay sau gửi thành công nhưng trước khi ghi trạng thái; đây không phải cam kết exactly-once từ nhà cung cấp.
 
-| Actor | Vai trò | Chức năng chính |
-|---|---|---|
-| Quản trị viên / Người quản lý hệ thống | Quản lý chung, giám sát và điều hành hoạt động thực tập | Quản lý tài khoản, cấu hình hệ thống, giám sát tiến độ, báo cáo tổng hợp |
-| Giảng viên / Người phụ trách | Theo dõi và đánh giá sinh viên trong quá trình thực tập | Xem hồ sơ sinh viên, theo dõi tiến độ, đánh giá, cập nhật kết quả |
-| Sinh viên thực tập | Người tham gia chương trình thực tập | Cập nhật thông tin cá nhân, theo dõi nhiệm vụ, nộp kết quả, xem tiến độ |
-| Đơn vị/Doanh nghiệp thực tập | Đối tác tiếp nhận sinh viên thực tập | Quản lý địa điểm, người hướng dẫn, theo dõi sinh viên thực tập |
-| Người hướng dẫn | Hướng dẫn và giám sát công việc của sinh viên | Giao nhiệm vụ, theo dõi tiến độ, đánh giá kết quả thực tập |
+## Kiểm thử
 
-> Nếu Product Backlog không nêu rõ thêm các actor khác, các actor trên được xem là các nhóm chính phù hợp với phạm vi hệ thống.
+Chạy API trước. `tests/smoke.py` cần Python 3, không cần thư viện ngoài. Nó tạo hồ sơ thử tên duy nhất, không xóa dữ liệu:
 
-## 5. Phạm vi dự án
+```powershell
+$env:SPRINT1_TEST_HR_PASSWORD = '<mat-khau-HR-trong-terminal>'
+python .\tests\smoke.py
+dotnet run --project .\tests\DatabaseChecks -p:BuildProjectReferences=false -p:BuildProjectReferences=false -p:BuildProjectReferences=false
+```
 
-### 5.1. Trong phạm vi
-Các chức năng thuộc phạm vi của hệ thống được xác định trực tiếp từ Product Backlog, bao gồm:
+Nhóm smoke kiểm tra xác thực, quyền HR/chủ hồ sơ, tạo/sửa/validate/trùng dữ liệu, tìm kiếm/phân trang, upload/thay thế/tải xuống, xét duyệt và lịch sử, mail chống sự kiện trùng, xác nhận hợp đồng một lần. DatabaseChecks kiểm tra hash mật khẩu, dữ liệu thực lưu database, hợp đồng hết hạn, email thất bại/retry, index trường/ngành/trạng thái. Chạy các kiểm thử khi đang dùng chế độ email `.eml` mặc định, không dùng SMTP thật.
 
-- Quản lý thông tin thực tập sinh
-- Quản lý đợt thực tập
-- Quản lý cơ sở/đơn vị thực tập
-- Quản lý người hướng dẫn
-- Quản lý nhiệm vụ và công việc thực tập
-- Theo dõi tiến độ thực tập
-- Đánh giá kết quả thực tập
-- Tổng hợp báo cáo và thống kê
+## Giới hạn demo
 
-Những thành phần này phản ánh toàn bộ vòng đời của chương trình thực tập: từ chuẩn bị, triển khai, theo dõi đến đánh giá và báo cáo.
-
-### 5.2. Ngoài phạm vi
-Theo Product Backlog, không có căn cứ rõ ràng cho việc bổ sung các chức năng vượt ra ngoài quản lý thực tập sinh như:
-- Quản lý nhân sự doanh nghiệp tổng quát;
-- Hệ thống tuyển dụng trực tuyến;
-- Quản lý tài chính/đơn hàng;
-- Tính năng marketing hoặc CRM tổng thể;
-- Quản lý chuỗi cung ứng hoặc logistics.
-
-Các nội dung trên chưa được xác định là phần của hệ thống trong phạm vi hiện tại và do đó không được đưa vào phần giới thiệu như một chức năng chính của dự án.
-
-## 6. Các chức năng chính
-
-Hệ thống quản lý Thực tập sinh có thể được nhóm thành các module chính như sau:
-
-### Module 1: Quản lý thông tin cơ bản
-- Quản lý thông tin sinh viên
-- Quản lý thông tin đợt thực tập
-- Quản lý thông tin cơ sở thực tập
-- Quản lý thông tin người hướng dẫn
-
-### Module 2: Theo dõi và quản lý quá trình thực tập
-- Giao nhiệm vụ cho sinh viên
-- Theo dõi tiến độ hoàn thành công việc
-- Cập nhật trạng thái thực tập
-- Quản lý lịch trình và thời gian thực tập
-
-### Module 3: Đánh giá và kiểm soát
-- Đánh giá năng lực/hiệu quả thực tập
-- Theo dõi kết quả thực tập theo tiêu chí
-- Xác định sinh viên hoàn thành hoặc chưa hoàn thành nhiệm vụ
-
-### Module 4: Báo cáo và thống kê
-- Tổng hợp báo cáo theo đợt thực tập
-- Thống kê số lượng sinh viên tham gia
-- Thống kê tiến độ và kết quả đánh giá
-- Cung cấp dữ liệu cho quản lý điều hành
-
-## 7. Kết luận
-
-Hệ thống quản lý Thực tập sinh là một hệ thống nghiệp vụ hỗ trợ quản lý toàn bộ quy trình thực tập của sinh viên từ khi đăng ký, theo dõi, đánh giá đến báo cáo kết quả. Hệ thống này tập trung vào việc giải quyết các vấn đề về quản lý thông tin, đồng bộ dữ liệu, kiểm soát tiến độ và nâng cao hiệu quả công tác giám sát thực tập.
-
-Với các actor chính là sinh viên, giảng viên, người hướng dẫn, đơn vị thực tập và quản trị viên, hệ thống đáp ứng nhu cầu quản lý thực tập trong môi trường giáo dục và doanh nghiệp, đồng thời tạo nền tảng cho việc ra quyết định và báo cáo quản lý một cách chính xác, kịp thời và minh bạch.
-
+Chạy localhost cho trình diễn; chưa phải bản triển khai production. Kiểm tra PDF/DOCX dựa trên chữ ký/cấu trúc, loại bỏ macro DOCX và đường dẫn nguy hiểm, giới hạn kích thước/nội dung giải nén; không thay thế antivirus. Production cần HTTPS, quản lý tài khoản HR tập trung, rate limiting, kho bí mật, bảo vệ key, quét malware và giám sát vận hành.
