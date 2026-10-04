@@ -31,6 +31,7 @@ public static class Documents
     static async Task<IResult> Upload(int id,bool contract,HttpContext c,CareerDbContext db)
     {
         if(contract?!SprintSecurity.HR(c):!SprintSecurity.Own(c,id))return Results.Forbid();var p=await db.InternProfiles.FindAsync(id);if(p is null)return Results.NotFound();
+        if(!contract&&!p.EmailVerified)return Results.BadRequest(new{message="Cần xác thực email trước khi tải tài liệu lên."});
         var type=contract?"Hợp đồng thực tập":c.Request.Query["type"].ToString();if(!contract&&type is not("CV" or "Đơn xin thực tập"))return Results.BadRequest(new{message="Loại tài liệu không hợp lệ."});
         if(!contract&&await db.InternApplications.AnyAsync(x=>x.ProfileId==id&&(x.Status=="Chờ duyệt"||x.Status=="Đã duyệt")))return Results.Conflict(new{message="Hồ sơ đã nộp. Không thay tài liệu khi đang chờ duyệt hoặc đã duyệt."});
         DateTimeOffset? expires=null;if(contract){expires=DateTimeOffset.UtcNow.AddDays(90);if(c.Request.Query.TryGetValue("expiresAt",out var value)){if(!DateTimeOffset.TryParse(value,out var date)||date<=DateTimeOffset.UtcNow)return Results.BadRequest(new{message="Hạn hợp đồng phải nằm trong tương lai."});expires=date;}}
