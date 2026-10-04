@@ -19,7 +19,7 @@ public static class AuthEndpoints
             Recipient=p.Email,
             Subject="Xác thực tài khoản thực tập",
             IsHtml=true,
-            Body=$"""<html><body style="font-family:Arial,sans-serif;color:#202e29"><p>Xin chào {safeName},</p><p>Nhấn nút bên dưới trong vòng 24 giờ để xác thực email:</p><p><a href="{safeUrl}" style="display:inline-block;padding:12px 20px;background:#17473b;color:#fff;text-decoration:none;border-radius:6px">Xác thực email</a></p><p>Nếu nút không hoạt động, mở liên kết này:</p><p><a href="{safeUrl}">{safeUrl}</a></p></body></html>"""
+            Body=$"""<html><body style="font-family:Arial,sans-serif;color:#202e29"><p>Xin chào {safeName},</p><p>Nhấn nút bên dưới trong vòng 24 giờ để xác thực email:</p><p><a href="{safeUrl}" style="display:inline-block;padding:12px 20px;background:#17473b;color:#fff;text-decoration:none;border-radius:6px">Xác thực email</a></p></body></html>"""
         });
     }
     public static void MapSprintAuth(this WebApplication app)
