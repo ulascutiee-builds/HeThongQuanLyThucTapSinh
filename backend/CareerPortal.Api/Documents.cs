@@ -39,6 +39,20 @@ public static class Documents
                     db.MailJobs.Add(new MailJob{EventKey=$"decision:{application.Id}:{application.SubmissionVersion}",Recipient=application.Profile.Email,Subject="Kết quả xét duyệt hồ sơ thực tập",Body="Xin chào "+application.Profile.Name+",\nHồ sơ thực tập của bạn: Đã duyệt.\nVui lòng đăng nhập để xem thông tin và hợp đồng thực tập."});
                 }
             }
+            else
+            {
+                var application=await db.InternApplications.Include(x=>x.Profile).SingleOrDefaultAsync(x=>x.ProfileId==d.ProfileId&&(x.Status=="Chờ duyệt"||x.Status=="Đã duyệt"));
+                if(application is not null)
+                {
+                    application.Status="Từ chối";
+                    application.Note=d.Note;
+                    application.ReviewedAt=d.ReviewedAt;
+                    application.ReviewedBy=d.ReviewedBy;
+                    application.Profile!.Status="Từ chối";
+                    db.InternReviewHistories.Add(new InternReviewHistory{ProfileId=d.ProfileId,TargetType="Hồ sơ",TargetId=application.Id,TargetLabel="Hồ sơ đăng ký",Status=application.Status,Note=application.Note,ReviewedBy=application.ReviewedBy!});
+                    db.MailJobs.Add(new MailJob{EventKey=$"decision-rejected:{application.Id}:{application.SubmissionVersion}",Recipient=application.Profile.Email,Subject="Kết quả xét duyệt hồ sơ thực tập",Body="Xin chào "+application.Profile.Name+",\nHồ sơ thực tập của bạn: Từ chối.\nLý do: "+application.Note});
+                }
+            }
             db.InternReviewHistories.Add(new InternReviewHistory{ProfileId=d.ProfileId,TargetType="Tài liệu",TargetId=d.Id,TargetLabel=d.Type,Status=d.Status,Note=d.Note,ReviewedBy=d.ReviewedBy!});await db.SaveChangesAsync();await tx.CommitAsync();return Results.Ok(d.ToResponse());
         });
         app.MapPost("/api/contracts/{id:int}/confirm",(int id,HttpContext c,CareerDbContext db)=>Confirm(id,null,c,db));
