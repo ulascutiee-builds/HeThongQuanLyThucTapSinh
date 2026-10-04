@@ -23,6 +23,22 @@ public static class Documents
             await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var d=await db.InternDocuments.FindAsync(id);if(d is null)return Results.NotFound();if(!d.IsCurrent||d.Status!="Chờ duyệt"||d.Type=="Hợp đồng thực tập")return Results.Conflict(new{message="Tài liệu không còn chờ duyệt."});
             d.Status=input.Status;d.Note=input.Note?.Trim();d.ReviewedBy=c.User.Identity!.Name;d.ReviewedAt=DateTimeOffset.UtcNow;
+            if(input.Status=="Đã duyệt")
+            {
+                var approvedTypes=new[]{"CV","Đơn xin thực tập"};
+                var allApplicationDocumentsApproved=await db.InternDocuments.Where(x=>x.ProfileId==d.ProfileId&&x.IsCurrent&&approvedTypes.Contains(x.Type)).Select(x=>x.Type).Distinct().CountAsync()==approvedTypes.Length;
+                var application=await db.InternApplications.Include(x=>x.Profile).SingleOrDefaultAsync(x=>x.ProfileId==d.ProfileId&&x.Status=="Chờ duyệt");
+                if(allApplicationDocumentsApproved&&application is not null)
+                {
+                    application.Status="Đã duyệt";
+                    application.Note=null;
+                    application.ReviewedAt=d.ReviewedAt;
+                    application.ReviewedBy=d.ReviewedBy;
+                    application.Profile!.Status="Đang thực tập";
+                    db.InternReviewHistories.Add(new InternReviewHistory{ProfileId=d.ProfileId,TargetType="Hồ sơ",TargetId=application.Id,TargetLabel="Hồ sơ đăng ký",Status=application.Status,ReviewedBy=application.ReviewedBy!});
+                    db.MailJobs.Add(new MailJob{EventKey=$"decision:{application.Id}:{application.SubmissionVersion}",Recipient=application.Profile.Email,Subject="Kết quả xét duyệt hồ sơ thực tập",Body="Xin chào "+application.Profile.Name+",\nHồ sơ thực tập của bạn: Đã duyệt.\nVui lòng đăng nhập để xem thông tin và hợp đồng thực tập."});
+                }
+            }
             db.InternReviewHistories.Add(new InternReviewHistory{ProfileId=d.ProfileId,TargetType="Tài liệu",TargetId=d.Id,TargetLabel=d.Type,Status=d.Status,Note=d.Note,ReviewedBy=d.ReviewedBy!});await db.SaveChangesAsync();await tx.CommitAsync();return Results.Ok(d.ToResponse());
         });
         app.MapPost("/api/contracts/{id:int}/confirm",(int id,HttpContext c,CareerDbContext db)=>Confirm(id,null,c,db));
