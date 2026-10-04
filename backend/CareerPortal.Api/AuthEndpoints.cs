@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,17 @@ public static class AuthEndpoints
     public static void Verification(CareerDbContext db,InternProfile p,IConfiguration config)
     {
         var token=Convert.ToHexString(RandomNumberGenerator.GetBytes(32));p.VerificationHash=Hash(token);p.VerificationExpires=DateTimeOffset.UtcNow.AddHours(24);
-        db.MailJobs.Add(new MailJob{EventKey="verify:"+Guid.NewGuid(),Recipient=p.Email,Subject="Xác thực tài khoản thực tập",Body=$"Xin chào {p.Name},\nMở liên kết trong 24 giờ để xác thực email:\n{config["PublicUrl"]??"http://localhost:5135"}/dang-nhap.html?verify={token}&profileId={p.Id}"});
+        var verifyUrl=$"{(config["PublicUrl"]??"http://localhost:5135").TrimEnd('/')}/dang-nhap.html?verify={Uri.EscapeDataString(token)}&profileId={p.Id}";
+        var safeName=WebUtility.HtmlEncode(p.Name);
+        var safeUrl=WebUtility.HtmlEncode(verifyUrl);
+        db.MailJobs.Add(new MailJob
+        {
+            EventKey="verify:"+Guid.NewGuid(),
+            Recipient=p.Email,
+            Subject="Xác thực tài khoản thực tập",
+            IsHtml=true,
+            Body=$"""<html><body style="font-family:Arial,sans-serif;color:#202e29"><p>Xin chào {safeName},</p><p>Nhấn nút bên dưới trong vòng 24 giờ để xác thực email:</p><p><a href="{safeUrl}" style="display:inline-block;padding:12px 20px;background:#17473b;color:#fff;text-decoration:none;border-radius:6px">Xác thực email</a></p><p>Nếu nút không hoạt động, mở liên kết này:</p><p><a href="{safeUrl}">{safeUrl}</a></p></body></html>"""
+        });
     }
     public static void MapSprintAuth(this WebApplication app)
     {

@@ -373,6 +373,38 @@
       const loginForm = document.getElementById("login-form");
       const status = document.getElementById("status-message");
 
+      const verification = new URLSearchParams(location.search);
+      if (verification.has("verify")) {
+        status.dataset.state = "info";
+        status.textContent = "Đang xác thực email...";
+        fetch(`${API_BASE}/auth/verify-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: Number(verification.get("profileId")),
+            token: verification.get("verify"),
+          }),
+        })
+          .then(async (response) => {
+            const result = await response.json().catch(() => null);
+            if (!response.ok)
+              throw new Error(
+                result?.message || "Liên kết xác thực không hợp lệ hoặc hết hạn.",
+              );
+            status.dataset.state = "success";
+            status.textContent =
+              result?.message || "Email đã xác thực. Bạn có thể nộp hồ sơ.";
+          })
+          .catch((error) => {
+            status.dataset.state = "error";
+            status.textContent =
+              error instanceof Error
+                ? error.message
+                : "Không thể xác thực email. Vui lòng thử lại.";
+          })
+          .finally(() => history.replaceState(null, "", location.pathname));
+      }
+
       document
         .getElementById("password-toggle")
         .addEventListener("click", () => {
