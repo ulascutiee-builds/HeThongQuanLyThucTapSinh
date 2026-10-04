@@ -19,6 +19,7 @@ req(anon,'GET','/hr/dashboard',expected=401)
 req(hr,'POST','/auth/login',{'identity':'hr@sprint1.local','password':password})
 profile={'name':'Test Sprint '+tag,'studentId':'TEST'+tag,'email':tag+'@example.test','phone':'09'+str(int(tag,16))[-8:].zfill(8),'school':'ICTU Test','major':'CNTT Test','password':'TestOnly123!'}
 p=req(a,'POST','/interns/register',profile,201);pid=p['id']
+req(hr,'POST',f'/hr/profiles/{pid}/contract?fileName=contract.pdf',b'',400)
 req(a,'POST','/interns/register',profile,409)
 req(a,'POST','/interns/login',{'identity':profile['email'],'password':profile['password']})
 req(a,'GET','/hr/dashboard',expected=403)
@@ -54,6 +55,7 @@ req(a,'PATCH',f"/hr/documents/{replacement['id']}",{'status':'Đã duyệt'},403
 req(hr,'PATCH',f"/hr/documents/{doc['id']}",{'status':'Đã duyệt'},409)
 req(hr,'PATCH',f"/hr/documents/{replacement['id']}",{'status':'Từ chối'},400)
 req(hr,'PATCH',f"/hr/documents/{replacement['id']}",{'status':'Đã duyệt'})
+req(hr,'POST',f'/hr/profiles/{pid}/contract?fileName=contract.pdf',b'',400)
 req(hr,'PATCH',f"/hr/documents/{letter['id']}",{'status':'Đã duyệt'})
 maildir=Path(__file__).resolve().parents[1]/'backend/CareerPortal.Api/App_Data/mail'
 token=None

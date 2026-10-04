@@ -1959,9 +1959,20 @@
       function renderContractProfiles() {
         const select = document.getElementById("contract-profile");
         const current = select.value;
+        const eligibleProfiles = state.profiles.filter((profile) =>
+          ["CV", "Đơn xin thực tập"].every((type) =>
+            state.documents.some(
+              (documentItem) =>
+                documentItem.profileId === profile.id &&
+                documentItem.type === type &&
+                documentItem.isCurrent &&
+                documentItem.status === "Đã duyệt",
+            ),
+          ),
+        );
         select.replaceChildren(
           new Option("Chọn thực tập sinh", ""),
-          ...state.profiles.map(
+          ...eligibleProfiles.map(
             (profile) =>
               new Option(`${profile.name} · ${profile.studentId}`, profile.id),
           ),
