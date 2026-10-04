@@ -13,8 +13,8 @@ public static class Applications
             a.Profile!.Status=input.Status=="Đã duyệt"?"Đang thực tập":"Từ chối";
             if(input.Status=="Đã duyệt")
             {
-                var applicationDocument=await db.InternDocuments.SingleOrDefaultAsync(x=>x.ProfileId==a.ProfileId&&x.Type=="Đơn xin thực tập"&&x.IsCurrent);
-                if(applicationDocument is not null&&applicationDocument.Status=="Chờ duyệt")
+                var applicationDocuments=await db.InternDocuments.Where(x=>x.ProfileId==a.ProfileId&&x.IsCurrent&&(x.Type=="CV"||x.Type=="Đơn xin thực tập")&&x.Status=="Chờ duyệt").ToListAsync();
+                foreach(var applicationDocument in applicationDocuments)
                 {
                     applicationDocument.Status="Đã duyệt";
                     applicationDocument.ReviewedBy=a.ReviewedBy;
