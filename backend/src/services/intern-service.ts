@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
+import type { Pool } from 'pg';
 import { pool } from '../db/pool.js';
 import type { CreateInternInput } from '../validation/intern.js';
 import type { Intern, InternStatus } from '../types/intern.js';
 import { HttpError } from '../utils/http-error.js';
+import { enqueueDecisionEmail } from '../email/outbox.js';
 
 interface InternRow {
   id: string;
@@ -115,21 +117,53 @@ export async function reviewInternApplication(input: {
   decision: 'APPROVED' | 'REJECTED';
   reviewerId: string;
   rejectionReason?: string;
-}): Promise<Intern> {
+}, database: Pick<Pool, 'connect'> = pool): Promise<Intern> {
   if (input.decision === 'REJECTED' && !input.rejectionReason?.trim()) {
     throw new HttpError(400, 'Lý do từ chối là bắt buộc');
   }
-  const result = await pool.query<InternRow>(
-    `UPDATE interns
-       SET status = $2, reviewed_by = $3, reviewed_at = now(),
-           rejection_reason = $4, updated_at = now()
-     WHERE id = $1 AND status = 'PENDING'
-     RETURNING *`,
-    [input.internId, input.decision, input.reviewerId, input.decision === 'REJECTED' ? input.rejectionReason?.trim() : null],
-  );
-  if (result.rows[0]) return toIntern(result.rows[0]);
+  const client = await database.connect();
+  try {
+    await client.query('BEGIN');
+    try {
+      const result = await client.query<InternRow>(
+        `UPDATE interns
+           SET status = $2, reviewed_by = $3, reviewed_at = now(),
+               rejection_reason = $4, updated_at = now()
+         WHERE id = $1 AND status = 'PENDING'
+         RETURNING *`,
+        [input.internId, input.decision, input.reviewerId,
+          input.decision === 'REJECTED' ? input.rejectionReason?.trim() : null],
+      );
+      const row = result.rows[0];
+      if (!row) {
+        const exists = await client.query('SELECT 1 FROM interns WHERE id = $1', [input.internId]);
+        if (!exists.rowCount) throw new HttpError(404, 'Không tìm thấy hồ sơ thực tập sinh');
+        throw new HttpError(409, 'Hồ sơ đã được xử lý');
+      }
 
-  const exists = await pool.query('SELECT 1 FROM interns WHERE id = $1', [input.internId]);
-  if (!exists.rowCount) throw new HttpError(404, 'Không tìm thấy hồ sơ thực tập sinh');
-  throw new HttpError(409, 'Hồ sơ đã được xử lý');
+      const intern = toIntern(row);
+      await enqueueDecisionEmail({
+        internId: intern.id,
+        recipient: intern.email,
+        decision: input.decision,
+        idempotencyKey: 'initial-review',
+        data: {
+          fullName: intern.fullName,
+          ...(input.decision === 'REJECTED' ? { rejectionReason: intern.rejectionReason ?? undefined } : {}),
+        },
+      }, client);
+
+      await client.query('COMMIT');
+      return intern;
+    } catch (error) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Failed to roll back intern review transaction:', rollbackError);
+      }
+      throw error;
+    }
+  } finally {
+    client.release();
+  }
 }

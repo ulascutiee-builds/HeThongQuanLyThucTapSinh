@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import type { PoolClient } from 'pg';
 import { pool } from '../db/pool.js';
 import type { DecisionEmailData } from './templates.js';
+
+export type OutboxQueryExecutor = Pick<PoolClient, 'query'>;
 
 export async function enqueueDecisionEmail(input: {
   internId: string;
@@ -8,10 +11,10 @@ export async function enqueueDecisionEmail(input: {
   decision: 'APPROVED' | 'REJECTED';
   idempotencyKey: string;
   data: DecisionEmailData;
-}) {
+}, queryExecutor: OutboxQueryExecutor = pool) {
   const template = input.decision === 'APPROVED' ? 'intern_approved' : 'intern_rejected';
   const dedupeKey = `intern-decision:${input.internId}:${input.decision}:${input.idempotencyKey}`;
-  const inserted = await pool.query<{ id: string }>(
+  const inserted = await queryExecutor.query<{ id: string }>(
     `INSERT INTO email_outbox (id, dedupe_key, recipient, template, payload)
      VALUES ($1, $2, $3, $4, $5::jsonb)
      ON CONFLICT (dedupe_key) DO NOTHING
@@ -20,6 +23,9 @@ export async function enqueueDecisionEmail(input: {
   );
   if (inserted.rows[0]) return { id: inserted.rows[0].id, queued: true };
 
-  const existing = await pool.query<{ id: string }>('SELECT id FROM email_outbox WHERE dedupe_key = $1', [dedupeKey]);
+  const existing = await queryExecutor.query<{ id: string }>(
+    'SELECT id FROM email_outbox WHERE dedupe_key = $1',
+    [dedupeKey],
+  );
   return { id: existing.rows[0]?.id, queued: false };
 }

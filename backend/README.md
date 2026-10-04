@@ -76,15 +76,15 @@ Search checks full name, student ID, email, university, and major. `status` is o
 
 ## Sprint services for other backend routes to call
 
-These services persist the assigned review and contract/email metadata; they are intentionally service functions so the teammates implementing review, authentication, and file-upload routes can call them without competing route definitions:
+These services persist the assigned review and contract/email metadata; the review, authentication, and file-upload routes can call them without competing route definitions:
 
-- `reviewInternApplication(...)` records approved/rejected status, reviewer, time, and required rejection reason.
+- `reviewInternApplication(...)` records the approved/rejected decision and atomically queues the matching email in the same PostgreSQL transaction. If the email cannot be queued, the review is rolled back so the intern is not left with a decision but no notification.
 - `reviewInternDocument(...)` records document status, reviewer, time, and required rejection reason.
 - `saveInternDocument(...)` stores document upload metadata after the file is saved by the upload layer.
 - `recordContractUpload(...)` allocates the next contract version per intern and stores uploader, storage key, content type, file size, and upload time. The caller must save the file first and pass its storage key.
-- `enqueueDecisionEmail(...)` queues an approval/rejection message. Pass the same stable `idempotencyKey` when retrying the same review event; a repeated key returns the existing outbox item.
+- The review service uses `enqueueDecisionEmail(...)` with a stable idempotency key, so repeated handling of the same decision cannot create duplicate outbox jobs.
 
-The email worker is disabled by default. To enable it, configure SMTP and set `EMAIL_WORKER_ENABLED=true`. It records status and errors, retries with exponential backoff, and marks exhausted jobs `FAILED`. Enqueueing is idempotent by key and workers claim rows safely across processes. SMTP is at-least-once: a process crash after the SMTP server accepts a message but before the database records `SENT` can still cause a retry. Use a provider with idempotency support if strict end-to-end deduplication is required.
+The email worker is disabled by default. To enable delivery, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, and a real `EMAIL_FROM`, then set `EMAIL_WORKER_ENABLED=true`. The review route must call `reviewInternApplication(...)`; this branch does not add a review route or authentication policy. The worker records status and errors, retries with exponential backoff, and marks exhausted jobs `FAILED`. SMTP is at-least-once: a process crash after the SMTP server accepts a message but before the database records `SENT` can still cause a retry.
 
 `passwordSchema` in `src/validation/intern.ts` is a reusable baseline for the account-registration task. Passwords are not stored on the intern profile; the authentication owner should hash passwords and own the registration route.
 
