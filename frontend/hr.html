@@ -195,7 +195,7 @@
         font-size: 11px;
         font-weight: 700;
       }
-      .account-role {
+      .account-role-cell {
         margin: 3px 0 0;
         color: rgba(245, 244, 237, 0.59);
         font-size: 10px;
@@ -752,6 +752,47 @@
         min-width: 140px;
       }
 
+      /* BEGIN: Bố cục bảng tài khoản và hộp thoại tạo tài khoản dùng riêng cho prototype frontend. */
+      .account-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .account-search {
+        width: min(100%, 360px);
+      }
+      .account-role {
+        color: #68736c;
+      }
+      .account-dialog {
+        width: min(100% - 28px, 520px);
+      }
+      .account-form {
+        display: grid;
+        gap: 15px;
+        padding: 20px;
+      }
+      .account-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+      }
+      .account-form-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.6;
+      }
+      .account-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 5px;
+      }
+      /* END: Các kiểu tài khoản giới hạn trong màn danh sách và hộp thoại tạo mới. */
+
       .dialog {
         width: min(100% - 28px, 540px);
         max-height: min(88vh, 820px);
@@ -1103,6 +1144,19 @@
         .form-field.full {
           grid-column: auto;
         }
+        /* BEGIN: Thu gọn form tài khoản để nhập liệu thuận tiện trên màn hình nhỏ. */
+        .account-toolbar,
+        .account-form-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .account-search {
+          width: 100%;
+        }
+        .account-form-grid {
+          grid-template-columns: 1fr;
+        }
+        /* END: Bố cục mobile của form tài khoản trở về một cột. */
       }
       @media (prefers-reduced-motion: reduce) {
         *,
@@ -1152,6 +1206,13 @@
             >
             <span class="nav-count" id="document-count">0</span>
           </button>
+          <!-- BEGIN: Điều hướng tới màn tài khoản demo, không mở rộng API Sprint 1. -->
+          <button class="nav-item" type="button" data-view="accounts">
+            <span class="nav-item-text"
+              ><span class="nav-glyph" aria-hidden="true">♙</span>Tài khoản</span
+            >
+          </button>
+          <!-- END: Điều hướng tài khoản được gắn vào bộ chuyển màn hình HR hiện có. -->
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -1548,6 +1609,96 @@
               </div>
             </div>
           </section>
+          <!-- BEGIN: Màn quản lý tài khoản hiển thị dữ liệu mẫu và mở form tạo mới tại frontend. -->
+          <section
+            class="view-section"
+            id="view-accounts"
+            aria-labelledby="accounts-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="heading-kicker">Quản trị nội bộ · Bản xem trước</p>
+                <h1 id="accounts-title">Quản lý tài khoản</h1>
+                <p class="heading-description">
+                  Theo dõi quyền truy cập của HR, mentor và thực tập sinh.
+                </p>
+              </div>
+              <button class="primary-button" id="account-add" type="button">
+                <span class="plus" aria-hidden="true">+</span>Tạo tài khoản
+              </button>
+            </div>
+            <div class="info-banner">
+              Đây là dữ liệu minh họa chỉ tồn tại trong phiên trình duyệt; chưa
+              tạo tài khoản thật hoặc ghi dữ liệu vào hệ thống.
+            </div>
+            <div class="metrics" aria-label="Thống kê tài khoản demo">
+              <article class="metric">
+                <p class="metric-label">Tổng tài khoản</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="account-metric-total">0</p>
+                  <span class="metric-hint">trong danh sách demo</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">Đang hoạt động</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="account-metric-active">0</p>
+                  <span class="metric-hint">có thể đăng nhập</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">HR & Mentor</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="account-metric-staff">0</p>
+                  <span class="metric-hint">tài khoản nhân sự</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">Thực tập sinh</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="account-metric-interns">0</p>
+                  <span class="metric-hint">tài khoản học viên</span>
+                </div>
+              </article>
+            </div>
+            <div class="account-toolbar">
+              <div>
+                <h2 class="section-title">Danh sách tài khoản</h2>
+                <p class="section-subtitle">
+                  Lọc nhanh theo họ tên, email hoặc vai trò.
+                </p>
+              </div>
+              <input
+                class="control account-search"
+                id="account-search"
+                type="search"
+                placeholder="Tìm tài khoản..."
+                aria-label="Tìm tài khoản"
+              />
+            </div>
+            <div class="table-frame">
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Người dùng</th>
+                      <th>Vai trò</th>
+                      <th>Ngày tạo</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accounts-table"></tbody>
+                </table>
+              </div>
+              <div class="table-foot">
+                <span id="account-result-count">0 tài khoản</span>
+                <span>Dữ liệu demo trên thiết bị này</span>
+              </div>
+            </div>
+          </section>
+          <!-- END: Màn danh sách kết thúc trước các dialog chung của ứng dụng. -->
         </main>
       </div>
     </div>
@@ -1752,6 +1903,60 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+    <!-- BEGIN: Form demo xác thực trường bắt buộc và mật khẩu, không gửi thông tin tới API. -->
+    <dialog
+      class="dialog account-dialog"
+      id="account-dialog"
+      aria-labelledby="account-dialog-title"
+    >
+      <form class="account-form" id="account-form">
+        <div class="dialog-head">
+          <div>
+            <p class="dialog-eyebrow">Tài khoản nội bộ · Bản xem trước</p>
+            <h2 id="account-dialog-title">Tạo tài khoản</h2>
+            <p>Nhập thông tin cơ bản và phân quyền truy cập.</p>
+          </div>
+          <button
+            class="quiet-button"
+            type="button"
+            data-close-dialog="account-dialog"
+            aria-label="Đóng form"
+          >Đóng</button>
+        </div>
+        <div class="account-form-grid">
+          <div class="form-field">
+            <label for="account-name">Họ và tên</label>
+            <input class="form-control" id="account-name" name="name" required maxlength="100" autocomplete="name" />
+          </div>
+          <div class="form-field">
+            <label for="account-email">Email</label>
+            <input class="form-control" id="account-email" name="email" type="email" required maxlength="160" autocomplete="email" />
+          </div>
+          <div class="form-field">
+            <label for="account-role-select">Vai trò</label>
+            <select class="form-control" id="account-role-select" name="role" required>
+              <option value="HR">HR</option>
+              <option value="Mentor">Mentor</option>
+              <option value="Thực tập sinh">Thực tập sinh</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="account-password">Mật khẩu tạm</label>
+            <input class="form-control" id="account-password" name="password" type="password" required minlength="8" autocomplete="new-password" />
+          </div>
+        </div>
+        <p class="account-form-note">
+          Mật khẩu chỉ được kiểm tra tại trình duyệt và không lưu vào danh sách
+          demo. Bản triển khai cần tích hợp luồng tạo tài khoản an toàn ở backend.
+        </p>
+        <div class="account-form-actions">
+          <button class="secondary-button" type="button" data-close-dialog="account-dialog">Hủy</button>
+          <button class="primary-button" type="submit">Tạo trong bản xem trước</button>
+        </div>
+      </form>
+    </dialog>
+    <!-- END: Hộp thoại tài khoản chỉ thao tác trên mảng dữ liệu minh họa trong bộ nhớ. -->
+
     <script src="session-bridge.js?v=20261003"></script>
     <script>
       const API_BASE =
@@ -1771,6 +1976,14 @@
       const REVIEW_HISTORY_PAGE_SIZE = 5;
       const navItems = [...document.querySelectorAll(".nav-item[data-view]")];
       const profileForm = document.getElementById("profile-form");
+      /* BEGIN: Mảng tài khoản mẫu tách biệt hoàn toàn với state và API HR hiện hành. */
+      let demoAccounts = [
+        { name: "Nguyễn Minh Anh", email: "minhanh.hr@example.test", role: "HR", createdAt: "2026-09-12", active: true },
+        { name: "Trần Quốc Bảo", email: "quocbao.mentor@example.test", role: "Mentor", createdAt: "2026-09-18", active: true },
+        { name: "Lê Thu Hà", email: "thuha.intern@example.test", role: "Thực tập sinh", createdAt: "2026-10-01", active: true },
+        { name: "Phạm Gia Huy", email: "giahuy.intern@example.test", role: "Thực tập sinh", createdAt: "2026-10-02", active: false },
+      ];
+      /* END: Thông tin mẫu không chứa dữ liệu cá nhân hoặc thông tin xác thực thật. */
 
       async function apiRequest(path, options = {}) {
         const response = await fetch(`${API_BASE}${path}`, options);
@@ -2284,6 +2497,9 @@
         profiles: "Hồ sơ thực tập",
         applications: "Đơn xin",
         documents: "Tài liệu & hợp đồng",
+        /* BEGIN: Tiêu đề được bổ sung để breadcrumb đồng bộ với màn hình tài khoản. */
+        accounts: "Quản lý tài khoản",
+        /* END: Mục tài khoản dùng lại showView và điều hướng hiện tại. */
       };
       function showView(view) {
         document.querySelectorAll(".view-section").forEach((section) => {
@@ -2407,6 +2623,80 @@
       document
         .getElementById("add-profile")
         .addEventListener("click", () => openProfileDialog());
+
+      /* BEGIN: Kết xuất, lọc, tạo và khóa tài khoản demo hoàn toàn ở phía trình duyệt. */
+      function renderDemoAccounts() {
+        const query = document.getElementById("account-search").value.trim().toLocaleLowerCase("vi");
+        const visibleAccounts = demoAccounts.filter((account) =>
+          `${account.name} ${account.email} ${account.role}`.toLocaleLowerCase("vi").includes(query),
+        );
+        document.getElementById("accounts-table").innerHTML = visibleAccounts.length
+          ? visibleAccounts.map((account) => {
+              const accountIndex = demoAccounts.indexOf(account);
+              return `<tr>
+                <td class="person-cell"><p class="person-name">${escapeHtml(account.name)}</p><p class="person-meta">${escapeHtml(account.email)}</p></td>
+                <td class="account-role-cell">${escapeHtml(account.role)}</td>
+                <td class="date-cell">${formatDate(account.createdAt)}</td>
+                <td><span class="status-pill ${account.active ? "" : "neutral"}">${account.active ? "Đang hoạt động" : "Đã tạm khóa"}</span></td>
+                <td><div class="row-actions"><button class="quiet-button" type="button" data-account-toggle="${accountIndex}">${account.active ? "Tạm khóa" : "Mở khóa"}</button></div></td>
+              </tr>`;
+            }).join("")
+          : '<tr><td class="empty-state" colspan="5">Không tìm thấy tài khoản phù hợp.</td></tr>';
+        document.getElementById("account-result-count").textContent =
+          `${visibleAccounts.length} / ${demoAccounts.length} tài khoản`;
+        document.getElementById("account-metric-total").textContent = demoAccounts.length;
+        document.getElementById("account-metric-active").textContent =
+          demoAccounts.filter((account) => account.active).length;
+        document.getElementById("account-metric-staff").textContent =
+          demoAccounts.filter((account) => account.role !== "Thực tập sinh").length;
+        document.getElementById("account-metric-interns").textContent =
+          demoAccounts.filter((account) => account.role === "Thực tập sinh").length;
+      }
+
+      document.getElementById("account-add").addEventListener("click", () => {
+        document.getElementById("account-form").reset();
+        document.getElementById("account-dialog").showModal();
+      });
+      document.getElementById("account-search").addEventListener("input", renderDemoAccounts);
+      document.getElementById("accounts-table").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-account-toggle]");
+        if (!button) return;
+        const account = demoAccounts[Number(button.dataset.accountToggle)];
+        if (!account) return;
+        account.active = !account.active;
+        renderDemoAccounts();
+        showToast(account.active ? "Đã mở khóa tài khoản trong bản xem trước." : "Đã tạm khóa trong bản xem trước.");
+      });
+      document.getElementById("account-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.reportValidity()) return;
+        const name = form.elements.name.value.trim();
+        const email = form.elements.email.value.trim();
+        if (demoAccounts.some((account) => account.email.toLocaleLowerCase("vi") === email.toLocaleLowerCase("vi"))) {
+          form.elements.email.setCustomValidity("Email này đã có trong danh sách demo.");
+          form.elements.email.reportValidity();
+          return;
+        }
+        demoAccounts.unshift({
+          name,
+          email,
+          role: form.elements.role.value,
+          createdAt: new Date().toISOString().slice(0, 10),
+          active: true,
+        });
+        form.elements.email.setCustomValidity("");
+        form.reset();
+        document.getElementById("account-dialog").close();
+        renderDemoAccounts();
+        showToast("Đã thêm tài khoản vào danh sách demo của phiên này.");
+      });
+      document.getElementById("account-email").addEventListener("input", (event) => {
+        event.currentTarget.setCustomValidity("");
+      });
+      renderDemoAccounts();
+      /* END: Form không gửi email/mật khẩu hay thay đổi dữ liệu backend thật. */
+
       document
         .getElementById("profile-search")
         .addEventListener("input", () => {
