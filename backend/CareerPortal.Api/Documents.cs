@@ -6,7 +6,7 @@ public static class Documents
         app.MapPost("/api/interns/{id:int}/documents",(int id,HttpContext c,CareerDbContext db)=>Upload(id,false,c,db));
         app.MapPost("/api/hr/profiles/{id:int}/contract",(int id,HttpContext c,CareerDbContext db)=>Upload(id,true,c,db));
         app.MapGet("/api/interns/{id:int}/documents",async(int id,HttpContext c,CareerDbContext db)=>{
-            if(!SprintSecurity.Own(c,id))return Results.Forbid();if(!await db.InternProfiles.AnyAsync(x=>x.Id==id))return Results.NotFound();
+            if(!SprintSecurity.Own(c,id))return Results.Forbid();if(!await db.InternProfiles.AnyAsync(x=>x.Id==id))return Results.NotFound();await InternshipStatusSync.UpdateAsync(db);
             var list=await db.InternDocuments.Where(x=>x.ProfileId==id).OrderByDescending(x=>x.Version).AsNoTracking().ToListAsync();return Results.Ok(list.Select(x=>x.ToResponse()));
         });
         app.MapGet("/api/documents/{id:int}/file",async(int id,HttpContext c,CareerDbContext db)=>{
@@ -61,16 +61,16 @@ public static class Documents
     static async Task<IResult> Upload(int id,bool contract,HttpContext c,CareerDbContext db)
     {
         if(contract?!SprintSecurity.HR(c):!SprintSecurity.Own(c,id))return Results.Forbid();var p=await db.InternProfiles.FindAsync(id);if(p is null)return Results.NotFound();
-        if(!contract&&!p.EmailVerified)return Results.BadRequest(new{message="Cần xác thực email trước khi tải tài liệu lên."});
         var type=contract?"Hợp đồng thực tập":c.Request.Query["type"].ToString();if(!contract&&type is not("CV" or "Đơn xin thực tập"))return Results.BadRequest(new{message="Loại tài liệu không hợp lệ."});
         if(contract&&!await HasApprovedApplicationDocuments(db,id))return Results.BadRequest(new{message="Chỉ có thể tải hợp đồng sau khi CV và đơn xin thực tập được duyệt."});
         if(!contract&&await db.InternApplications.AnyAsync(x=>x.ProfileId==id&&(x.Status=="Chờ duyệt"||x.Status=="Đã duyệt")))return Results.Conflict(new{message="Hồ sơ đã nộp. Không thay tài liệu khi đang chờ duyệt hoặc đã duyệt."});
-        DateTimeOffset? expires=null;if(contract){expires=DateTimeOffset.UtcNow.AddDays(90);if(c.Request.Query.TryGetValue("expiresAt",out var value)){if(!DateTimeOffset.TryParse(value,out var date)||date<=DateTimeOffset.UtcNow)return Results.BadRequest(new{message="Hạn hợp đồng phải nằm trong tương lai."});expires=date;}}
+        DateTimeOffset? starts=null,expires=null;if(contract){if(!c.Request.Query.TryGetValue("startsAt",out var startValue)||string.IsNullOrWhiteSpace(startValue)||!DateTimeOffset.TryParse(startValue,out var startDate)||startDate<DateTimeOffset.UtcNow.Date)return Results.BadRequest(new{message="Vui lòng chọn ngày bắt đầu hợp đồng từ hôm nay trở đi."});if(!c.Request.Query.TryGetValue("expiresAt",out var value)||string.IsNullOrWhiteSpace(value)||!DateTimeOffset.TryParse(value,out var date)||date<startDate)return Results.BadRequest(new{message="Ngày bắt đầu không được lớn hơn ngày kết thúc."});starts=startDate;expires=date;}
         var file=await UploadValidator.Read(c.Request);if(file.Error!=null)return Results.BadRequest(new{message=file.Error});
         await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
         if(contract&&!await HasApprovedApplicationDocuments(db,id))return Results.BadRequest(new{message="Chỉ có thể tải hợp đồng sau khi CV và đơn xin thực tập được duyệt."});
         var old=await db.InternDocuments.Where(x=>x.ProfileId==id&&x.Type==type).ToListAsync();foreach(var d in old)d.IsCurrent=false;
-        var row=new InternDocument{ProfileId=id,Type=type,FileName=file.Name,ContentType=file.Mime,Content=file.Data!,Status=contract?"Chờ xác nhận":"Chờ duyệt",Version=old.Select(x=>x.Version).DefaultIfEmpty(0).Max()+1,UploadedBy=c.User.Identity!.Name??"",ExpiresAt=expires};
+        var row=new InternDocument{ProfileId=id,Type=type,FileName=file.Name,ContentType=file.Mime,Content=file.Data!,Status=contract?"Chờ xác nhận":"Chờ duyệt",Version=old.Select(x=>x.Version).DefaultIfEmpty(0).Max()+1,UploadedBy=c.User.Identity!.Name??"",StartsAt=starts,ExpiresAt=expires};
+        if(contract){p.StartDate=DateOnly.FromDateTime(starts!.Value.Date);p.EndDate=DateOnly.FromDateTime(expires!.Value.Date);}
         db.InternDocuments.Add(row);await db.SaveChangesAsync();await tx.CommitAsync();return Results.Created($"/api/documents/{row.Id}/file",row.ToResponse());
     }
     static async Task<bool> HasApprovedApplicationDocuments(CareerDbContext db,int profileId)
@@ -86,6 +86,10 @@ public static class Documents
         var now=DateTimeOffset.UtcNow;
         var count=await db.InternDocuments.Where(x=>x.Id==id&&x.Type=="Hợp đồng thực tập"&&x.IsCurrent&&x.Status=="Chờ xác nhận"&&(x.ExpiresAt==null||x.ExpiresAt>now)).ExecuteUpdateAsync(s=>s.SetProperty(x=>x.Status,"Đã xác nhận").SetProperty(x=>x.ConfirmedAt,now));
         if(count==0)return Results.Conflict(new{message="Hợp đồng đã xác nhận, hết hạn hoặc đã được thay bằng phiên bản mới."});
+        var profile=await db.InternProfiles.FindAsync(row.ProfileId);
+        if(profile is not null&&profile.Status is not ("Đã hoàn thành" or "Từ chối"))
+            profile.Status=row.StartsAt is DateTimeOffset start&&start>now?"Chờ bắt đầu":"Đang thực tập";
+        await db.SaveChangesAsync();
         var updated=await db.InternDocuments.AsNoTracking().SingleAsync(x=>x.Id==id);return Results.Ok(updated.ToResponse());
     }
 }

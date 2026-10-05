@@ -407,6 +407,14 @@
         align-items: center;
         gap: 8px;
       }
+      #application-profile-filter {
+        width: auto;
+        min-width: 180px;
+      }
+      #application-status-filter {
+        width: auto;
+        min-width: 140px;
+      }
       .filter-bar {
         display: grid;
         grid-template-columns:
@@ -454,6 +462,9 @@
         padding-inline: 18px;
         border-color: #d5d9d3;
         background: #fff;
+      }
+      .row-actions .quiet-button {
+        text-align: center;
       }
       .search-glyph {
         position: absolute;
@@ -570,9 +581,17 @@
       }
       .row-actions {
         display: flex;
-        min-width: 128px;
+        width: 100%;
         align-items: center;
+        justify-content: center;
         gap: 2px;
+      }
+      table thead th:last-child,
+      #profiles-table td:last-child {
+        text-align: center;
+      }
+      #profiles-table td:last-child .row-actions {
+        margin: 0 auto;
       }
       .empty-state {
         padding: 35px 16px;
@@ -613,20 +632,6 @@
         gap: 12px;
         margin-bottom: 12px;
       }
-      .application-pending-filter {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0;
-        color: var(--ink);
-        font-size: 12px;
-      }
-      .application-pending-filter input {
-        width: 16px;
-        height: 16px;
-        margin: 0;
-        accent-color: var(--forest);
-      }
       .work-panel {
         overflow: hidden;
         border: 1px solid var(--line);
@@ -655,6 +660,36 @@
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+      .application-documents {
+        padding: 13px 16px 15px;
+        border-top: 1px solid var(--line);
+        background: #fcfcfa;
+      }
+      .application-documents-title {
+        margin: 0 0 9px;
+        color: #68736c;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .application-document {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 0;
+        border-top: 1px solid #edf0eb;
+      }
+      .application-document:first-of-type {
+        border-top: 0;
+      }
+      .application-document .document-actions {
+        flex-shrink: 0;
+      }
+      .application-document-empty {
+        margin: 0;
+        color: #929b94;
+        font-size: 10px;
       }
       .document-title {
         color: var(--ink);
@@ -685,10 +720,10 @@
       }
       .contract-upload {
         display: grid;
-        grid-template-columns: minmax(150px, 0.8fr) minmax(210px, 1.2fr) minmax(
-            200px,
-            1fr
-          ) auto;
+        grid-template-columns: repeat(2, minmax(150px, 1fr)) minmax(
+            210px,
+            1.2fr
+          ) minmax(200px, 1fr) auto;
         align-items: end;
         gap: 10px;
         padding: 15px;
@@ -932,7 +967,7 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .contract-upload {
-          grid-template-columns: 1fr 1.2fr;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .contract-upload button {
           grid-column: 1 / -1;
@@ -1029,7 +1064,9 @@
           flex: 1;
         }
         #document-profile-filter,
-        #document-filter {
+        #document-filter,
+        #application-profile-filter,
+        #application-status-filter {
           width: 0;
           min-width: 0;
           flex: 1 1 0;
@@ -1111,8 +1148,7 @@
           </button>
           <button class="nav-item" type="button" data-view="documents">
             <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">▣</span>Tài liệu & hợp
-              đồng</span
+              ><span class="nav-glyph" aria-hidden="true">▣</span>Hợp đồng</span
             >
             <span class="nav-count" id="document-count">0</span>
           </button>
@@ -1337,8 +1373,49 @@
                   xử lý.
                 </p>
               </div>
+              <div class="toolbar-actions">
+                <input
+                  class="control"
+                  id="application-profile-filter"
+                  type="search"
+                  placeholder="Tìm tên, mã sinh viên, email..."
+                  aria-label="Tìm đơn theo thực tập sinh"
+                />
+                <select
+                  class="control"
+                  id="application-status-filter"
+                  aria-label="Lọc đơn theo trạng thái"
+                >
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="Chờ duyệt">Chờ duyệt</option>
+                  <option value="Đã duyệt">Đã duyệt</option>
+                  <option value="Từ chối">Từ chối</option>
+                </select>
+              </div>
             </div>
             <div class="application-list" id="applications-list"></div>
+            <div class="table-foot">
+              <span id="application-result-count">0 đơn</span>
+              <div class="profile-pagination" aria-label="Phân trang đơn xin">
+                <button
+                  class="quiet-button"
+                  id="application-page-previous"
+                  type="button"
+                  aria-label="Trang đơn xin trước"
+                >
+                  ‹
+                </button>
+                <span id="application-page-label">Trang 1/1</span>
+                <button
+                  class="quiet-button"
+                  id="application-page-next"
+                  type="button"
+                  aria-label="Trang đơn xin sau"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
             <div class="section-toolbar" style="margin-top: 24px">
               <div>
                 <h2 class="section-title">Lịch sử xử lý</h2>
@@ -1348,6 +1425,14 @@
               </div>
             </div>
             <div class="document-list" id="review-history-list"></div>
+            <div class="table-foot">
+              <span id="review-history-result-count">0 mục</span>
+              <div class="profile-pagination" aria-label="Phân trang lịch sử xử lý">
+                <button class="quiet-button" id="review-history-page-previous" type="button" aria-label="Trang lịch sử trước">‹</button>
+                <span id="review-history-page-label">Trang 1/1</span>
+                <button class="quiet-button" id="review-history-page-next" type="button" aria-label="Trang lịch sử sau">›</button>
+              </div>
+            </div>
           </section>
 
           <section
@@ -1402,33 +1487,66 @@
                 </button>
               </form>
             </div>
-            <div class="section-toolbar">
+            <div class="section-toolbar" style="margin-top: 24px">
               <div>
-                <h2 class="section-title">Danh sách tài liệu</h2>
+                <h2 class="section-title">Thực tập sinh đã có hợp đồng</h2>
                 <p class="section-subtitle">
-                  Tài liệu cần HR xem sẽ được hiển thị ở đầu danh sách.
+                  Theo dõi thời hạn và trạng thái các hợp đồng đã tải lên.
                 </p>
               </div>
-              <div class="toolbar-actions">
-                <select
+            </div>
+            <div class="filter-bar contract-filter-bar">
+              <label class="filter-search">
+                <span class="search-glyph" aria-hidden="true">⌕</span>
+                <input
                   class="control"
-                  id="document-profile-filter"
-                  aria-label="Lọc theo thực tập sinh"
-                >
-                  <option value="">Tất cả thực tập sinh</option></select
-                ><select
-                  class="control"
-                  id="document-filter"
-                  aria-label="Lọc trạng thái tài liệu"
-                >
-                  <option value="all">Tất cả tài liệu</option>
-                  <option value="Chờ duyệt">Chờ duyệt</option>
-                  <option value="Đã duyệt">Đã duyệt</option>
-                  <option value="Từ chối">Từ chối</option>
-                </select>
+                  id="contract-search"
+                  type="search"
+                  placeholder="Tìm tên, mã sinh viên..."
+                  aria-label="Tìm hợp đồng"
+                />
+              </label>
+              <select class="control" id="contract-status-filter" aria-label="Lọc trạng thái hợp đồng">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Chờ xác nhận">Chờ xác nhận</option>
+                <option value="Đã xác nhận">Đã xác nhận</option>
+              </select>
+              <select class="control" id="contract-school-filter" aria-label="Lọc theo trường">
+                <option value="">Tất cả trường</option>
+              </select>
+              <select class="control" id="contract-major-filter" aria-label="Lọc theo ngành">
+                <option value="">Tất cả ngành</option>
+              </select>
+              <button class="secondary-button" id="clear-contract-filters" type="button">
+                Xóa bộ lọc
+              </button>
+            </div>
+            <div class="table-frame">
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Thực tập sinh</th>
+                      <th>Trường</th>
+                      <th>Ngành</th>
+                      <th>Ngày bắt đầu</th>
+                      <th>Ngày hết hạn</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contract-table"></tbody>
+                </table>
+              </div>
+              <div class="table-foot">
+                <span id="contract-result-count">0 hợp đồng</span>
+                <div class="profile-pagination" aria-label="Phân trang hợp đồng">
+                  <button class="quiet-button" id="contract-page-previous" type="button" aria-label="Trang trước">‹</button>
+                  <span id="contract-page-label">Trang 1/1</span>
+                  <button class="quiet-button" id="contract-page-next" type="button" aria-label="Trang sau">›</button>
+                </div>
               </div>
             </div>
-            <div class="document-list" id="documents-list"></div>
           </section>
         </main>
       </div>
@@ -1534,7 +1652,6 @@
                 id="profile-start-date"
                 name="startDate"
                 type="date"
-                required
               />
             </div>
             <div class="form-field">
@@ -1544,7 +1661,6 @@
                 id="profile-end-date"
                 name="endDate"
                 type="date"
-                required
               />
             </div>
             <div class="form-field full">
@@ -1646,7 +1762,13 @@
       let toastTimer;
       let activeDocumentId = null;
       let profilePage = 1;
+      let applicationPage = 1;
+      let contractPage = 1;
+      let reviewHistoryPage = 1;
       const PROFILE_PAGE_SIZE = 5;
+      const APPLICATION_PAGE_SIZE = 5;
+      const CONTRACT_PAGE_SIZE = 5;
+      const REVIEW_HISTORY_PAGE_SIZE = 5;
       const navItems = [...document.querySelectorAll(".nav-item[data-view]")];
       const profileForm = document.getElementById("profile-form");
 
@@ -1682,7 +1804,9 @@
                 email: profile?.email ?? "",
                 school: profile?.school ?? "",
                 major: profile?.major ?? "",
-                appliedAt: application.appliedAt?.slice(0, 10),
+                appliedAt: application.appliedAt,
+                reviewedAt: application.reviewedAt,
+                reviewedBy: application.reviewedBy,
                 status: application.status,
               };
             }),
@@ -1713,16 +1837,24 @@
 
       function formatDate(value) {
         if (!value) return "Chưa cập nhật";
-        const [year, month, day] = value.split("-");
-        return `${day}/${month}/${year}`;
+        const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!match) return "Chưa cập nhật";
+        return `${match[3]}/${match[2]}/${match[1]}`;
       }
 
       function formatDateTime(value) {
         return value
           ? new Intl.DateTimeFormat("vi-VN", {
-              dateStyle: "short",
-              timeStyle: "short",
-            }).format(new Date(value))
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hourCycle: "h23",
+              timeZone: "Asia/Ho_Chi_Minh",
+            })
+              .format(new Date(value))
+              .replace(", ", " ")
           : "Chưa ghi nhận";
       }
 
@@ -1772,6 +1904,13 @@
           (documentItem) =>
             documentItem.isCurrent && documentItem.status === "Chờ duyệt",
         ).length;
+        const activeContracts = state.documents.filter(
+          (documentItem) =>
+            documentItem.type === "Hợp đồng thực tập" &&
+            documentItem.isCurrent &&
+            documentItem.expiresAt &&
+            new Date(documentItem.expiresAt).getTime() >= Date.now(),
+        ).length;
         document.getElementById("metric-total").textContent =
           state.profiles.length;
         document.getElementById("metric-active").textContent =
@@ -1785,7 +1924,7 @@
         document.getElementById("application-count").textContent =
           pendingApplications;
         document.getElementById("document-count").textContent =
-          pendingDocuments;
+          activeContracts;
         document.getElementById("app-total").textContent =
           state.applications.length;
         document.getElementById("app-pending").textContent =
@@ -1861,7 +2000,7 @@
             <td class="major-cell">${escapeHtml(profile.major)}</td>
             <td class="date-cell">${formatDate(profile.startDate)} – ${formatDate(profile.endDate)}</td>
             <td><span class="status-pill ${statusClass(profile.status)}">${escapeHtml(profile.status)}</span></td>
-            <td><div class="row-actions"><button class="quiet-button" type="button" data-edit-profile="${escapeHtml(profile.id)}">Sửa</button><button class="quiet-button" type="button" data-profile-documents="${escapeHtml(profile.id)}">Tài liệu</button></div></td>
+            <td><div class="row-actions"><button class="quiet-button" type="button" data-edit-profile="${escapeHtml(profile.id)}">Sửa</button></div></td>
           </tr>`,
             )
             .join("");
@@ -1879,13 +2018,29 @@
 
       function renderReviewHistory() {
         const list = document.getElementById("review-history-list");
-        const history = state.reviewHistory ?? [];
+        const history = (state.reviewHistory ?? []).filter(
+          (item) =>
+            !(
+              item.targetType === "Tài liệu" &&
+              ["CV", "Đơn xin thực tập"].includes(item.targetLabel)
+            ),
+        );
         if (!history.length) {
           list.innerHTML =
             '<div class="work-panel"><div class="empty-state">Chưa có quyết định xử lý.</div></div>';
+          document.getElementById("review-history-result-count").textContent = "0 mục";
+          document.getElementById("review-history-page-label").textContent = "Trang 1/1";
+          document.getElementById("review-history-page-previous").disabled = true;
+          document.getElementById("review-history-page-next").disabled = true;
           return;
         }
-        list.innerHTML = history
+        const pageCount = Math.max(1, Math.ceil(history.length / REVIEW_HISTORY_PAGE_SIZE));
+        reviewHistoryPage = Math.min(reviewHistoryPage, pageCount);
+        const pageItems = history.slice(
+          (reviewHistoryPage - 1) * REVIEW_HISTORY_PAGE_SIZE,
+          reviewHistoryPage * REVIEW_HISTORY_PAGE_SIZE,
+        );
+        list.innerHTML = pageItems
           .map((item) => {
             const profile = getProfile(item.profileId);
             const owner = profile
@@ -1894,32 +2049,80 @@
             return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(item.targetType)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(item.targetLabel)} · ${formatDateTime(item.reviewedAt)}</p></div><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>${item.note ? `<p class="document-file" style="padding: 0 16px 12px">${escapeHtml(item.note)}</p>` : ""}</article>`;
           })
           .join("");
+        document.getElementById("review-history-result-count").textContent =
+          `${history.length} mục`;
+        document.getElementById("review-history-page-label").textContent =
+          `Trang ${reviewHistoryPage}/${pageCount}`;
+        document.getElementById("review-history-page-previous").disabled =
+          reviewHistoryPage <= 1;
+        document.getElementById("review-history-page-next").disabled =
+          reviewHistoryPage >= pageCount;
       }
 
       function renderApplications() {
         const list = document.getElementById("applications-list");
-        if (!state.applications.length) {
+        const profileFilter = document.getElementById(
+          "application-profile-filter",
+        );
+        const statusFilter = document.getElementById("application-status-filter");
+        const selectedProfile = profileFilter.value.trim().toLowerCase();
+        const selectedStatus = statusFilter.value;
+        statusFilter.value = selectedStatus;
+        const filteredApplications = state.applications.filter((application) => {
+          const profile = getProfile(application.profileId);
+          const searchableText =
+            `${profile?.name ?? ""} ${profile?.studentId ?? ""} ${profile?.email ?? ""}`.toLowerCase();
+          return (
+            (!selectedProfile || searchableText.includes(selectedProfile)) &&
+            (!selectedStatus || application.status === selectedStatus)
+          );
+        });
+        if (!filteredApplications.length) {
           list.innerHTML =
-            '<div class="work-panel"><div class="empty-state">Chưa có đơn xin thực tập.</div></div>';
+            `<div class="work-panel"><div class="empty-state">${state.applications.length ? "Không có đơn phù hợp với bộ lọc." : "Chưa có đơn xin thực tập."}</div></div>`;
+          document.getElementById("application-result-count").textContent = "0 đơn";
+          document.getElementById("application-page-label").textContent =
+            "Trang 1/1";
+          document.getElementById("application-page-previous").disabled = true;
+          document.getElementById("application-page-next").disabled = true;
           return;
         }
-        const ordered = [...state.applications].sort(
+        const ordered = [...filteredApplications].sort(
           (a, b) =>
             (a.status === "Chờ duyệt" ? -1 : 1) -
             (b.status === "Chờ duyệt" ? -1 : 1),
         );
-        list.innerHTML = ordered
+        const pageCount = Math.max(
+          1,
+          Math.ceil(ordered.length / APPLICATION_PAGE_SIZE),
+        );
+        if (applicationPage > pageCount) applicationPage = pageCount;
+        const pageApplications = ordered.slice(
+          (applicationPage - 1) * APPLICATION_PAGE_SIZE,
+          applicationPage * APPLICATION_PAGE_SIZE,
+        );
+        list.innerHTML = pageApplications
           .map(
-            (application) => `
+            (application) => {
+              return `
         <article class="work-panel" data-sprint-profile="${application.profileId}">
           <div class="work-panel-head">
             <div><span class="status-pill ${statusClass(application.status)}">${escapeHtml(application.status)}</span><h2 style="margin-top:9px">${escapeHtml(application.name)}</h2><p>${escapeHtml(application.studentId)} · ${escapeHtml(application.email)}</p></div>
-            <div class="application-actions">${application.status === "Chờ duyệt" ? `<button class="primary-button" type="button" data-application-decision="approve" data-application-id="${escapeHtml(application.id)}">Duyệt đơn</button><button class="danger-button" type="button" data-application-decision="reject" data-application-id="${escapeHtml(application.id)}">Từ chối</button>` : `<span class="person-meta">Đã xử lý · ${formatDate(application.appliedAt)}</span>`}</div>
+            <div class="application-actions">${application.status === "Chờ duyệt" ? `<button class="primary-button" type="button" data-application-decision="approve" data-application-id="${escapeHtml(application.id)}">Duyệt đơn</button><button class="danger-button" type="button" data-application-decision="reject" data-application-id="${escapeHtml(application.id)}">Từ chối</button>` : `<span class="person-meta">Đã xử lý · ${formatDateTime(application.reviewedAt)}${application.reviewedBy ? ` · ${escapeHtml(application.reviewedBy)}` : ""}</span>`}</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:13px 16px;color:#68736c;font-size:10px"><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">TRƯỜNG</strong>${escapeHtml(application.school)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀNH</strong>${escapeHtml(application.major)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY ỨNG TUYỂN</strong>${formatDate(application.appliedAt)}</div></div>
-        </article>`,
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:13px 16px;color:#68736c;font-size:10px"><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">TRƯỜNG</strong>${escapeHtml(application.school)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀNH</strong>${escapeHtml(application.major)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY NỘP HỒ SƠ</strong>${formatDateTime(application.appliedAt)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY XỬ LÝ</strong>${formatDateTime(application.reviewedAt)}</div></div>
+        </article>`;
+            },
           )
           .join("");
+        document.getElementById("application-result-count").textContent =
+          `${ordered.length} đơn`;
+        document.getElementById("application-page-label").textContent =
+          `Trang ${applicationPage}/${pageCount}`;
+        document.getElementById("application-page-previous").disabled =
+          applicationPage <= 1;
+        document.getElementById("application-page-next").disabled =
+          applicationPage >= pageCount;
       }
 
       function renderDocuments() {
@@ -1969,6 +2172,14 @@
                 documentItem.status === "Đã duyệt",
             ),
           ),
+        ).filter(
+          (profile) =>
+            !state.documents.some(
+              (documentItem) =>
+                documentItem.profileId === profile.id &&
+                documentItem.type === "Hợp đồng thực tập" &&
+                documentItem.isCurrent,
+            ),
         );
         select.replaceChildren(
           new Option("Chọn thực tập sinh", ""),
@@ -1980,6 +2191,71 @@
         if (state.profiles.some((profile) => String(profile.id) === current))
           select.value = current;
         select.disabled = state.profiles.length === 0;
+      }
+
+      function renderContractTable() {
+        const schoolSelect = document.getElementById("contract-school-filter");
+        const majorSelect = document.getElementById("contract-major-filter");
+        const selectedSchool = schoolSelect.value;
+        const selectedMajor = majorSelect.value;
+        fillFilterOptions(
+          schoolSelect,
+          state.profiles.map((profile) => profile.school),
+          "Tất cả trường",
+        );
+        fillFilterOptions(
+          majorSelect,
+          state.profiles.map((profile) => profile.major),
+          "Tất cả ngành",
+        );
+        schoolSelect.value = selectedSchool;
+        majorSelect.value = selectedMajor;
+        const search = document.getElementById("contract-search").value.trim().toLowerCase();
+        const status = document.getElementById("contract-status-filter").value;
+        const school = schoolSelect.value;
+        const major = majorSelect.value;
+        const contracts = state.documents
+          .filter((item) => item.type === "Hợp đồng thực tập" && item.isCurrent)
+          .filter((item) => {
+            const profile = getProfile(item.profileId);
+            const text = `${profile?.name ?? ""} ${profile?.studentId ?? ""} ${item.fileName ?? ""}`.toLowerCase();
+            return (
+              (!search || text.includes(search)) &&
+              (!status || item.status === status) &&
+              (!school || profile?.school === school) &&
+              (!major || profile?.major === major)
+            );
+          })
+          .sort((a, b) => {
+            const aDate = a.expiresAt ? new Date(a.expiresAt).getTime() : Number.MAX_SAFE_INTEGER;
+            const bDate = b.expiresAt ? new Date(b.expiresAt).getTime() : Number.MAX_SAFE_INTEGER;
+            return aDate - bDate;
+          });
+        const pageCount = Math.max(1, Math.ceil(contracts.length / CONTRACT_PAGE_SIZE));
+        contractPage = Math.min(contractPage, pageCount);
+        const pageItems = contracts.slice(
+          (contractPage - 1) * CONTRACT_PAGE_SIZE,
+          contractPage * CONTRACT_PAGE_SIZE,
+        );
+        const table = document.getElementById("contract-table");
+        table.innerHTML = pageItems.length
+          ? pageItems.map((item) => {
+              const profile = getProfile(item.profileId);
+              return `<tr>
+                <td class="person-cell"><p class="person-name">${escapeHtml(profile?.name ?? "Chưa gắn hồ sơ")}</p><p class="person-meta">${escapeHtml(profile?.studentId ?? "—")} · ${escapeHtml(profile?.email ?? "—")}</p></td>
+                <td>${escapeHtml(profile?.school ?? "—")}</td>
+                <td>${escapeHtml(profile?.major ?? "—")}</td>
+                <td>${formatDate(item.startsAt)}</td>
+                <td>${formatDate(item.expiresAt)}</td>
+                <td><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></td>
+                <td><div class="row-actions"><button class="quiet-button" type="button" data-view-document="${escapeHtml(item.id)}">Xem</button></div></td>
+              </tr>`;
+            }).join("")
+          : '<tr><td colspan="7"><div class="empty-state">Chưa có thực tập sinh nào có hợp đồng phù hợp.</div></td></tr>';
+        document.getElementById("contract-result-count").textContent = `${contracts.length} hợp đồng`;
+        document.getElementById("contract-page-label").textContent = `Trang ${contractPage}/${pageCount}`;
+        document.getElementById("contract-page-previous").disabled = contractPage <= 1;
+        document.getElementById("contract-page-next").disabled = contractPage >= pageCount;
       }
 
       function renderDocumentProfileFilter() {
@@ -1999,10 +2275,9 @@
       function renderAll() {
         renderProfiles();
         renderApplications();
-        renderDocuments();
         renderReviewHistory();
         renderContractProfiles();
-        renderDocumentProfileFilter();
+        renderContractTable();
       }
 
       const viewTitles = {
@@ -2054,6 +2329,7 @@
         document.getElementById("profile-phone").value = profile?.phone || "";
         document.getElementById("profile-date-of-birth").value =
           profile?.dateOfBirth || "";
+        validateInternshipDateRange();
         document.getElementById("profile-dialog").showModal();
       }
 
@@ -2076,7 +2352,7 @@
         document.getElementById("document-dialog-status").textContent =
           documentItem.status;
         document.getElementById("document-dialog-note").textContent =
-          `Phiên bản ${documentItem.version} · Người tải: ${documentItem.uploadedBy} · ${documentItem.expiresAt ? "Hết hạn: " + formatDateTime(documentItem.expiresAt) : ""} · ${documentItem.note || ""}`;
+          `Phiên bản ${documentItem.version} · Người tải: ${documentItem.uploadedBy} · ${documentItem.startsAt ? "Bắt đầu: " + formatDateTime(documentItem.startsAt) : ""} · ${documentItem.expiresAt ? "Hết hạn: " + formatDateTime(documentItem.expiresAt) : ""} · ${documentItem.note || ""}`;
         const preview = document.getElementById("sprint-preview");
         preview.hidden = documentItem.contentType !== "application/pdf";
         preview.src = preview.hidden
@@ -2159,6 +2435,42 @@
           profilePage += 1;
           renderProfiles();
         });
+      document
+        .getElementById("application-page-previous")
+        .addEventListener("click", () => {
+          applicationPage = Math.max(1, applicationPage - 1);
+          renderApplications();
+        });
+      document
+        .getElementById("application-page-next")
+        .addEventListener("click", () => {
+          applicationPage += 1;
+          renderApplications();
+        });
+      document
+        .getElementById("review-history-page-previous")
+        .addEventListener("click", () => {
+          reviewHistoryPage = Math.max(1, reviewHistoryPage - 1);
+          renderReviewHistory();
+        });
+      document
+        .getElementById("review-history-page-next")
+        .addEventListener("click", () => {
+          reviewHistoryPage += 1;
+          renderReviewHistory();
+        });
+      document
+        .getElementById("application-profile-filter")
+        .addEventListener("input", () => {
+          applicationPage = 1;
+          renderApplications();
+        });
+      document
+        .getElementById("application-status-filter")
+        .addEventListener("change", () => {
+          applicationPage = 1;
+          renderApplications();
+        });
       document.getElementById("clear-filters").addEventListener("click", () => {
         profilePage = 1;
         document.getElementById("profile-search").value = "";
@@ -2166,30 +2478,44 @@
         document.getElementById("major-filter").value = "";
         renderProfiles();
       });
-      document
-        .getElementById("document-filter")
-        .addEventListener("change", renderDocuments);
-      document
-        .getElementById("document-profile-filter")
-        .addEventListener("change", renderDocuments);
-
+      document.getElementById("contract-search").addEventListener("input", () => {
+        contractPage = 1;
+        renderContractTable();
+      });
+      document.getElementById("contract-status-filter").addEventListener("change", () => {
+        contractPage = 1;
+        renderContractTable();
+      });
+      document.getElementById("contract-school-filter").addEventListener("change", () => {
+        contractPage = 1;
+        renderContractTable();
+      });
+      document.getElementById("contract-major-filter").addEventListener("change", () => {
+      contractPage = 1;
+      renderContractTable();
+      });
+      document.getElementById("clear-contract-filters").addEventListener("click", () => {
+        contractPage = 1;
+        document.getElementById("contract-search").value = "";
+        document.getElementById("contract-status-filter").value = "";
+        document.getElementById("contract-school-filter").value = "";
+        document.getElementById("contract-major-filter").value = "";
+        renderContractTable();
+      });
+      document.getElementById("contract-page-previous").addEventListener("click", () => {
+        contractPage = Math.max(1, contractPage - 1);
+        renderContractTable();
+      });
+      document.getElementById("contract-page-next").addEventListener("click", () => {
+        contractPage += 1;
+        renderContractTable();
+      });
       document
         .getElementById("profiles-table")
         .addEventListener("click", (event) => {
           const editButton = event.target.closest("[data-edit-profile]");
-          const docsButton = event.target.closest("[data-profile-documents]");
           if (editButton)
             openProfileDialog(getProfile(editButton.dataset.editProfile));
-          if (docsButton) {
-            showView("documents");
-            document.getElementById("document-filter").value = "all";
-            document.getElementById("document-profile-filter").value =
-              docsButton.dataset.profileDocuments;
-            renderDocuments();
-            showToast(
-              `Đang xem tài liệu của ${getProfile(docsButton.dataset.profileDocuments)?.name ?? "thực tập sinh"}.`,
-            );
-          }
         });
 
       function clearProfileFieldError(input) {
@@ -2214,24 +2540,32 @@
       function validateInternshipDateRange() {
         const startInput = profileForm.elements.startDate;
         const endInput = profileForm.elements.endDate;
+        const status = profileForm.elements.status.value;
+        const requiresDates = [
+          "Đã hoàn thành",
+          "Đang thực tập",
+          "Chờ bắt đầu",
+        ].includes(status);
         const startDate = startInput.value;
         const endDate = endInput.value;
-
+        const missingDates = requiresDates && (!startDate || !endDate);
         const hasError = !!startDate && !!endDate && endDate < startDate;
-        const message = "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
+        const message = missingDates
+          ? "Vui lòng nhập ngày bắt đầu và ngày kết thúc."
+          : "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
 
-        startInput.setCustomValidity(hasError ? message : "");
-        endInput.setCustomValidity(hasError ? message : "");
-
-        if (hasError) {
+        startInput.required = requiresDates;
+        endInput.required = requiresDates;
+        startInput.setCustomValidity(missingDates || hasError ? message : "");
+        endInput.setCustomValidity(missingDates || hasError ? message : "");
+        if (missingDates || hasError) {
           showProfileFieldError(startInput, message);
           showProfileFieldError(endInput, message);
         } else {
           clearProfileFieldError(startInput);
           clearProfileFieldError(endInput);
         }
-
-        return !hasError;
+        return !(missingDates || hasError);
       }
 
       function validateProfileEmail() {
@@ -2295,17 +2629,23 @@
         return isValid;
       }
 
-      profileForm.elements.startDate.addEventListener("input", () => {
-        validateInternshipDateRange();
-      });
+      profileForm.elements.startDate.addEventListener(
+        "input",
+        validateInternshipDateRange,
+      );
       profileForm.elements.startDate.addEventListener(
         "change",
         validateInternshipDateRange,
       );
-      profileForm.elements.endDate.addEventListener("input", () => {
-        validateInternshipDateRange();
-      });
       profileForm.elements.endDate.addEventListener(
+        "input",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.endDate.addEventListener(
+        "change",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.status.addEventListener(
         "change",
         validateInternshipDateRange,
       );
@@ -2340,10 +2680,16 @@
         if (!validateProfileEmail()) return;
         if (!validateProfilePhone()) return;
         if (!validateProfileDateOfBirth()) return;
+        if (!validateInternshipDateRange()) return;
         const values = Object.fromEntries(new FormData(profileForm).entries());
-        if (values.endDate < values.startDate) {
+        if (!values.profileId && !values.dateOfBirth) {
+          profileForm.elements.dateOfBirth.setCustomValidity(
+            "Vui lòng nhập ngày sinh để tạo mật khẩu mặc định.",
+          );
+          profileForm.elements.dateOfBirth.reportValidity();
           return;
         }
+        if (values.endDate < values.startDate) return;
         const existing = values.profileId ? getProfile(values.profileId) : null;
         const profile = {
           name: values.name.trim(),
@@ -2379,6 +2725,7 @@
         } catch (error) {
           const message = error.message || "Không lưu được hồ sơ.";
           if (/đã tồn tại/i.test(message)) {
+            showProfileFieldError(profileForm.elements.studentId, message);
             showProfileFieldError(profileForm.elements.email, message);
             showProfileFieldError(profileForm.elements.phone, message);
             profileForm.elements.email.focus();
@@ -2391,8 +2738,21 @@
       document
         .getElementById("applications-list")
         .addEventListener("click", async (event) => {
-          const button = event.target.closest("[data-application-decision]");
+          const button = event.target.closest(
+            "[data-application-decision], [data-view-document], [data-document-decision]",
+          );
           if (!button) return;
+          if (button.dataset.viewDocument) {
+            openDocumentDialog(button.dataset.viewDocument);
+            return;
+          }
+          if (button.dataset.documentDecision) {
+            decideDocument(
+              button.dataset.documentId,
+              button.dataset.documentDecision,
+            );
+            return;
+          }
           const application = state.applications.find(
             (item) => String(item.id) === button.dataset.applicationId,
           );
@@ -2419,21 +2779,6 @@
           } catch (error) {
             showToast(error.message || "Không cập nhật được đơn.", "error");
           }
-        });
-
-      document
-        .getElementById("documents-list")
-        .addEventListener("click", (event) => {
-          const viewButton = event.target.closest("[data-view-document]");
-          const decisionButton = event.target.closest(
-            "[data-document-decision]",
-          );
-          if (viewButton) openDocumentDialog(viewButton.dataset.viewDocument);
-          if (decisionButton)
-            decideDocument(
-              decisionButton.dataset.documentId,
-              decisionButton.dataset.documentDecision,
-            );
         });
 
       document
@@ -2465,9 +2810,24 @@
             showToast("Tệp vượt quá giới hạn 10 MB.", "error");
             return;
           }
+          if (!form.elements.expiresAt.value) {
+            showToast("Vui lòng chọn ngày hết hiệu lực hợp đồng.", "error");
+            form.elements.expiresAt.focus();
+            return;
+          }
+          if (!form.elements.startsAt.value) {
+            showToast("Vui lòng chọn ngày bắt đầu hợp đồng.", "error");
+            form.elements.startsAt.focus();
+            return;
+          }
+          if (form.elements.startsAt.value > form.elements.expiresAt.value) {
+            showToast("Ngày bắt đầu không được lớn hơn ngày kết thúc.", "error");
+            form.elements.expiresAt.focus();
+            return;
+          }
           try {
             await apiRequest(
-              `/hr/profiles/${profileId}/contract?fileName=${encodeURIComponent(file.name)}${form.elements.expiresAt.value ? "&expiresAt=" + encodeURIComponent(form.elements.expiresAt.value + "T23:59:59+07:00") : ""}`,
+              `/hr/profiles/${profileId}/contract?fileName=${encodeURIComponent(file.name)}&startsAt=${encodeURIComponent(form.elements.startsAt.value + "T00:00:00+07:00")}&expiresAt=${encodeURIComponent(form.elements.expiresAt.value + "T23:59:59+07:00")}`,
               {
                 method: "POST",
                 headers: {
@@ -2478,10 +2838,6 @@
             );
             await loadState();
             form.reset();
-            document.getElementById("document-filter").value = "all";
-            document.getElementById("document-profile-filter").value =
-              String(profileId);
-            renderDocuments();
             showToast(`Đã tải ${file.name} lên SQL Server.`);
           } catch (error) {
             showToast(error.message || "Không tải được hợp đồng.", "error");

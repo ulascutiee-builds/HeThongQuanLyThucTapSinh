@@ -1261,13 +1261,6 @@
                         Theo dõi việc nộp hồ sơ và phản hồi từ nhân sự.
                       </p>
                     </div>
-                    <button
-                      class="panel-heading-action"
-                      type="button"
-                      data-open-view="documents"
-                    >
-                      Mở hồ sơ →
-                    </button>
                   </div>
                   <div class="panel-content">
                     <div
@@ -1327,13 +1320,6 @@
                         CV và đơn xin thực tập đã chọn tải lên.
                       </p>
                     </div>
-                    <button
-                      class="panel-heading-action"
-                      type="button"
-                      data-open-view="documents"
-                    >
-                      Quản lý →
-                    </button>
                   </div>
                   <div class="panel-content">
                     <div
@@ -1457,14 +1443,6 @@
                         Thông tin hồ sơ thực tập sinh.
                       </p>
                     </div>
-                    <button
-                      class="panel-heading-action"
-                      type="button"
-                      data-open-registration
-                      id="profile-edit-action"
-                    >
-                      Đăng ký →
-                    </button>
                   </div>
                   <div class="panel-content" id="profile-summary-content"></div>
                 </section>
@@ -1614,14 +1592,6 @@
                         Đăng ký để lưu thông tin hồ sơ.
                       </p>
                     </div>
-                    <button
-                      class="panel-heading-action"
-                      type="button"
-                      data-open-registration
-                      id="documents-register-action"
-                    >
-                      Đăng ký →
-                    </button>
                   </div>
                   <div
                     class="panel-content"
@@ -2151,12 +2121,6 @@
         document.getElementById("welcome-action").textContent = registered
           ? "Cập nhật hồ sơ"
           : "Đăng ký tài khoản →";
-        document.getElementById("profile-edit-action").textContent = registered
-          ? "Cập nhật →"
-          : "Đăng ký →";
-        document.getElementById("documents-register-action").textContent =
-          registered ? "Cập nhật →" : "Đăng ký →";
-
         const overview = document.getElementById("profile-summary-content");
         const documentsProfile = document.getElementById(
           "documents-profile-content",
@@ -2276,7 +2240,7 @@
               ? "Hồ sơ đã sẵn sàng"
               : "Hồ sơ chưa sẵn sàng";
         const latestApplicationReview = state.reviewHistory.find(
-          (item) => item.targetType === "Đơn ứng tuyển",
+          (item) => item.targetType === "Hồ sơ",
         );
         document.getElementById("submission-status-description").textContent =
           state.applicationStatus === "submitted"
@@ -2317,8 +2281,7 @@
                 : "Bạn chưa nộp hồ sơ";
         document.getElementById("application-status-description").textContent =
           rejected
-            ? latestApplicationReview?.note ||
-              `Quyết định lúc ${formatDate(latestApplicationReview?.reviewedAt)}. Cập nhật tài liệu để nộp lại hồ sơ.`
+            ? `Quyết định lúc ${formatDate(latestApplicationReview?.reviewedAt)}.${latestApplicationReview?.note ? ` ${latestApplicationReview.note}` : " Cập nhật tài liệu để nộp lại hồ sơ."}`
             : reviewStatus === "Đã duyệt"
               ? `Được duyệt lúc ${formatDate(latestApplicationReview?.reviewedAt)}.`
               : submitted
@@ -2376,7 +2339,13 @@
 
       function renderReviewHistory() {
         const list = document.getElementById("review-history-list");
-        const history = state.reviewHistory ?? [];
+        const history = (state.reviewHistory ?? []).filter(
+          (item) =>
+            !(
+              item.targetType === "Tài liệu" &&
+              ["CV", "Đơn xin thực tập"].includes(item.targetLabel)
+            ),
+        );
         list.innerHTML = history.length
           ? history
               .map(
@@ -2448,7 +2417,7 @@
         if (hasContract) {
           const link = document.getElementById("contract-document-link");
           link.href = `${API_BASE}/documents/${contract.id}/file`;
-          link.textContent = `${contract.fileName} · v${contract.version} · Người tải: ${contract.uploadedBy} · Hết hạn: ${contract.expiresAt ? formatDate(contract.expiresAt) : "Không giới hạn"}`;
+          link.textContent = `${contract.fileName} · v${contract.version} · Người tải: ${contract.uploadedBy} · Bắt đầu: ${contract.startsAt ? formatDate(contract.startsAt) : "Chưa có"} · Hết hạn: ${contract.expiresAt ? formatDate(contract.expiresAt) : "Không giới hạn"}`;
         }
         document.getElementById("contract-consent-label").hidden =
           !hasContract || confirmed;
@@ -2526,14 +2495,10 @@
                   phone: values.phone || null,
                   dateOfBirth: values.dateOfBirth || null,
                   email: values.email.trim(),
+                  studentId: values.studentId.trim(),
                   school: values.school.trim(),
                   major: values.major.trim(),
-                  ...(!editing
-                    ? {
-                        studentId: values.studentId.trim(),
-                        password: values.password,
-                      }
-                    : {}),
+                  ...(!editing ? { password: values.password } : {}),
                 }),
               },
             );

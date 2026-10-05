@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 public static class AuthEndpoints
 {
     static string Hash(string value)=>Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
+    public static bool RequireEmailVerification(IConfiguration config)=>config.GetValue("Sprint1:RequireEmailVerification",false);
     public static void Verification(CareerDbContext db,InternProfile p,IConfiguration config)
     {
         var token=Convert.ToHexString(RandomNumberGenerator.GetBytes(32));p.VerificationHash=Hash(token);p.VerificationExpires=DateTimeOffset.UtcNow.AddHours(24);
@@ -39,8 +40,8 @@ public static class AuthEndpoints
             if(await Profiles.PhoneExistsAsync(db,phone))errors["Phone"]=["Số điện thoại này đã được sử dụng."];
             if(errors.Count>0)return Results.ValidationProblem(errors,statusCode:StatusCodes.Status409Conflict);
             await using var tx=await db.Database.BeginTransactionAsync();
-            var p=new InternProfile{Name=input.Name.Trim(),Email=email,StudentId=student,Phone=phone,DateOfBirth=input.DateOfBirth,School=input.School.Trim(),Major=input.Major.Trim(),PasswordHash="",Status="Chờ hồ sơ"};
-            p.PasswordHash=hasher.HashPassword(p,input.Password);db.InternProfiles.Add(p);await db.SaveChangesAsync();Verification(db,p,config);await db.SaveChangesAsync();await tx.CommitAsync();return Results.Created($"/api/interns/{p.Id}/workspace",p.ToResponse());
+            var p=new InternProfile{Name=input.Name.Trim(),Email=email,StudentId=student,Phone=phone,DateOfBirth=input.DateOfBirth,School=input.School.Trim(),Major=input.Major.Trim(),PasswordHash="",Status="Chờ hồ sơ",EmailVerified=!RequireEmailVerification(config)};
+            p.PasswordHash=hasher.HashPassword(p,input.Password);db.InternProfiles.Add(p);await db.SaveChangesAsync();if(RequireEmailVerification(config))Verification(db,p,config);await db.SaveChangesAsync();await tx.CommitAsync();return Results.Created($"/api/interns/{p.Id}/workspace",p.ToResponse());
         });
         app.MapPost("/api/interns/login",async(LoginInternRequest input,HttpContext c,CareerDbContext db,IPasswordHasher<InternProfile> hasher)=>{
             var email=input.Identity.Trim().ToLowerInvariant();var p=await db.InternProfiles.FirstOrDefaultAsync(x=>x.Email==email);

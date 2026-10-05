@@ -11,7 +11,7 @@ builder.Services.AddAuthentication("Sprint1").AddCookie("Sprint1",o=>{
     o.Events.OnRedirectToLogin=c=>{c.Response.StatusCode=401;return Task.CompletedTask;};
     o.Events.OnRedirectToAccessDenied=c=>{c.Response.StatusCode=403;return Task.CompletedTask;};
 });
-builder.Services.AddAuthorization();builder.Services.AddHostedService<MailWorker>();
+builder.Services.AddAuthorization();builder.Services.AddHostedService<MailWorker>();builder.Services.AddHostedService<InternshipStatusWorker>();
 var app=builder.Build();
 app.UseAuthentication();app.UseAuthorization();app.UseMiddleware<SprintSecurity>();
 var frontend=Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath,"../../frontend"));

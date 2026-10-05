@@ -37,6 +37,7 @@ public sealed class InternDocument
     public string UploadedBy { get; set; } = "";
     public string? ReviewedBy { get; set; }
     public DateTimeOffset? ReviewedAt { get; set; }
+    public DateTimeOffset? StartsAt { get; set; }
     public DateTimeOffset? ExpiresAt { get; set; }
     public InternProfile? Profile { get; set; }
 }

@@ -66,15 +66,15 @@
     const expiry = el("div");
     expiry.className = "form-field";
     expiry.innerHTML =
-      '<label for="sprint-expiry">Ngày hết hiệu lực hợp đồng</label><input class="form-control" id="sprint-expiry" type="date" name="expiresAt">';
+      '<label for="sprint-expiry">Ngày hết hiệu lực hợp đồng</label><input class="form-control" id="sprint-expiry" type="date" name="expiresAt" required>';
+    const start = el("div");
+    start.className = "form-field";
+    start.innerHTML =
+      '<label for="sprint-start">Ngày bắt đầu hợp đồng</label><input class="form-control" id="sprint-start" type="date" name="startsAt" required>';
     document.getElementById("contract-form").prepend(expiry);
+    document.getElementById("contract-form").prepend(start);
     const tools = el("div");
     tools.className = "application-tools";
-    const pending = el("label");
-    pending.className = "application-pending-filter";
-    pending.innerHTML =
-      '<input type="checkbox" id="sprint-pending"> Chỉ hồ sơ chờ duyệt';
-    tools.append(pending);
     document.getElementById("applications-list").before(tools);
     const detail = el("dialog");
     detail.style.cssText =
@@ -86,8 +86,6 @@
       document
         .querySelectorAll("#applications-list article")
         .forEach((card) => {
-          if (document.getElementById("sprint-pending").checked)
-            card.hidden = !card.querySelector("[data-application-decision]");
           const a = state.applications.find(
             (x) => String(x.profileId) === card.dataset.sprintProfile,
           );
@@ -129,7 +127,6 @@
           };
         });
     };
-    pending.onchange = renderApplications;
     const mails = el("button", "Trạng thái email thông báo");
     mails.className = "secondary-button";
     tools.append(mails);
@@ -159,35 +156,6 @@
         const btn = event.target.closest("[data-app-detail]");
         if (btn) openProfileDialog(getProfile(btn.dataset.appDetail));
       });
-  }
-  if (intern) {
-    const note = el("div");
-    note.style.cssText = "padding:12px 24px;background:#fff4d8;color:#453a20";
-    note.hidden = true;
-    const text = el(
-      "span",
-      "Email chưa xác thực. Mở liên kết trong email trước khi nộp hồ sơ. ",
-    );
-    const resend = el("button", "Gửi lại email");
-    resend.className = "button-secondary";
-    note.append(text, resend);
-    document.body.prepend(note);
-    resend.onclick = async () => {
-      try {
-        const r = await fetch("/api/auth/resend-verification", {
-          method: "POST",
-        });
-        const d = await r.json();
-        showToast(d.message, r.ok ? "success" : "error");
-      } catch (e) {
-        showToast(e.message, "error");
-      }
-    };
-    const previous = renderAll;
-    renderAll = function () {
-      previous();
-      note.hidden = !state.profile || state.profile.emailVerified;
-    };
   }
   const query = new URLSearchParams(location.search);
   if (query.has("verify"))

@@ -21,6 +21,7 @@ public sealed record LoginInternRequest
 public sealed record UpdateInternProfileRequest
 {
     [Required, MaxLength(120)] public required string Name { get; init; }
+    [Required, MaxLength(40)] public required string StudentId { get; init; }
     [Required, EmailAddress, MaxLength(160)] public required string Email { get; init; }
     [RegularExpression(@"^\+?[0-9]{9,15}$"), MaxLength(16)] public string? Phone { get; init; }
     public DateOnly? DateOfBirth { get; init; }
@@ -36,6 +37,7 @@ public sealed record CreateHrProfileRequest
     [RegularExpression(@"^\+?[0-9]{9,15}$"), MaxLength(16)] public string? Phone { get; init; }
     [Required, MaxLength(160)] public required string School { get; init; }
     [Required, MaxLength(120)] public required string Major { get; init; }
+    [Required] public DateOnly? DateOfBirth { get; init; }
     public DateOnly? StartDate { get; init; }
     public DateOnly? EndDate { get; init; }
     public string Status { get; init; } = "Đang thực tập";
@@ -60,7 +62,7 @@ public sealed record InternProfileResponse(
 
 public sealed record InternDocumentResponse(
     int Id, int ProfileId, string Type, string FileName, string ContentType,
-    long Size, string Status, string? Note, DateTimeOffset UploadedAt, DateTimeOffset? ConfirmedAt, int Version, bool IsCurrent, string UploadedBy, string? ReviewedBy, DateTimeOffset? ReviewedAt, DateTimeOffset? ExpiresAt);
+    long Size, string Status, string? Note, DateTimeOffset UploadedAt, DateTimeOffset? ConfirmedAt, int Version, bool IsCurrent, string UploadedBy, string? ReviewedBy, DateTimeOffset? ReviewedAt, DateTimeOffset? StartsAt, DateTimeOffset? ExpiresAt);
 
 public sealed record InternApplicationResponse(
     int Id, int ProfileId, string Status, DateTimeOffset AppliedAt, string? ReviewedBy, DateTimeOffset? ReviewedAt, string? Note);

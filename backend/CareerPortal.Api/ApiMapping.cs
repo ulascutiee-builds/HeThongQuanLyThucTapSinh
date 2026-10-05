@@ -22,7 +22,7 @@ public static class ApiMapping
         document.Status,
         document.Note,
         document.UploadedAt,
-        document.ConfirmedAt, document.Version, document.IsCurrent, document.UploadedBy, document.ReviewedBy, document.ReviewedAt, document.ExpiresAt);
+        document.ConfirmedAt, document.Version, document.IsCurrent, document.UploadedBy, document.ReviewedBy, document.ReviewedAt, document.StartsAt, document.ExpiresAt);
 
     public static InternApplicationResponse ToResponse(this InternApplication application) => new(
         application.Id,
