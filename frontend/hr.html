@@ -884,6 +884,64 @@
       }
       /* END: Giao diện hiển thị trạng thái ngày và cho phép dịch chuyển đồng hồ kiểm thử. */
 
+      /* BEGIN: Bố cục chọn thực tập sinh, mentor và chương trình kèm thẻ xem trước. */
+      .assignment-form {
+        display: grid;
+        gap: 16px;
+        padding: 17px;
+      }
+      .assignment-select-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .assignment-preview {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .assignment-preview-card {
+        min-height: 91px;
+        padding: 13px;
+        border: 1px solid var(--line);
+        background: #fbfcf9;
+      }
+      .assignment-preview-label {
+        margin: 0 0 7px;
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .assignment-preview-value {
+        margin: 0;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .assignment-preview-meta {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 1.45;
+      }
+      .assignment-form-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .assignment-capacity {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .assignment-table-name {
+        min-width: 165px;
+      }
+      /* END: Khu vực phân công được trình bày responsive mà không dùng API/backend. */
+
       .dialog {
         width: min(100% - 28px, 540px);
         max-height: min(88vh, 820px);
@@ -1267,6 +1325,16 @@
           width: 100%;
         }
         /* END: Bố cục mobile vẫn giữ đủ nút thao tác và thông tin trạng thái. */
+        /* BEGIN: Form phân công chuyển về một cột, ưu tiên thao tác cảm ứng. */
+        .assignment-select-grid,
+        .assignment-preview {
+          grid-template-columns: 1fr;
+        }
+        .assignment-form-footer {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        /* END: Màn phân công không gây cuộn ngang trên điện thoại. */
       }
       @media (prefers-reduced-motion: reduce) {
         *,
@@ -1330,6 +1398,13 @@
             >
           </button>
           <!-- END: Màn chấm công tiếp tục dùng cơ chế điều hướng của HR. -->
+          <!-- BEGIN: Mục điều hướng màn ghép cặp người hướng dẫn và chương trình. -->
+          <button class="nav-item" type="button" data-view="assignments">
+            <span class="nav-item-text"
+              ><span class="nav-glyph" aria-hidden="true">⇄</span>Phân công</span
+            >
+          </button>
+          <!-- END: Điều hướng phân công được quản lý bằng showView chung. -->
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -1879,6 +1954,137 @@
             <div class="info-banner attendance-rollover" id="attendance-rollover-note" hidden></div>
           </section>
           <!-- END: Mọi trạng thái chấm công là dữ liệu tạm, không được gửi sang server. -->
+          <!-- BEGIN: Màn ghép thực tập sinh, mentor và chương trình bằng dữ liệu prototype. -->
+          <section
+            class="view-section"
+            id="view-assignments"
+            aria-labelledby="assignments-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="heading-kicker">Điều phối đào tạo · Bản xem trước</p>
+                <h1 id="assignments-title">Phân công thực tập</h1>
+                <p class="heading-description">
+                  Ghép đúng thực tập sinh với mentor và chương trình còn chỗ.
+                </p>
+              </div>
+            </div>
+            <div class="info-banner">
+              Danh sách và giới hạn bên dưới là dữ liệu mẫu trong phiên này;
+              phân công thật cần kết nối API ở bước triển khai backend.
+            </div>
+            <div class="metrics" aria-label="Tổng quan phân công demo">
+              <article class="metric">
+                <p class="metric-label">Đã phân công</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="assignment-metric-total">0</p>
+                  <span class="metric-hint">cặp thực tập hiện có</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">Chưa phân công</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="assignment-metric-available">0</p>
+                  <span class="metric-hint">thực tập sinh sẵn sàng</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">Mentor sẵn sàng</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="assignment-metric-mentors">0</p>
+                  <span class="metric-hint">còn sức chứa hướng dẫn</span>
+                </div>
+              </article>
+              <article class="metric">
+                <p class="metric-label">Chương trình mở</p>
+                <div class="metric-bottom">
+                  <p class="metric-value" id="assignment-metric-programs">0</p>
+                  <span class="metric-hint">còn vị trí tiếp nhận</span>
+                </div>
+              </article>
+            </div>
+            <div class="work-panel">
+              <div class="work-panel-head">
+                <div>
+                  <h2>Tạo phân công mới</h2>
+                  <p>Kiểm tra năng lực mentor và chỗ trống trước khi xác nhận.</p>
+                </div>
+              </div>
+              <form class="assignment-form" id="assignment-form">
+                <div class="assignment-select-grid">
+                  <div class="form-field">
+                    <label for="assignment-intern">Thực tập sinh</label>
+                    <select class="form-control" id="assignment-intern" name="internId" required>
+                      <option value="">Chọn thực tập sinh</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="assignment-mentor">Mentor</label>
+                    <select class="form-control" id="assignment-mentor" name="mentorId" required>
+                      <option value="">Chọn mentor</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="assignment-program">Chương trình</label>
+                    <select class="form-control" id="assignment-program" name="programId" required>
+                      <option value="">Chọn chương trình</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="assignment-preview" aria-live="polite">
+                  <article class="assignment-preview-card">
+                    <p class="assignment-preview-label">Thực tập sinh</p>
+                    <p class="assignment-preview-value" id="assignment-preview-intern">Chưa chọn</p>
+                    <p class="assignment-preview-meta" id="assignment-preview-intern-meta">Hồ sơ và chuyên ngành sẽ hiển thị ở đây.</p>
+                  </article>
+                  <article class="assignment-preview-card">
+                    <p class="assignment-preview-label">Mentor</p>
+                    <p class="assignment-preview-value" id="assignment-preview-mentor">Chưa chọn</p>
+                    <p class="assignment-preview-meta" id="assignment-preview-mentor-meta">Tải hướng dẫn còn trống.</p>
+                  </article>
+                  <article class="assignment-preview-card">
+                    <p class="assignment-preview-label">Chương trình</p>
+                    <p class="assignment-preview-value" id="assignment-preview-program">Chưa chọn</p>
+                    <p class="assignment-preview-meta" id="assignment-preview-program-meta">Lịch học và số chỗ còn trống.</p>
+                  </article>
+                </div>
+                <div class="assignment-form-footer">
+                  <p class="assignment-capacity" id="assignment-capacity-note" aria-live="polite">
+                    Chọn đủ ba mục để xem tóm tắt trước khi phân công.
+                  </p>
+                  <button class="primary-button" type="submit">Xác nhận phân công</button>
+                </div>
+              </form>
+            </div>
+            <div class="section-toolbar" style="margin-top: 24px">
+              <div>
+                <h2 class="section-title">Danh sách phân công</h2>
+                <p class="section-subtitle">Các cặp demo đang được theo dõi trong phiên.</p>
+              </div>
+            </div>
+            <div class="table-frame">
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Thực tập sinh</th>
+                      <th>Mentor</th>
+                      <th>Chương trình</th>
+                      <th>Ngày phân công</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody id="assignment-table"></tbody>
+                </table>
+              </div>
+              <div class="table-foot">
+                <span id="assignment-result-count">0 phân công</span>
+                <span>Chưa ghi dữ liệu lên hệ thống</span>
+              </div>
+            </div>
+          </section>
+          <!-- END: Form phân công và danh sách chỉ thao tác trên dữ liệu mẫu trong frontend. -->
         </main>
       </div>
     </div>
@@ -2683,6 +2889,9 @@
         /* BEGIN: Đồng bộ nhãn breadcrumb cho màn chấm công mới. */
         attendance: "Chấm công hôm nay",
         /* END: Không thay đổi các nhãn màn hình Sprint 1. */
+        /* BEGIN: Nhãn breadcrumb tương ứng với màn phân công thực tập. */
+        assignments: "Phân công thực tập",
+        /* END: Dùng chung bộ chuyển màn hình và breadcrumb hiện có. */
       };
       function showView(view) {
         document.querySelectorAll(".view-section").forEach((section) => {
@@ -2995,6 +3204,163 @@
       });
       renderAttendance();
       /* END: Kiểm tra trạng thái theo ngày địa phương, chặn trùng và giờ ra không hợp lệ. */
+
+      /* BEGIN: Dữ liệu ghép cặp mẫu, lọc sức chứa và cập nhật danh sách ngay trong trình duyệt. */
+      const demoInterns = [
+        { id: "INT-026", name: "Nguyễn Minh Anh", school: "ĐH Bách khoa Hà Nội", major: "Công nghệ thông tin" },
+        { id: "INT-031", name: "Lê Thu Hà", school: "ĐH Công nghệ - ĐHQGHN", major: "Hệ thống thông tin" },
+        { id: "INT-034", name: "Phạm Gia Huy", school: "ĐH FPT", major: "Kỹ thuật phần mềm" },
+        { id: "INT-039", name: "Đỗ Khánh Linh", school: "ĐH Thủy Lợi", major: "Khoa học máy tính" },
+      ];
+      const demoMentors = [
+        { id: "MEN-01", name: "Trần Quốc Bảo", focus: "Frontend · React", capacity: 3 },
+        { id: "MEN-02", name: "Nguyễn Ngọc Lan", focus: "UI/UX · Design system", capacity: 2 },
+        { id: "MEN-03", name: "Vũ Hoàng Nam", focus: "Backend · .NET", capacity: 2 },
+      ];
+      const demoPrograms = [
+        { id: "PRG-FE-10", name: "Frontend Web", cohort: "K10 · 10 tuần", capacity: 3 },
+        { id: "PRG-UX-04", name: "UI/UX Design", cohort: "K04 · 8 tuần", capacity: 2 },
+        { id: "PRG-BE-08", name: "Backend .NET", cohort: "K08 · 12 tuần", capacity: 2 },
+      ];
+      const demoAssignments = [
+        { internId: "INT-026", mentorId: "MEN-01", programId: "PRG-FE-10", assignedAt: "2026-10-01" },
+      ];
+      const assignmentForm = document.getElementById("assignment-form");
+
+      function assignedCount(field, id) {
+        return demoAssignments.filter((assignment) => assignment[field] === id).length;
+      }
+
+      function renderAssignmentOptions() {
+        const internSelect = document.getElementById("assignment-intern");
+        const mentorSelect = document.getElementById("assignment-mentor");
+        const programSelect = document.getElementById("assignment-program");
+        const selected = {
+          intern: internSelect.value,
+          mentor: mentorSelect.value,
+          program: programSelect.value,
+        };
+        internSelect.replaceChildren(new Option("Chọn thực tập sinh", ""));
+        demoInterns
+          .filter((intern) => !demoAssignments.some((assignment) => assignment.internId === intern.id))
+          .forEach((intern) =>
+            internSelect.add(new Option(`${intern.name} · ${intern.id}`, intern.id)),
+          );
+        mentorSelect.replaceChildren(new Option("Chọn mentor", ""));
+        demoMentors.forEach((mentor) => {
+          const remaining = mentor.capacity - assignedCount("mentorId", mentor.id);
+          mentorSelect.add(
+            new Option(`${mentor.name} · còn ${remaining} lượt`, mentor.id, false, false),
+          );
+          mentorSelect.lastElementChild.disabled = remaining <= 0;
+        });
+        programSelect.replaceChildren(new Option("Chọn chương trình", ""));
+        demoPrograms.forEach((program) => {
+          const remaining = program.capacity - assignedCount("programId", program.id);
+          programSelect.add(
+            new Option(`${program.name} · còn ${remaining}/${program.capacity} chỗ`, program.id, false, false),
+          );
+          programSelect.lastElementChild.disabled = remaining <= 0;
+        });
+        if ([...internSelect.options].some((option) => option.value === selected.intern))
+          internSelect.value = selected.intern;
+        if ([...mentorSelect.options].some((option) => option.value === selected.mentor))
+          mentorSelect.value = selected.mentor;
+        if ([...programSelect.options].some((option) => option.value === selected.program))
+          programSelect.value = selected.program;
+      }
+
+      function renderAssignmentPreview() {
+        const intern = demoInterns.find((item) => item.id === document.getElementById("assignment-intern").value);
+        const mentor = demoMentors.find((item) => item.id === document.getElementById("assignment-mentor").value);
+        const program = demoPrograms.find((item) => item.id === document.getElementById("assignment-program").value);
+        document.getElementById("assignment-preview-intern").textContent = intern?.name ?? "Chưa chọn";
+        document.getElementById("assignment-preview-intern-meta").textContent =
+          intern ? `${intern.id} · ${intern.school} · ${intern.major}` : "Hồ sơ và chuyên ngành sẽ hiển thị ở đây.";
+        document.getElementById("assignment-preview-mentor").textContent = mentor?.name ?? "Chưa chọn";
+        document.getElementById("assignment-preview-mentor-meta").textContent =
+          mentor ? `${mentor.focus} · còn ${mentor.capacity - assignedCount("mentorId", mentor.id)} lượt hướng dẫn` : "Tải hướng dẫn còn trống.";
+        document.getElementById("assignment-preview-program").textContent = program?.name ?? "Chưa chọn";
+        document.getElementById("assignment-preview-program-meta").textContent =
+          program ? `${program.cohort} · còn ${program.capacity - assignedCount("programId", program.id)}/${program.capacity} chỗ` : "Lịch học và số chỗ còn trống.";
+        const selectionComplete = Boolean(intern && mentor && program);
+        document.getElementById("assignment-capacity-note").textContent =
+          selectionComplete
+            ? `Sẵn sàng ghép ${intern.name} vào ${program.name} cùng mentor ${mentor.name}.`
+            : "Chọn đủ ba mục để xem tóm tắt trước khi phân công.";
+      }
+
+      function renderAssignmentTable() {
+        const rows = demoAssignments.map((assignment) => {
+          const intern = demoInterns.find((item) => item.id === assignment.internId);
+          const mentor = demoMentors.find((item) => item.id === assignment.mentorId);
+          const program = demoPrograms.find((item) => item.id === assignment.programId);
+          return `<tr>
+            <td class="assignment-table-name"><p class="person-name">${escapeHtml(intern?.name ?? "Không xác định")}</p><p class="person-meta">${escapeHtml(intern?.id ?? "")}</p></td>
+            <td>${escapeHtml(mentor?.name ?? "Không xác định")}</td>
+            <td>${escapeHtml(program?.name ?? "Không xác định")}</td>
+            <td class="date-cell">${formatDate(assignment.assignedAt)}</td>
+            <td><span class="status-pill">Đang theo học</span></td>
+          </tr>`;
+        });
+        document.getElementById("assignment-table").innerHTML =
+          rows.join("") || '<tr><td class="empty-state" colspan="5">Chưa có phân công nào.</td></tr>';
+        document.getElementById("assignment-result-count").textContent =
+          `${demoAssignments.length} phân công`;
+        document.getElementById("assignment-metric-total").textContent = demoAssignments.length;
+        document.getElementById("assignment-metric-available").textContent =
+          demoInterns.filter((intern) => !demoAssignments.some((assignment) => assignment.internId === intern.id)).length;
+        document.getElementById("assignment-metric-mentors").textContent =
+          demoMentors.filter((mentor) => assignedCount("mentorId", mentor.id) < mentor.capacity).length;
+        document.getElementById("assignment-metric-programs").textContent =
+          demoPrograms.filter((program) => assignedCount("programId", program.id) < program.capacity).length;
+      }
+
+      assignmentForm.addEventListener("change", renderAssignmentPreview);
+      assignmentForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!assignmentForm.reportValidity()) return;
+        const internId = assignmentForm.elements.internId.value;
+        const mentorId = assignmentForm.elements.mentorId.value;
+        const programId = assignmentForm.elements.programId.value;
+        const intern = demoInterns.find((item) => item.id === internId);
+        const mentor = demoMentors.find((item) => item.id === mentorId);
+        const program = demoPrograms.find((item) => item.id === programId);
+        if (!intern || !mentor || !program) {
+          showToast("Vui lòng chọn thực tập sinh, mentor và chương trình hợp lệ.", "error");
+          return;
+        }
+        if (demoAssignments.some((assignment) => assignment.internId === internId)) {
+          showToast("Thực tập sinh này đã có phân công.", "error");
+          renderAssignmentOptions();
+          renderAssignmentPreview();
+          return;
+        }
+        if (
+          assignedCount("mentorId", mentorId) >= mentor.capacity ||
+          assignedCount("programId", programId) >= program.capacity
+        ) {
+          showToast("Mentor hoặc chương trình đã hết sức chứa.", "error");
+          renderAssignmentOptions();
+          renderAssignmentPreview();
+          return;
+        }
+        demoAssignments.unshift({
+          internId,
+          mentorId,
+          programId,
+          assignedAt: new Date().toISOString().slice(0, 10),
+        });
+        assignmentForm.reset();
+        renderAssignmentOptions();
+        renderAssignmentPreview();
+        renderAssignmentTable();
+        showToast("Đã tạo phân công trong danh sách demo của phiên.");
+      });
+      renderAssignmentOptions();
+      renderAssignmentPreview();
+      renderAssignmentTable();
+      /* END: Xác thực trùng và sức chứa trước khi cập nhật danh sách phân công tạm. */
 
       document
         .getElementById("profile-search")
