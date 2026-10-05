@@ -793,6 +793,97 @@
       }
       /* END: Các kiểu tài khoản giới hạn trong màn danh sách và hộp thoại tạo mới. */
 
+      /* BEGIN: Thẻ ca làm và bộ điều khiển thời gian mô phỏng chỉ dùng cho màn chấm công demo. */
+      .attendance-clock {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+        padding: 19px 21px;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--gold);
+        background: #fff;
+      }
+      .attendance-date {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: capitalize;
+      }
+      .attendance-time {
+        margin: 4px 0 0;
+        color: var(--forest);
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(27px, 4vw, 38px);
+        line-height: 1.1;
+      }
+      .attendance-status-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .attendance-status-card {
+        min-height: 118px;
+        padding: 17px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .attendance-status-label {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .attendance-status-value {
+        margin: 0;
+        color: var(--ink);
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .attendance-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin: 17px 0;
+      }
+      .attendance-actions .primary-button,
+      .attendance-actions .secondary-button {
+        min-width: 150px;
+        min-height: 43px;
+      }
+      .attendance-actions button:disabled {
+        border-color: #e4e7e2;
+        background: #eef0ed;
+        color: #9aa39d;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .attendance-simulator {
+        display: grid;
+        grid-template-columns: minmax(210px, 1fr) auto auto;
+        align-items: end;
+        gap: 10px;
+        padding: 15px;
+        border: 1px dashed #cbd4cc;
+        background: #f8f9f6;
+      }
+      .attendance-simulator .form-field label {
+        margin-bottom: 7px;
+      }
+      .attendance-simulator-note {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.5;
+      }
+      .attendance-rollover {
+        margin-top: 13px;
+      }
+      /* END: Giao diện hiển thị trạng thái ngày và cho phép dịch chuyển đồng hồ kiểm thử. */
+
       .dialog {
         width: min(100% - 28px, 540px);
         max-height: min(88vh, 820px);
@@ -1157,6 +1248,25 @@
           grid-template-columns: 1fr;
         }
         /* END: Bố cục mobile của form tài khoản trở về một cột. */
+        /* BEGIN: Bộ mô phỏng chấm công xếp dọc ở màn hình điện thoại. */
+        .attendance-clock {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .attendance-status-panel {
+          grid-template-columns: 1fr;
+        }
+        .attendance-simulator {
+          grid-template-columns: 1fr;
+        }
+        .attendance-simulator-note {
+          grid-column: auto;
+        }
+        .attendance-actions > button,
+        .attendance-simulator > button {
+          width: 100%;
+        }
+        /* END: Bố cục mobile vẫn giữ đủ nút thao tác và thông tin trạng thái. */
       }
       @media (prefers-reduced-motion: reduce) {
         *,
@@ -1213,6 +1323,13 @@
             >
           </button>
           <!-- END: Điều hướng tài khoản được gắn vào bộ chuyển màn hình HR hiện có. -->
+          <!-- BEGIN: Lối vào màn chấm công với đồng hồ và trạng thái ngày demo. -->
+          <button class="nav-item" type="button" data-view="attendance">
+            <span class="nav-item-text"
+              ><span class="nav-glyph" aria-hidden="true">◷</span>Chấm công</span
+            >
+          </button>
+          <!-- END: Màn chấm công tiếp tục dùng cơ chế điều hướng của HR. -->
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -1699,6 +1816,69 @@
             </div>
           </section>
           <!-- END: Màn danh sách kết thúc trước các dialog chung của ứng dụng. -->
+          <!-- BEGIN: Màn chấm công và đồng hồ ảo dùng để xem trước luồng check-in/check-out. -->
+          <section
+            class="view-section"
+            id="view-attendance"
+            aria-labelledby="attendance-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="heading-kicker">Theo dõi giờ làm · Bản xem trước</p>
+                <h1 id="attendance-title">Chấm công hôm nay</h1>
+                <p class="heading-description">
+                  Ghi nhận giờ vào/ra và kiểm tra trạng thái trong ngày đang mô phỏng.
+                </p>
+              </div>
+            </div>
+            <div class="info-banner">
+              Chấm công minh họa chỉ tồn tại trong bộ nhớ của trang. Có thể đổi
+              thời gian bên dưới để kiểm thử ngày mới, giờ lùi và các thao tác trùng.
+            </div>
+            <div class="attendance-clock" aria-live="polite">
+              <div>
+                <p class="attendance-date" id="attendance-date-label"></p>
+                <p class="attendance-time" id="attendance-time-label"></p>
+              </div>
+              <span class="status-pill neutral" id="attendance-today-status">Chưa check-in</span>
+            </div>
+            <div class="attendance-status-panel">
+              <article class="attendance-status-card">
+                <p class="attendance-status-label">CHECK-IN</p>
+                <p class="attendance-status-value" id="attendance-checkin-value">Chưa ghi nhận</p>
+              </article>
+              <article class="attendance-status-card">
+                <p class="attendance-status-label">CHECK-OUT</p>
+                <p class="attendance-status-value" id="attendance-checkout-value">Chưa ghi nhận</p>
+              </article>
+            </div>
+            <div class="attendance-actions" aria-label="Thao tác chấm công">
+              <button class="primary-button" id="attendance-checkin" type="button">
+                <span aria-hidden="true">↘</span>Check-in
+              </button>
+              <button class="secondary-button" id="attendance-checkout" type="button" disabled>
+                <span aria-hidden="true">↗</span>Check-out
+              </button>
+              <button class="quiet-button" id="attendance-reset" type="button">
+                Đặt lại dữ liệu thử
+              </button>
+            </div>
+            <div class="attendance-simulator">
+              <div class="form-field">
+                <label for="attendance-clock-input">Thời gian mô phỏng</label>
+                <input class="form-control" id="attendance-clock-input" type="datetime-local" required />
+              </div>
+              <button class="secondary-button" id="attendance-apply-time" type="button">Cập nhật thời gian</button>
+              <button class="quiet-button" id="attendance-use-now" type="button">Dùng giờ hiện tại</button>
+              <p class="attendance-simulator-note">
+                Mốc thời gian được áp dụng theo múi giờ địa phương của trình duyệt.
+                Check-out phải sau check-in và nằm trong cùng ngày.
+              </p>
+            </div>
+            <div class="info-banner attendance-rollover" id="attendance-rollover-note" hidden></div>
+          </section>
+          <!-- END: Mọi trạng thái chấm công là dữ liệu tạm, không được gửi sang server. -->
         </main>
       </div>
     </div>
@@ -2500,6 +2680,9 @@
         /* BEGIN: Tiêu đề được bổ sung để breadcrumb đồng bộ với màn hình tài khoản. */
         accounts: "Quản lý tài khoản",
         /* END: Mục tài khoản dùng lại showView và điều hướng hiện tại. */
+        /* BEGIN: Đồng bộ nhãn breadcrumb cho màn chấm công mới. */
+        attendance: "Chấm công hôm nay",
+        /* END: Không thay đổi các nhãn màn hình Sprint 1. */
       };
       function showView(view) {
         document.querySelectorAll(".view-section").forEach((section) => {
@@ -2696,6 +2879,122 @@
       });
       renderDemoAccounts();
       /* END: Form không gửi email/mật khẩu hay thay đổi dữ liệu backend thật. */
+
+      /* BEGIN: Đồng hồ mô phỏng và quy tắc ngày/giờ chấm công chạy độc lập với API. */
+      let simulatedClock = new Date();
+      const demoAttendance = new Map();
+      const attendanceClockInput = document.getElementById("attendance-clock-input");
+
+      function attendanceDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function toDateTimeLocalValue(date) {
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return localDate.toISOString().slice(0, 16);
+      }
+
+      function formatAttendanceTime(date) {
+        return new Intl.DateTimeFormat("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }).format(date);
+      }
+
+      function renderAttendance() {
+        const todayKey = attendanceDateKey(simulatedClock);
+        const record = demoAttendance.get(todayKey);
+        const openPreviousShift = [...demoAttendance.entries()].find(
+          ([key, value]) => key < todayKey && !value.checkedOutAt,
+        );
+        document.getElementById("attendance-date-label").textContent =
+          new Intl.DateTimeFormat("vi-VN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }).format(simulatedClock);
+        document.getElementById("attendance-time-label").textContent =
+          formatAttendanceTime(simulatedClock);
+        document.getElementById("attendance-checkin-value").textContent =
+          record ? formatAttendanceTime(record.checkedInAt) : "Chưa ghi nhận";
+        document.getElementById("attendance-checkout-value").textContent =
+          record?.checkedOutAt ? formatAttendanceTime(record.checkedOutAt) : "Chưa ghi nhận";
+        const status = document.getElementById("attendance-today-status");
+        status.textContent = !record
+          ? "Chưa check-in"
+          : record.checkedOutAt
+            ? "Đã hoàn tất ca"
+            : "Đang trong ca";
+        status.className = `status-pill ${record?.checkedOutAt ? "" : "neutral"}`;
+        document.getElementById("attendance-checkin").disabled = Boolean(record);
+        document.getElementById("attendance-checkout").disabled =
+          !record || Boolean(record.checkedOutAt);
+        const rolloverNote = document.getElementById("attendance-rollover-note");
+        rolloverNote.hidden = !openPreviousShift || Boolean(record);
+        if (openPreviousShift && !record) {
+          rolloverNote.textContent =
+            `Ca ngày ${formatDate(openPreviousShift[0])} chưa được check-out. Không hỗ trợ check-out qua ngày; hãy đặt lại dữ liệu thử để kiểm tra ca mới.`;
+        }
+      }
+
+      attendanceClockInput.value = toDateTimeLocalValue(simulatedClock);
+      document.getElementById("attendance-apply-time").addEventListener("click", () => {
+        const nextClock = new Date(attendanceClockInput.value);
+        if (!attendanceClockInput.value || Number.isNaN(nextClock.getTime())) {
+          showToast("Vui lòng chọn ngày và giờ hợp lệ để mô phỏng.", "error");
+          attendanceClockInput.focus();
+          return;
+        }
+        simulatedClock = nextClock;
+        renderAttendance();
+        showToast("Đã cập nhật thời gian mô phỏng.");
+      });
+      document.getElementById("attendance-use-now").addEventListener("click", () => {
+        simulatedClock = new Date();
+        attendanceClockInput.value = toDateTimeLocalValue(simulatedClock);
+        renderAttendance();
+      });
+      document.getElementById("attendance-checkin").addEventListener("click", () => {
+        const todayKey = attendanceDateKey(simulatedClock);
+        if (demoAttendance.has(todayKey)) {
+          showToast("Ngày này đã có check-in, không thể ghi nhận lần thứ hai.", "error");
+          renderAttendance();
+          return;
+        }
+        demoAttendance.set(todayKey, { checkedInAt: new Date(simulatedClock), checkedOutAt: null });
+        renderAttendance();
+        showToast(`Đã check-in lúc ${formatAttendanceTime(simulatedClock)} (dữ liệu thử).`);
+      });
+      document.getElementById("attendance-checkout").addEventListener("click", () => {
+        const record = demoAttendance.get(attendanceDateKey(simulatedClock));
+        if (!record) {
+          showToast("Bạn cần check-in trước khi check-out trong ngày này.", "error");
+          return;
+        }
+        if (record.checkedOutAt) {
+          showToast("Ca làm hôm nay đã check-out.", "error");
+          return;
+        }
+        if (simulatedClock.getTime() <= record.checkedInAt.getTime()) {
+          showToast("Giờ check-out phải sau giờ check-in.", "error");
+          return;
+        }
+        record.checkedOutAt = new Date(simulatedClock);
+        renderAttendance();
+        showToast(`Đã check-out lúc ${formatAttendanceTime(simulatedClock)} (dữ liệu thử).`);
+      });
+      document.getElementById("attendance-reset").addEventListener("click", () => {
+        demoAttendance.clear();
+        renderAttendance();
+        showToast("Đã xóa toàn bộ dữ liệu chấm công thử trong phiên.");
+      });
+      renderAttendance();
+      /* END: Kiểm tra trạng thái theo ngày địa phương, chặn trùng và giờ ra không hợp lệ. */
 
       document
         .getElementById("profile-search")
