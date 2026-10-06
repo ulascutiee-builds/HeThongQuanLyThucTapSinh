@@ -14,6 +14,13 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
         modelBuilder.Entity<PortalAccount>().HasIndex(x => x.Email).IsUnique();
+        modelBuilder.Entity<PortalAccount>().HasIndex(x => x.InternProfileId).IsUnique().HasFilter("[InternProfileId] IS NOT NULL");
+        modelBuilder.Entity<PortalAccount>().HasIndex(x => x.ActivationTokenHash).IsUnique().HasFilter("[ActivationTokenHash] IS NOT NULL");
+        modelBuilder.Entity<PortalAccount>()
+            .HasOne(x => x.InternProfile)
+            .WithOne()
+            .HasForeignKey<PortalAccount>(x => x.InternProfileId)
+            .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<WorkItem>().Property(x => x.Amount).HasPrecision(18, 2);
         modelBuilder.Entity<WorkItem>().HasIndex(x => new { x.Kind, x.ProfileId });
         modelBuilder.Entity<WorkItem>().HasIndex(x => x.UniqueKey).IsUnique().HasFilter("[UniqueKey] IS NOT NULL");

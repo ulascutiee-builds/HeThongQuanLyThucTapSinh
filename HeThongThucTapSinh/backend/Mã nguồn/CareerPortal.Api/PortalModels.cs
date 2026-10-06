@@ -9,6 +9,11 @@ public sealed class PortalAccount
     public string Role { get; set; } = "Mentor";
     public bool Active { get; set; } = true;
     public string Permissions { get; set; } = "";
+    public int? InternProfileId { get; set; }
+    public InternProfile? InternProfile { get; set; }
+    [MaxLength(64)] public string? ActivationTokenHash { get; set; }
+    public DateTimeOffset? ActivationExpiresAt { get; set; }
+    public DateTimeOffset? EmailVerifiedAt { get; set; }
 }
 
 // One extensible workflow table, with kind-specific rules in PortalWorkflow.
@@ -56,5 +61,13 @@ public sealed class MailJob
     public DateTimeOffset DueAt { get; set; } = DateTimeOffset.UtcNow;
     public string Error { get; set; } = "";
 }
-public record AccountInput(string Name, string Email, string Password, string Role, bool Active = true, string Permissions = "");
+public record AccountInput(
+    string Name,
+    string Email,
+    string Role,
+    string Password = "",
+    bool Active = true,
+    string Permissions = "",
+    int? InternProfileId = null);
+public record ActivateAccountInput(string Token, string Password);
 public record ActionInput(string Action, int Progress = 0, string Feedback = "", decimal Amount = 0);

@@ -15,7 +15,7 @@ public sealed class PortalSecurity(RequestDelegate next)
     {
         var path = c.Request.Path.Value ?? "";
         if (!path.StartsWith("/api/")) { await next(c); return; }
-        var publicPath = path is "/api/auth/login" or "/api/auth/bootstrap" or "/api/auth/verify-email" or "/api/interns/register" or "/api/interns/login" or "/api/health/database";
+        var publicPath = path is "/api/auth/login" or "/api/auth/bootstrap" or "/api/auth/verify-email" or "/api/auth/activate-account" or "/api/interns/register" or "/api/interns/login" or "/api/health/database";
         // Cookie-authenticated writes must originate from the same site or the two development frontends.
         var origin = c.Request.Headers.Origin.ToString();
         if (c.Request.Method is not ("GET" or "HEAD" or "OPTIONS") && origin.Length > 0 &&
