@@ -11,6 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="sprint2-programs.css?v=20261006" />
     <style>
       :root {
         color-scheme: light;
@@ -1364,19 +1365,27 @@
           </section>
           
           <section class="view-section" id="view-programs" hidden aria-labelledby="programs-title">
-            <div class="page-heading">
+            <div class="page-heading program-page-heading">
               <div>
-                <p class="heading-kicker">Quản lý chương trình</p>
+                <p class="heading-kicker">Không gian thực tập</p>
                 <h1 id="programs-title">Chương trình thực tập</h1>
-                <p class="heading-description">Thiết lập thời gian, trạng thái và nội dung cho các chương trình đang tuyển.</p>
+                <p class="heading-description">Theo dõi danh sách, trạng thái và thời gian triển khai của các chương trình.</p>
               </div>
-              <button class="primary-button" type="button" data-sprint-toast="Tính năng tạo chương trình sẽ được kết nối ở bước tiếp theo.">+ Tạo chương trình</button>
+              <button class="primary-button" id="program-add" type="button"><span class="plus" aria-hidden="true">+</span> Tạo chương trình</button>
             </div>
-            <div class="sprint-grid sprint-grid-3">
-              <article class="sprint-card sprint-card-featured"><span class="sprint-badge sprint-badge-active">Đang diễn ra</span><h2>Thực tập sinh Web Full-stack</h2><p>Phát triển kỹ năng frontend, backend và quy trình làm việc Agile.</p><div class="sprint-card-meta"><strong>01/06/2026 — 31/08/2026</strong><span>24 thực tập sinh</span></div><div class="sprint-progress"><span style="width:72%"></span></div><small>72% chương trình đã hoàn thành</small></article>
-              <article class="sprint-card"><span class="sprint-badge sprint-badge-planned">Sắp diễn ra</span><h2>Thực tập sinh Java Backend</h2><p>Đào tạo Java, Spring Boot và xây dựng API doanh nghiệp.</p><div class="sprint-card-meta"><strong>15/09/2026 — 15/12/2026</strong><span>12 chỉ tiêu</span></div><button class="quiet-button" type="button" data-sprint-toast="Đã mở phần chỉnh sửa chương trình.">Xem chi tiết</button></article>
-              <article class="sprint-card"><span class="sprint-badge sprint-badge-closed">Đã kết thúc</span><h2>Thực tập sinh kiểm thử</h2><p>Chương trình đã hoàn tất và đang chờ tổng hợp kết quả đánh giá.</p><div class="sprint-card-meta"><strong>01/02/2026 — 30/04/2026</strong><span>18 thực tập sinh</span></div><button class="quiet-button" type="button" data-sprint-toast="Chương trình đã được lưu trữ.">Xem báo cáo</button></article>
+            <div class="program-overview" id="program-overview" aria-label="Tổng quan chương trình"></div>
+            <div class="program-section-heading">
+              <div><h2 class="section-title">Danh sách chương trình</h2><p class="section-subtitle">Cấu hình thời gian và trạng thái hiển thị cho từng đợt thực tập.</p></div>
+              <label class="program-status-filter">Trạng thái
+                <select class="control" id="program-status-filter" aria-label="Lọc chương trình theo trạng thái">
+                  <option value="all">Tất cả chương trình</option>
+                  <option value="Đang diễn ra">Đang diễn ra</option>
+                  <option value="Sắp diễn ra">Sắp diễn ra</option>
+                  <option value="Đã kết thúc">Đã kết thúc</option>
+                </select>
+              </label>
             </div>
+            <div class="program-grid" id="program-list" aria-live="polite"></div>
           </section>
 
           <section class="view-section" id="view-schedule" hidden aria-labelledby="schedule-title">
@@ -1628,6 +1637,55 @@
         </main>
       </div>
     </div>
+
+    <dialog class="dialog program-dialog" id="program-dialog" aria-labelledby="program-dialog-title">
+      <form id="program-form">
+        <div class="dialog-head">
+          <div>
+            <p class="dialog-eyebrow">Cấu hình chương trình</p>
+            <h2 id="program-dialog-title">Tạo chương trình</h2>
+            <p>Nhập thời gian triển khai và trạng thái của chương trình.</p>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog="program-dialog" aria-label="Đóng">×</button>
+        </div>
+        <div class="dialog-body program-form-grid">
+          <input type="hidden" name="id" />
+          <div class="form-field program-field-full">
+            <label for="program-name">Tên chương trình</label>
+            <input class="form-control" id="program-name" name="name" required maxlength="90" placeholder="Ví dụ: Thực tập sinh Web Full-stack" />
+          </div>
+          <div class="form-field program-field-full">
+            <label for="program-description">Mô tả</label>
+            <textarea class="form-control program-textarea" id="program-description" name="description" rows="3" maxlength="240" placeholder="Mục tiêu và nội dung chính của chương trình"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="program-start-date">Ngày bắt đầu</label>
+            <input class="form-control" id="program-start-date" name="startDate" type="date" required />
+          </div>
+          <div class="form-field">
+            <label for="program-end-date">Ngày kết thúc</label>
+            <input class="form-control" id="program-end-date" name="endDate" type="date" required />
+          </div>
+          <div class="form-field">
+            <label for="program-status">Trạng thái</label>
+            <select class="form-control" id="program-status" name="status" required>
+              <option value="Sắp diễn ra">Sắp diễn ra</option>
+              <option value="Đang diễn ra">Đang diễn ra</option>
+              <option value="Đã kết thúc">Đã kết thúc</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="program-seats">Số lượng mentee</label>
+            <input class="form-control" id="program-seats" name="seats" type="number" min="0" max="999" value="0" required />
+          </div>
+          <p class="program-form-note program-field-full"><span aria-hidden="true">ⓘ</span> Thông tin trên màn hình hiện được lưu trên trình duyệt để xem trước giao diện; chưa kết nối API.</p>
+        </div>
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" data-close-dialog="program-dialog">Hủy</button>
+          <button class="primary-button" type="submit">Lưu chương trình</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog
       class="dialog"
@@ -2963,5 +3021,6 @@
       loadState();
     </script>
     <script src="sprint1-ui.js?v=20261003-3"></script>
+    <script src="sprint2-programs.js?v=20261006"></script>
   </body>
 </html>
