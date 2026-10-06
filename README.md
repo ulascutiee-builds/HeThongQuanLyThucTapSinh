@@ -1,8 +1,8 @@
-# Demo riêng — Sprint 1
+# Demo quản lý thực tập sinh — Sprint 1 và giao diện xem trước Sprint 2
 
-Bản này chỉ chứa 10 user story ở sheet **Sprint 1** của Excel phân công. Giữ bố cục, màu sắc, logo và các màn hình HR/thực tập sinh của demo gốc; bổ sung các trường và thao tác cần cho Sprint 1. Không chứa module của Sprint 2–4: chương trình, công việc/đánh giá, chấm công, hỗ trợ/quyền lợi, mentor/phòng ban, báo cáo, quản trị hệ thống.
+Backend trong bản này phục vụ 10 user story ở sheet **Sprint 1** của Excel phân công. Bố cục, màu sắc, logo và các màn HR/thực tập sinh được giữ theo demo gốc; các API và dữ liệu SQL chỉ bao gồm phạm vi Sprint 1.
 
-Màn HR có thêm **bản xem trước giao diện frontend** cho tài khoản, chấm công, phân công và luồng nhiệm vụ/đánh giá mentor. Những phần xem trước này dùng dữ liệu giả trong bộ nhớ trình duyệt, không gọi API hoặc lưu vào SQL Server; chúng không thay thế các module backend chưa có trong Sprint 1.
+Màn HR có thêm **bản xem trước giao diện frontend Sprint 2** cho tài khoản, chấm công, phân công và luồng nhiệm vụ/đánh giá mentor. Đây chỉ là prototype: dữ liệu mẫu nằm trong bộ nhớ trình duyệt, không gọi API hay lưu vào SQL Server, và được khôi phục khi tải lại trang. Các màn xem trước không có nghĩa là backend Sprint 2 đã được triển khai.
 
 ## Chạy trong VS Code
 
@@ -29,6 +29,7 @@ Nếu LocalDB không khởi động: chạy `sqllocaldb info MSSQLLocalDB` rồi
 4. Đăng nhập HR để tạo/sửa/tìm/lọc/phân trang hồ sơ; xem và duyệt/từ chối tài liệu, đơn xin. Từ chối bắt buộc nhập lý do. Lịch sử lưu người xử lý, thời điểm, lý do.
 5. Email kết quả duyệt/từ chối được xếp hàng tự động. HR xem nút **Trạng thái email thông báo** trong Đơn xin.
 6. HR upload hợp đồng, chọn ngày hết hiệu lực (bỏ trống = 90 ngày). Mỗi lần upload giữ phiên bản cũ, metadata người tải/thời gian; thực tập sinh chỉ xác nhận phiên bản hiện hành, còn hiệu lực, một lần.
+7. Trong các màn xem trước Sprint 2 của HR, thử ghép thực tập sinh với mentor/chương trình, giao nhiệm vụ và đổi tiến độ, xem lịch sử phản hồi, sửa hoặc khóa đánh giá theo ngày kết thúc kỳ, và kiểm tra check-in/check-out. Các thay đổi chỉ tồn tại trong phiên trình duyệt.
 
 Hồ sơ do HR tạo trực tiếp không tự tạo mật khẩu đăng nhập cho sinh viên. Muốn trình diễn luồng sinh viên, đăng ký từ màn hình công khai trước. File PDF xem trước trong cửa sổ tài liệu HR, DOCX tải về bằng Word. File được lưu trong database cùng metadata, không lưu tên tệp người dùng thành đường dẫn máy chủ.
 
