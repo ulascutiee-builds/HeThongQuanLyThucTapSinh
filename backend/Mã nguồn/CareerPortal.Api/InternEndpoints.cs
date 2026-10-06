@@ -27,6 +27,8 @@ public static partial class InternEndpoints
 
         MapConfirmContract(group);
 
+        MapSchedule(group);
+
         return group;
     }
 }

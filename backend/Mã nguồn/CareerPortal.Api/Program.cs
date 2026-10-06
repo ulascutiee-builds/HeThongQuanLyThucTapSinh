@@ -40,6 +40,8 @@ app.MapPortalEndpoints();
 
 app.MapInternEndpoints();
 app.MapHrEndpoints();
+app.MapAssignmentEndpoints();
+app.MapTaskProgressEndpoints();
 
 app.MapGet("/api/health/database", async (CareerDbContext db) =>
 {

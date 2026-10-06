@@ -79,3 +79,56 @@ public sealed record DecideStatusRequest
     [Required] public required string Status { get; init; }
     [MaxLength(1000)] public string? Note { get; init; }
 }
+
+// ──────────────────────────────────────────────
+// Feature 13 – POST /api/assignments
+// ──────────────────────────────────────────────
+
+public sealed record CreateAssignmentRequest
+{
+    /// <summary>ID thực tập sinh (InternProfile.Id)</summary>
+    [Required] public required int ProfileId { get; init; }
+
+    /// <summary>ID WorkItem kind="programs"</summary>
+    [Required] public required int ProgramId { get; init; }
+
+    /// <summary>ID WorkItem kind="mentors"</summary>
+    [Required] public required int MentorId { get; init; }
+}
+
+// ──────────────────────────────────────────────
+// Feature 14 – GET /api/interns/me/schedule
+// ──────────────────────────────────────────────
+
+public sealed record InternScheduleResponse(
+    ScheduleSummary? Program,
+    IReadOnlyList<ScheduleItem> Shifts,
+    IReadOnlyList<ScheduleItem> Tasks,
+    IReadOnlyList<ScheduleItem> Milestones);
+
+public sealed record ScheduleSummary(
+    string ProgramName,
+    string Department,
+    string MentorName,
+    DateTimeOffset? Start,
+    DateTimeOffset? End);
+
+public sealed record ScheduleItem(
+    int Id,
+    string Type,
+    string Title,
+    string Detail,
+    DateTimeOffset? Start,
+    DateTimeOffset? End,
+    string Status,
+    int Progress);
+
+// ──────────────────────────────────────────────
+// Feature 15 – PATCH /api/tasks/{id}/progress
+// ──────────────────────────────────────────────
+
+public sealed record UpdateTaskProgressRequest
+{
+    /// <summary>Tiến độ hoàn thành, giá trị 0–100</summary>
+    [Required, Range(0, 100)] public required int Progress { get; init; }
+}
