@@ -2,6 +2,8 @@
 
 Bản này chỉ chứa 10 user story ở sheet **Sprint 1** của Excel phân công. Giữ bố cục, màu sắc, logo và các màn hình HR/thực tập sinh của demo gốc; bổ sung các trường và thao tác cần cho Sprint 1. Không chứa module của Sprint 2–4: chương trình, công việc/đánh giá, chấm công, hỗ trợ/quyền lợi, mentor/phòng ban, báo cáo, quản trị hệ thống.
 
+Màn HR có thêm **bản xem trước giao diện frontend** cho tài khoản, chấm công, phân công và luồng nhiệm vụ/đánh giá mentor. Những phần xem trước này dùng dữ liệu giả trong bộ nhớ trình duyệt, không gọi API hoặc lưu vào SQL Server; chúng không thay thế các module backend chưa có trong Sprint 1.
+
 ## Chạy trong VS Code
 
 1. Giải nén ra thư mục mới; **không chép đè bản demo đầy đủ**. Open Folder thư mục có `start.ps1`.

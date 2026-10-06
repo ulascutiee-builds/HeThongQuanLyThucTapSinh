@@ -942,6 +942,200 @@
       }
       /* END: Khu vực phân công được trình bày responsive mà không dùng API/backend. */
 
+      /* BEGIN: Bố cục mentor cho nhiệm vụ, tiến độ, phản hồi và khóa đánh giá theo kỳ. */
+      .mentor-toolbar {
+        display: grid;
+        grid-template-columns: minmax(180px, 0.8fr) minmax(190px, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .mentor-toolbar .form-field label,
+      .mentor-simulator .form-field label {
+        margin-bottom: 7px;
+      }
+      .mentor-work-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+        align-items: start;
+        gap: 15px;
+      }
+      .mentor-column {
+        display: grid;
+        gap: 15px;
+        min-width: 0;
+      }
+      .mentor-form {
+        display: grid;
+        gap: 12px;
+        padding: 15px;
+      }
+      .mentor-form .form-field label {
+        margin-bottom: 7px;
+      }
+      .mentor-form textarea.form-control {
+        min-height: 88px;
+        padding: 9px 10px;
+        resize: vertical;
+      }
+      .mentor-task-list,
+      .mentor-feedback-list {
+        display: grid;
+        gap: 9px;
+        padding: 12px;
+      }
+      .mentor-task-card,
+      .mentor-feedback-card,
+      .intern-task-card {
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: #fff;
+      }
+      .mentor-task-topline,
+      .mentor-feedback-topline {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .mentor-task-title,
+      .intern-task-title {
+        margin: 0;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .mentor-task-description,
+      .mentor-feedback-message,
+      .intern-task-description {
+        margin: 7px 0 0;
+        color: #68736c;
+        font-size: 10px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+      }
+      .mentor-task-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 13px;
+        margin: 9px 0;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .priority-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 7px;
+        border-radius: 2px;
+        background: #eef0ed;
+        color: #68736c;
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .priority-pill[data-priority="Cao"] {
+        background: #f8e9e6;
+        color: var(--danger);
+      }
+      .priority-pill[data-priority="Trung bình"] {
+        background: #faf1df;
+        color: var(--warning);
+      }
+      .mentor-progress-row {
+        display: grid;
+        grid-template-columns: minmax(130px, 1fr) auto;
+        gap: 8px;
+      }
+      .mentor-progress-row .form-control {
+        min-height: 31px;
+      }
+      .mentor-progress-row .secondary-button {
+        min-height: 31px;
+      }
+      .mentor-progress-meter {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .mentor-progress-meter progress {
+        width: 100%;
+        height: 7px;
+        accent-color: var(--success);
+      }
+      .mentor-preview-panel {
+        padding: 14px;
+        border: 1px solid #dce6df;
+        background: #f8faf7;
+      }
+      .mentor-preview-title {
+        margin: 0 0 9px;
+        color: var(--forest);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .mentor-preview-list {
+        display: grid;
+        gap: 7px;
+      }
+      .intern-task-card {
+        padding: 10px;
+        background: #fff;
+      }
+      .mentor-feedback-card.is-unread {
+        border-left: 3px solid var(--accent);
+        background: #fffaf7;
+      }
+      .mentor-unread {
+        min-width: 19px;
+        padding: 2px 6px;
+        border-radius: 12px;
+        background: #f8e9e6;
+        color: var(--danger);
+        text-align: center;
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .mentor-simulator {
+        display: grid;
+        grid-template-columns: minmax(160px, 1fr) auto;
+        align-items: end;
+        gap: 10px;
+        padding: 13px;
+        border: 1px dashed #cbd4cc;
+        background: #f8f9f6;
+      }
+      .mentor-simulator-note {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .mentor-evaluation-lock {
+        margin: 0;
+        padding: 10px;
+        border-left: 3px solid var(--gold);
+        background: #fbf7ee;
+        color: #736342;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+      .mentor-evaluation-lock.is-locked {
+        border-color: var(--danger);
+        background: #fff4f1;
+        color: var(--danger);
+      }
+      .mentor-form :disabled {
+        cursor: not-allowed;
+      }
+      /* END: Các thành phần demo mentor phản hồi trực quan khi hết kỳ và khi có cập nhật mới. */
+
       .dialog {
         width: min(100% - 28px, 540px);
         max-height: min(88vh, 820px);
@@ -1335,6 +1529,26 @@
           flex-direction: column;
         }
         /* END: Màn phân công không gây cuộn ngang trên điện thoại. */
+        /* BEGIN: Bố cục mentor co về một cột và giữ biểu mẫu phản hồi dễ thao tác. */
+        .mentor-toolbar,
+        .mentor-work-grid {
+          grid-template-columns: 1fr;
+        }
+        .mentor-simulator {
+          grid-template-columns: 1fr;
+        }
+        .mentor-simulator-note {
+          grid-column: auto;
+        }
+        .mentor-progress-row {
+          grid-template-columns: 1fr;
+        }
+        .mentor-progress-row button,
+        .mentor-form > button,
+        .mentor-simulator > button {
+          width: 100%;
+        }
+        /* END: Bố cục mobile mentor không tạo cuộn ngang. */
       }
       @media (prefers-reduced-motion: reduce) {
         *,
@@ -1405,6 +1619,14 @@
             >
           </button>
           <!-- END: Điều hướng phân công được quản lý bằng showView chung. -->
+          <!-- BEGIN: Màn mentor có bộ đếm thông báo phản hồi mới trong phiên demo. -->
+          <button class="nav-item" type="button" data-view="mentor">
+            <span class="nav-item-text"
+              ><span class="nav-glyph" aria-hidden="true">✎</span>Nhiệm vụ & đánh giá</span
+            >
+            <span class="nav-count" id="mentor-unread-nav" hidden>0</span>
+          </button>
+          <!-- END: Mục mentor bao gồm giao việc, theo dõi và đánh giá thực tập sinh. -->
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -2085,6 +2307,155 @@
             </div>
           </section>
           <!-- END: Form phân công và danh sách chỉ thao tác trên dữ liệu mẫu trong frontend. -->
+          <!-- BEGIN: Bàn làm việc mentor demo cho giao nhiệm vụ, cập nhật tiến độ và đánh giá. -->
+          <section
+            class="view-section"
+            id="view-mentor"
+            aria-labelledby="mentor-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="heading-kicker">Không gian mentor · Bản xem trước</p>
+                <h1 id="mentor-title">Nhiệm vụ & đánh giá</h1>
+                <p class="heading-description">
+                  Giao việc, theo dõi tiến độ và phản hồi xuyên suốt kỳ thực tập.
+                </p>
+              </div>
+              <button class="secondary-button" id="mentor-notifications" type="button">
+                Thông báo phản hồi mới
+                <span class="mentor-unread" id="mentor-unread-button">0</span>
+              </button>
+            </div>
+            <div class="info-banner">
+              Các tài khoản mentor/thực tập sinh, nhiệm vụ, phản hồi và đánh giá
+              tại đây là dữ liệu mô phỏng trong phiên trình duyệt; chưa lưu vào backend.
+            </div>
+            <div class="mentor-toolbar">
+              <div class="form-field">
+                <label for="mentor-view-select">Mentor đang xem</label>
+                <select class="form-control" id="mentor-view-select"></select>
+              </div>
+              <div class="form-field">
+                <label for="mentor-intern-select">Thực tập sinh được hướng dẫn</label>
+                <select class="form-control" id="mentor-intern-select"></select>
+              </div>
+              <p class="assignment-capacity" id="mentor-period-label">
+                Chọn một cặp phân công để xem hoạt động.
+              </p>
+            </div>
+            <div class="mentor-work-grid">
+              <div class="mentor-column">
+                <div class="work-panel">
+                  <div class="work-panel-head">
+                    <div>
+                      <h2>Giao nhiệm vụ</h2>
+                      <p>Tiêu đề, mô tả, deadline và mức ưu tiên.</p>
+                    </div>
+                  </div>
+                  <form class="mentor-form" id="mentor-task-form">
+                    <div class="form-field">
+                      <label for="mentor-task-title">Tiêu đề nhiệm vụ</label>
+                      <input class="form-control" id="mentor-task-title" name="title" required maxlength="120" placeholder="Ví dụ: Xây dựng trang danh sách sản phẩm" />
+                    </div>
+                    <div class="form-field">
+                      <label for="mentor-task-description">Mô tả công việc</label>
+                      <textarea class="form-control" id="mentor-task-description" name="description" required maxlength="1000" placeholder="Nêu kết quả mong đợi, tiêu chí hoàn thành và tài liệu cần bàn giao."></textarea>
+                    </div>
+                    <div class="assignment-select-grid">
+                      <div class="form-field">
+                        <label for="mentor-task-deadline">Deadline</label>
+                        <input class="form-control" id="mentor-task-deadline" name="deadline" type="date" required />
+                      </div>
+                      <div class="form-field">
+                        <label for="mentor-task-priority">Mức ưu tiên</label>
+                        <select class="form-control" id="mentor-task-priority" name="priority" required>
+                          <option value="Thấp">Thấp</option>
+                          <option value="Trung bình" selected>Trung bình</option>
+                          <option value="Cao">Cao</option>
+                        </select>
+                      </div>
+                      <div class="form-field">
+                        <label for="mentor-task-assignee">Giao cho</label>
+                        <select class="form-control" id="mentor-task-assignee" name="internId" required></select>
+                      </div>
+                    </div>
+                    <button class="primary-button" type="submit">Giao nhiệm vụ</button>
+                  </form>
+                </div>
+                <div class="work-panel">
+                  <div class="work-panel-head">
+                    <div>
+                      <h2>Tiến độ thực tập sinh</h2>
+                      <p>Cập nhật trạng thái trên nhiệm vụ mentor đã giao.</p>
+                    </div>
+                  </div>
+                  <div class="mentor-task-list" id="mentor-task-list"></div>
+                </div>
+                <div class="mentor-preview-panel">
+                  <p class="mentor-preview-title">Góc nhìn thực tập sinh · cập nhật tiến độ nhiệm vụ</p>
+                  <div class="mentor-preview-list" id="intern-task-preview"></div>
+                </div>
+              </div>
+              <div class="mentor-column">
+                <div class="work-panel">
+                  <div class="work-panel-head">
+                    <div>
+                      <h2>Phản hồi & lịch sử</h2>
+                      <p>Ghi nhận trao đổi mới từ thực tập sinh.</p>
+                    </div>
+                    <span class="mentor-unread" id="mentor-unread-history">0 mới</span>
+                  </div>
+                  <form class="mentor-form" id="mentor-feedback-form">
+                    <div class="form-field">
+                      <label for="mentor-feedback-message">Phản hồi mới (mô phỏng phía thực tập sinh)</label>
+                      <textarea class="form-control" id="mentor-feedback-message" name="message" required maxlength="500" placeholder="Ví dụ: Em đã hoàn thành luồng đăng nhập, nhờ mentor xem giúp phần kiểm tra dữ liệu."></textarea>
+                    </div>
+                    <button class="secondary-button" type="submit">Gửi phản hồi demo</button>
+                  </form>
+                  <div class="mentor-feedback-list" id="mentor-feedback-list"></div>
+                </div>
+                <div class="work-panel">
+                  <div class="work-panel-head">
+                    <div>
+                      <h2>Đánh giá cuối kỳ</h2>
+                      <p>Cho phép sửa khi kỳ thực tập chưa kết thúc.</p>
+                    </div>
+                  </div>
+                  <form class="mentor-form" id="mentor-evaluation-form">
+                    <div class="mentor-simulator">
+                      <div class="form-field">
+                        <label for="mentor-evaluation-date">Ngày mô phỏng để kiểm thử khóa</label>
+                        <input class="form-control" id="mentor-evaluation-date" type="date" required />
+                      </div>
+                      <button class="quiet-button" id="mentor-evaluation-use-today" type="button">Dùng ngày hiện tại</button>
+                      <p class="mentor-simulator-note">
+                        Đánh giá khóa từ ngày tiếp theo sau deadline kỳ thực tập.
+                      </p>
+                    </div>
+                    <p class="mentor-evaluation-lock" id="mentor-evaluation-lock" aria-live="polite"></p>
+                    <div class="form-field">
+                      <label for="mentor-evaluation-rating">Mức đánh giá</label>
+                      <select class="form-control" id="mentor-evaluation-rating" name="rating" required>
+                        <option value="">Chọn mức đánh giá</option>
+                        <option value="1">1 · Cần cải thiện</option>
+                        <option value="2">2 · Đạt một phần</option>
+                        <option value="3">3 · Đạt yêu cầu</option>
+                        <option value="4">4 · Tốt</option>
+                        <option value="5">5 · Xuất sắc</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="mentor-evaluation-comment">Nhận xét của mentor</label>
+                      <textarea class="form-control" id="mentor-evaluation-comment" name="comment" required maxlength="1000" placeholder="Nêu điểm mạnh, kết quả và hướng phát triển tiếp theo."></textarea>
+                    </div>
+                    <button class="primary-button" id="mentor-evaluation-save" type="submit">Lưu đánh giá</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- END: Bàn mentor đồng bộ nhiệm vụ, phản hồi và đánh giá trong bộ nhớ frontend. -->
         </main>
       </div>
     </div>
@@ -2892,6 +3263,9 @@
         /* BEGIN: Nhãn breadcrumb tương ứng với màn phân công thực tập. */
         assignments: "Phân công thực tập",
         /* END: Dùng chung bộ chuyển màn hình và breadcrumb hiện có. */
+        /* BEGIN: Breadcrumb của không gian mentor mới. */
+        mentor: "Nhiệm vụ & đánh giá",
+        /* END: Không ảnh hưởng điều hướng các màn hiện hữu. */
       };
       function showView(view) {
         document.querySelectorAll(".view-section").forEach((section) => {
@@ -3206,11 +3580,18 @@
       /* END: Kiểm tra trạng thái theo ngày địa phương, chặn trùng và giờ ra không hợp lệ. */
 
       /* BEGIN: Dữ liệu ghép cặp mẫu, lọc sức chứa và cập nhật danh sách ngay trong trình duyệt. */
+      /* BEGIN: Mốc dữ liệu demo được tính từ ngày địa phương để không tạo deadline đã quá hạn. */
+      function attendanceDateOffset(days) {
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return attendanceDateKey(date);
+      }
+      /* END: Dùng chung phép dịch ngày cho fixture nhiệm vụ và kỳ thực tập. */
       const demoInterns = [
-        { id: "INT-026", name: "Nguyễn Minh Anh", school: "ĐH Bách khoa Hà Nội", major: "Công nghệ thông tin" },
-        { id: "INT-031", name: "Lê Thu Hà", school: "ĐH Công nghệ - ĐHQGHN", major: "Hệ thống thông tin" },
-        { id: "INT-034", name: "Phạm Gia Huy", school: "ĐH FPT", major: "Kỹ thuật phần mềm" },
-        { id: "INT-039", name: "Đỗ Khánh Linh", school: "ĐH Thủy Lợi", major: "Khoa học máy tính" },
+        { id: "INT-026", name: "Nguyễn Minh Anh", school: "ĐH Bách khoa Hà Nội", major: "Công nghệ thông tin", internshipEndDate: attendanceDateOffset(60) },
+        { id: "INT-031", name: "Lê Thu Hà", school: "ĐH Công nghệ - ĐHQGHN", major: "Hệ thống thông tin", internshipEndDate: attendanceDateOffset(45) },
+        { id: "INT-034", name: "Phạm Gia Huy", school: "ĐH FPT", major: "Kỹ thuật phần mềm", internshipEndDate: attendanceDateOffset(30) },
+        { id: "INT-039", name: "Đỗ Khánh Linh", school: "ĐH Thủy Lợi", major: "Khoa học máy tính", internshipEndDate: attendanceDateOffset(30) },
       ];
       const demoMentors = [
         { id: "MEN-01", name: "Trần Quốc Bảo", focus: "Frontend · React", capacity: 3 },
@@ -3226,6 +3607,222 @@
         { internId: "INT-026", mentorId: "MEN-01", programId: "PRG-FE-10", assignedAt: "2026-10-01" },
       ];
       const assignmentForm = document.getElementById("assignment-form");
+      /* BEGIN: Fixture nhiệm vụ, phản hồi và đánh giá cho luồng mentor chỉ ở frontend. */
+      const demoTasks = [
+        {
+          id: "TASK-DEMO-01",
+          mentorId: "MEN-01",
+          internId: "INT-026",
+          title: "Xây dựng trang danh sách sản phẩm",
+          description: "Hoàn thiện bố cục responsive, trạng thái tải dữ liệu và xử lý danh sách rỗng.",
+          deadline: attendanceDateOffset(14),
+          priority: "Cao",
+          status: "Đang thực hiện",
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "TASK-DEMO-02",
+          mentorId: "MEN-01",
+          internId: "INT-026",
+          title: "Viết tài liệu hướng dẫn sử dụng",
+          description: "Tóm tắt các thao tác chính để người dùng mới có thể bắt đầu.",
+          deadline: attendanceDateOffset(21),
+          priority: "Thấp",
+          status: "Chưa bắt đầu",
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      const demoFeedback = [
+        {
+          id: "FEEDBACK-DEMO-01",
+          mentorId: "MEN-01",
+          internId: "INT-026",
+          message: "Em đã hoàn thành luồng đăng nhập. Mentor có thể xem giúp phần kiểm tra dữ liệu đầu vào được không ạ?",
+          createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          isRead: false,
+        },
+      ];
+      const demoEvaluations = new Map([
+        ["INT-026", { rating: "4", comment: "Chủ động tiếp nhận góp ý, phối hợp nhóm tốt và hoàn thành các đầu việc đúng tiến độ.", updatedAt: new Date().toISOString() }],
+      ]);
+      const mentorTaskForm = document.getElementById("mentor-task-form");
+      const mentorFeedbackForm = document.getElementById("mentor-feedback-form");
+      const mentorEvaluationForm = document.getElementById("mentor-evaluation-form");
+      const mentorEvaluationDate = document.getElementById("mentor-evaluation-date");
+      let simulatedEvaluationDate = attendanceDateKey(new Date());
+      let mentorDemoSequence = 0;
+
+      function getMentorAssignments(mentorId) {
+        return demoAssignments.filter((assignment) => assignment.mentorId === mentorId);
+      }
+
+      function createMentorDemoId(prefix) {
+        mentorDemoSequence += 1;
+        return `${prefix}-${Date.now()}-${mentorDemoSequence}`;
+      }
+
+      function formatMentorDate(value) {
+        if (!value) return "Chưa cập nhật";
+        return formatDate(value);
+      }
+
+      function getTaskProgress(status) {
+        return {
+          "Chưa bắt đầu": 0,
+          "Đang thực hiện": 50,
+          "Chờ phản hồi": 80,
+          "Hoàn thành": 100,
+        }[status] ?? 0;
+      }
+
+      function renderMentorTaskLists(mentorId, internId) {
+        const tasks = demoTasks.filter(
+          (task) => task.mentorId === mentorId && task.internId === internId,
+        );
+        const statuses = ["Chưa bắt đầu", "Đang thực hiện", "Chờ phản hồi", "Hoàn thành"];
+        document.getElementById("mentor-task-list").innerHTML = tasks.length
+          ? tasks.map((task) => `<article class="mentor-task-card" data-task-card="${escapeHtml(task.id)}">
+              <div class="mentor-task-topline">
+                <p class="mentor-task-title">${escapeHtml(task.title)}</p>
+                <span class="priority-pill" data-priority="${escapeHtml(task.priority)}">${escapeHtml(task.priority)}</span>
+              </div>
+              <p class="mentor-task-description">${escapeHtml(task.description)}</p>
+              <div class="mentor-task-meta">
+                <span>Deadline: ${formatMentorDate(task.deadline)}</span>
+                <span>Cập nhật: ${formatDateTime(task.updatedAt)}</span>
+              </div>
+              <div class="mentor-progress-meter">
+                <progress max="100" value="${getTaskProgress(task.status)}" aria-label="Tiến độ ${escapeHtml(task.title)}"></progress>
+                <span>${getTaskProgress(task.status)}%</span>
+              </div>
+              <div class="mentor-progress-row">
+                <select class="form-control" data-task-status aria-label="Tiến độ ${escapeHtml(task.title)}">
+                  ${statuses.map((status) => `<option value="${escapeHtml(status)}"${status === task.status ? " selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                </select>
+                <button class="secondary-button" type="button" data-task-save="${escapeHtml(task.id)}">Cập nhật tiến độ</button>
+              </div>
+            </article>`).join("")
+          : '<p class="empty-state">Chưa có nhiệm vụ cho cặp mentor và thực tập sinh này.</p>';
+        document.getElementById("intern-task-preview").innerHTML = tasks.length
+          ? tasks.map((task) => `<article class="intern-task-card">
+              <p class="intern-task-title">${escapeHtml(task.title)}</p>
+              <p class="intern-task-description">${escapeHtml(task.description)}</p>
+              <div class="mentor-progress-meter">
+                <progress max="100" value="${getTaskProgress(task.status)}" aria-label="Tiến độ ${escapeHtml(task.title)}"></progress>
+                <span>${getTaskProgress(task.status)}%</span>
+              </div>
+              <div class="mentor-task-meta">
+                <span>Hạn ${formatMentorDate(task.deadline)}</span>
+                <span class="status-pill ${task.status === "Hoàn thành" ? "" : "pending"}">${escapeHtml(task.status)}</span>
+              </div>
+              <div class="mentor-progress-row">
+                <select class="form-control" data-intern-task-status aria-label="Thực tập sinh cập nhật ${escapeHtml(task.title)}">
+                  ${["Chưa bắt đầu", "Đang thực hiện", "Chờ phản hồi", "Hoàn thành"].map((status) => `<option value="${escapeHtml(status)}"${status === task.status ? " selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                </select>
+                <button class="secondary-button" type="button" data-intern-task-save="${escapeHtml(task.id)}">Gửi tiến độ mới</button>
+              </div>
+            </article>`).join("")
+          : '<p class="empty-state">Chưa có nhiệm vụ được giao.</p>';
+      }
+
+      function renderMentorFeedback(mentorId, internId) {
+        const feedback = demoFeedback
+          .filter((item) => item.mentorId === mentorId && item.internId === internId)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const unreadCount = feedback.filter((item) => !item.isRead).length;
+        document.getElementById("mentor-unread-button").textContent = unreadCount;
+        document.getElementById("mentor-unread-history").textContent =
+          unreadCount ? `${unreadCount} mới` : "Đã xem hết";
+        document.getElementById("mentor-unread-nav").textContent = demoFeedback.filter((item) => !item.isRead).length;
+        document.getElementById("mentor-unread-nav").hidden =
+          !demoFeedback.some((item) => !item.isRead);
+        document.getElementById("mentor-feedback-list").innerHTML = feedback.length
+          ? feedback.map((item) => `<article class="mentor-feedback-card ${item.isRead ? "" : "is-unread"}">
+              <div class="mentor-feedback-topline">
+                <span class="status-pill ${item.isRead ? "neutral" : "awaiting-confirmation"}">${item.isRead ? "Đã xem" : "Phản hồi mới"}</span>
+                <span class="person-meta">${formatDateTime(item.createdAt)}</span>
+              </div>
+              <p class="mentor-feedback-message">${escapeHtml(item.message)}</p>
+            </article>`).join("")
+          : '<p class="empty-state">Chưa có phản hồi cho thực tập sinh này.</p>';
+      }
+
+      function renderMentorEvaluation(intern) {
+        const rating = mentorEvaluationForm.elements.rating;
+        const comment = mentorEvaluationForm.elements.comment;
+        const save = document.getElementById("mentor-evaluation-save");
+        const lock = document.getElementById("mentor-evaluation-lock");
+        const evaluation = intern ? demoEvaluations.get(intern.id) : null;
+        const locked = !intern || !simulatedEvaluationDate ||
+          simulatedEvaluationDate > intern.internshipEndDate;
+        rating.disabled = locked;
+        comment.disabled = locked;
+        save.disabled = locked;
+        if (!intern) {
+          lock.textContent = "Chọn mentor có thực tập sinh được phân công để ghi đánh giá.";
+          lock.classList.remove("is-locked");
+          rating.value = "";
+          comment.value = "";
+          save.textContent = "Lưu đánh giá";
+          return;
+        }
+        rating.value = evaluation?.rating ?? "";
+        comment.value = evaluation?.comment ?? "";
+        save.textContent = evaluation ? "Cập nhật đánh giá" : "Lưu đánh giá";
+        if (locked) {
+          lock.textContent = `Kỳ thực tập kết thúc ngày ${formatMentorDate(intern.internshipEndDate)}. Đánh giá đã khóa, không thể tạo mới hoặc sửa.`;
+          lock.classList.add("is-locked");
+        } else {
+          lock.textContent = `Kỳ thực tập đến ${formatMentorDate(intern.internshipEndDate)}. ${evaluation ? "Có thể sửa đánh giá đã lưu." : "Có thể tạo đánh giá mới."}`;
+          lock.classList.remove("is-locked");
+        }
+      }
+
+      function renderMentorWorkspace() {
+        const mentorSelect = document.getElementById("mentor-view-select");
+        const internSelect = document.getElementById("mentor-intern-select");
+        const taskInternSelect = document.getElementById("mentor-task-assignee");
+        const selectedMentor = mentorSelect.value || demoMentors[0]?.id || "";
+        mentorSelect.replaceChildren(
+          ...demoMentors.map((mentor) => new Option(`${mentor.name} · ${mentor.focus}`, mentor.id)),
+        );
+        mentorSelect.value = selectedMentor;
+        const assignments = getMentorAssignments(mentorSelect.value);
+        const previousIntern = internSelect.value;
+        const assignedInterns = assignments
+          .map((assignment) => demoInterns.find((intern) => intern.id === assignment.internId))
+          .filter(Boolean);
+        internSelect.replaceChildren(
+          new Option("Chọn thực tập sinh", ""),
+          ...assignedInterns.map((intern) => new Option(`${intern.name} · ${intern.id}`, intern.id)),
+        );
+        internSelect.value = assignedInterns.some((intern) => intern.id === previousIntern)
+          ? previousIntern
+          : assignedInterns[0]?.id ?? "";
+        const selectedIntern = assignedInterns.find((intern) => intern.id === internSelect.value) ?? null;
+        taskInternSelect.replaceChildren(
+          new Option("Chọn thực tập sinh", ""),
+          ...assignedInterns.map((intern) => new Option(`${intern.name} · ${intern.id}`, intern.id)),
+        );
+        taskInternSelect.value = selectedIntern?.id ?? "";
+        taskInternSelect.disabled = !selectedIntern;
+        document.getElementById("mentor-period-label").textContent = selectedIntern
+          ? `Kỳ thực tập đến ${formatMentorDate(selectedIntern.internshipEndDate)} · ${selectedIntern.school} · ${selectedIntern.major}`
+          : "Mentor chưa có cặp phân công. Hãy tạo phân công ở mục Phân công.";
+        for (const control of mentorTaskForm.querySelectorAll("input, textarea, select, button"))
+          control.disabled = !selectedIntern;
+        taskInternSelect.disabled = !selectedIntern;
+        mentorFeedbackForm.elements.message.disabled = !selectedIntern;
+        mentorFeedbackForm.querySelector('button[type="submit"]').disabled = !selectedIntern;
+        const deadlineInput = mentorTaskForm.elements.deadline;
+        deadlineInput.min = simulatedEvaluationDate;
+        deadlineInput.max = selectedIntern?.internshipEndDate ?? "";
+        document.getElementById("mentor-evaluation-date").value = simulatedEvaluationDate;
+        renderMentorTaskLists(mentorSelect.value, selectedIntern?.id ?? "");
+        renderMentorFeedback(mentorSelect.value, selectedIntern?.id ?? "");
+        renderMentorEvaluation(selectedIntern);
+      }
+      /* END: Dữ liệu mentor tách biệt API, cập nhật cùng lúc cả góc nhìn mentor và thực tập sinh. */
 
       function assignedCount(field, id) {
         return demoAssignments.filter((assignment) => assignment[field] === id).length;
@@ -3355,11 +3952,217 @@
         renderAssignmentOptions();
         renderAssignmentPreview();
         renderAssignmentTable();
+        /* BEGIN: Làm mới danh sách mentor ngay khi HR tạo cặp phân công mới. */
+        renderMentorWorkspace();
+        /* END: Thực tập sinh mới được chọn lập tức trong bàn làm việc mentor. */
         showToast("Đã tạo phân công trong danh sách demo của phiên.");
       });
       renderAssignmentOptions();
       renderAssignmentPreview();
       renderAssignmentTable();
+      /* BEGIN: Sự kiện mentor cập nhật nhiệm vụ/tiến độ/phản hồi/đánh giá bằng dữ liệu demo. */
+      const mentorViewSelect = document.getElementById("mentor-view-select");
+      const mentorInternSelect = document.getElementById("mentor-intern-select");
+      const mentorTaskList = document.getElementById("mentor-task-list");
+      mentorViewSelect.addEventListener("change", renderMentorWorkspace);
+      mentorInternSelect.addEventListener("change", renderMentorWorkspace);
+      renderMentorWorkspace();
+
+      mentorTaskForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const mentorId = mentorViewSelect.value;
+        const internId = mentorTaskForm.elements.internId.value;
+        const intern = demoInterns.find((item) => item.id === internId);
+        const title = mentorTaskForm.elements.title.value.trim();
+        const description = mentorTaskForm.elements.description.value.trim();
+        const deadline = mentorTaskForm.elements.deadline.value;
+        if (!internId) {
+          showToast("Chọn thực tập sinh được mentor hướng dẫn.", "error");
+          mentorTaskForm.elements.internId.focus();
+          return;
+        }
+        if (!intern || !getMentorAssignments(mentorId).some((item) => item.internId === internId)) {
+          showToast("Chỉ giao việc cho thực tập sinh đang được mentor này hướng dẫn.", "error");
+          return;
+        }
+        if (!title) {
+          showToast("Tiêu đề nhiệm vụ không được để trống.", "error");
+          mentorTaskForm.elements.title.focus();
+          return;
+        }
+        if (!description) {
+          showToast("Mô tả nhiệm vụ không được để trống.", "error");
+          mentorTaskForm.elements.description.focus();
+          return;
+        }
+        if (!simulatedEvaluationDate) {
+          showToast("Cần chọn ngày hợp lệ trước khi giao nhiệm vụ.", "error");
+          mentorEvaluationDate.focus();
+          return;
+        }
+        if (!deadline) {
+          showToast("Chọn deadline cho nhiệm vụ.", "error");
+          mentorTaskForm.elements.deadline.focus();
+          return;
+        }
+        if (deadline < simulatedEvaluationDate) {
+          showToast("Deadline không được sớm hơn ngày đang mô phỏng.", "error");
+          mentorTaskForm.elements.deadline.focus();
+          return;
+        }
+        if (!["Thấp", "Trung bình", "Cao"].includes(mentorTaskForm.elements.priority.value)) {
+          showToast("Chọn mức ưu tiên hợp lệ.", "error");
+          mentorTaskForm.elements.priority.focus();
+          return;
+        }
+        if (deadline > intern.internshipEndDate) {
+          showToast("Deadline nhiệm vụ không được vượt quá ngày kết thúc kỳ thực tập.", "error");
+          mentorTaskForm.elements.deadline.focus();
+          return;
+        }
+        demoTasks.unshift({
+          id: createMentorDemoId("TASK"),
+          mentorId,
+          internId,
+          title,
+          description,
+          deadline,
+          priority: mentorTaskForm.elements.priority.value,
+          status: "Chưa bắt đầu",
+          updatedAt: new Date().toISOString(),
+        });
+        mentorTaskForm.reset();
+        renderMentorWorkspace();
+        showToast("Đã giao nhiệm vụ; nhiệm vụ mới hiển thị trong góc nhìn thực tập sinh.");
+      });
+
+      mentorTaskList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-task-save]");
+        if (!button) return;
+        const task = demoTasks.find(
+          (item) =>
+            item.id === button.dataset.taskSave &&
+            item.mentorId === mentorViewSelect.value &&
+            item.internId === mentorInternSelect.value,
+        );
+        if (!task) {
+          showToast("Không tìm thấy nhiệm vụ của cặp mentor hiện tại.", "error");
+          return;
+        }
+        const statusSelect = button.closest("[data-task-card]")?.querySelector("[data-task-status]");
+        if (!statusSelect || !["Chưa bắt đầu", "Đang thực hiện", "Chờ phản hồi", "Hoàn thành"].includes(statusSelect.value)) {
+          showToast("Trạng thái tiến độ không hợp lệ.", "error");
+          return;
+        }
+        task.status = statusSelect.value;
+        task.updatedAt = new Date().toISOString();
+        renderMentorWorkspace();
+        showToast(`Đã cập nhật tiến độ: ${task.status}.`);
+      });
+
+      /* BEGIN: Cho phép giả lập thực tập sinh gửi tiến độ mới và phản chiếu ngay ở mentor. */
+      document.getElementById("intern-task-preview").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-intern-task-save]");
+        if (!button) return;
+        const task = demoTasks.find(
+          (item) =>
+            item.id === button.dataset.internTaskSave &&
+            item.mentorId === mentorViewSelect.value &&
+            item.internId === mentorInternSelect.value,
+        );
+        const statusSelect = button.closest(".intern-task-card")?.querySelector("[data-intern-task-status]");
+        if (!task || !statusSelect || !["Chưa bắt đầu", "Đang thực hiện", "Chờ phản hồi", "Hoàn thành"].includes(statusSelect.value)) {
+          showToast("Không tìm thấy nhiệm vụ hoặc tiến độ hợp lệ.", "error");
+          return;
+        }
+        task.status = statusSelect.value;
+        task.updatedAt = new Date().toISOString();
+        renderMentorWorkspace();
+        showToast(`Đã gửi tiến độ mới cho mentor: ${task.status}.`);
+      });
+      /* END: Cùng dữ liệu nhiệm vụ cập nhật tiến độ ở mentor và góc nhìn thực tập sinh. */
+
+      mentorFeedbackForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!mentorFeedbackForm.reportValidity()) return;
+        const message = mentorFeedbackForm.elements.message.value.trim();
+        const internId = mentorInternSelect.value;
+        if (!message) {
+          showToast("Nội dung phản hồi không được để trống.", "error");
+          mentorFeedbackForm.elements.message.focus();
+          return;
+        }
+        if (!internId || !getMentorAssignments(mentorViewSelect.value).some((item) => item.internId === internId)) {
+          showToast("Không có thực tập sinh được phân công để gửi phản hồi.", "error");
+          return;
+        }
+        demoFeedback.unshift({
+          id: createMentorDemoId("FEEDBACK"),
+          mentorId: mentorViewSelect.value,
+          internId,
+          message,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+        });
+        mentorFeedbackForm.reset();
+        renderMentorWorkspace();
+        showToast("Có phản hồi mới từ thực tập sinh. Đã cập nhật thông báo mentor.");
+      });
+
+      document.getElementById("mentor-notifications").addEventListener("click", () => {
+        const currentMentorId = mentorViewSelect.value;
+        const unread = demoFeedback.filter(
+          (item) => item.mentorId === currentMentorId && !item.isRead,
+        );
+        if (!unread.length) {
+          showToast("Không có thông báo phản hồi mới.");
+          return;
+        }
+        unread.forEach((item) => {
+          item.isRead = true;
+        });
+        renderMentorWorkspace();
+        showToast(`Đã đọc ${unread.length} phản hồi mới.`);
+      });
+
+      mentorEvaluationDate.value = simulatedEvaluationDate;
+      mentorEvaluationDate.addEventListener("change", () => {
+        simulatedEvaluationDate = mentorEvaluationDate.value;
+        renderMentorWorkspace();
+      });
+      document.getElementById("mentor-evaluation-use-today").addEventListener("click", () => {
+        simulatedEvaluationDate = attendanceDateKey(new Date());
+        renderMentorWorkspace();
+        showToast("Đã đặt ngày kiểm thử đánh giá về ngày hiện tại.");
+      });
+      mentorEvaluationForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const intern = demoInterns.find((item) => item.id === mentorInternSelect.value);
+        if (!intern || !getMentorAssignments(mentorViewSelect.value).some((item) => item.internId === intern.id)) {
+          showToast("Chọn thực tập sinh được phân công trước khi đánh giá.", "error");
+          return;
+        }
+        if (simulatedEvaluationDate > intern.internshipEndDate) {
+          renderMentorWorkspace();
+          showToast("Kỳ thực tập đã kết thúc; không thể tạo hoặc sửa đánh giá.", "error");
+          return;
+        }
+        if (!mentorEvaluationForm.reportValidity()) return;
+        const rating = mentorEvaluationForm.elements.rating.value;
+        const comment = mentorEvaluationForm.elements.comment.value.trim();
+        if (!["1", "2", "3", "4", "5"].includes(rating) || !comment) {
+          showToast("Chọn mức đánh giá và nhập nhận xét hợp lệ.", "error");
+          return;
+        }
+        demoEvaluations.set(intern.id, {
+          rating,
+          comment,
+          updatedAt: new Date().toISOString(),
+        });
+        renderMentorWorkspace();
+        showToast("Đã lưu đánh giá. Có thể sửa lại trước khi kỳ thực tập kết thúc.");
+      });
+      /* END: Chặn deadline quá hạn, tiến độ không hợp lệ và mọi lần sửa đánh giá sau ngày kết thúc. */
       /* END: Xác thực trùng và sức chứa trước khi cập nhật danh sách phân công tạm. */
 
       document
