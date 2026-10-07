@@ -906,6 +906,13 @@
         color: var(--forest);
         font-size: 11px;
       }
+      .document-preview-frame {
+        display: block;
+        width: 100%;
+        min-height: 56vh;
+        border: 0;
+        background: #f8f9f6;
+      }
       .toast {
         position: fixed;
         right: 22px;
@@ -1547,6 +1554,26 @@
                   ></select>
                 </div>
                 <div class="form-field">
+                  <label for="contract-starts-at">Ngày bắt đầu</label>
+                  <input
+                    class="form-control"
+                    id="contract-starts-at"
+                    name="startsAt"
+                    type="date"
+                    required
+                  />
+                </div>
+                <div class="form-field">
+                  <label for="contract-expires-at">Ngày hết hạn</label>
+                  <input
+                    class="form-control"
+                    id="contract-expires-at"
+                    name="expiresAt"
+                    type="date"
+                    required
+                  />
+                </div>
+                <div class="form-field">
                   <label for="contract-file">Tệp hợp đồng (PDF, DOCX)</label
                   ><input
                     class="form-control"
@@ -1844,19 +1871,23 @@
             <div>
               <strong id="document-dialog-file"></strong
               ><span
-                >Tệp được lưu trong SQL Server. Dùng liên kết bên dưới để mở
-                hoặc tải xuống.</span
+                id="document-preview-message"
+                >Đang tải bản xem trước...</span
               >
             </div>
           </div>
+          <iframe
+            class="document-preview-frame"
+            id="document-preview-frame"
+            title="Bản xem trước hợp đồng"
+            hidden
+          ></iframe>
         </div>
-        <a
+        <button
           class="secondary-button document-download"
           id="document-download"
-          target="_blank"
-          rel="noopener"
-          >Mở / tải tệp</a
-        >
+          type="button"
+        >Tải tệp xuống</button>
         <p class="dialog-note" id="document-dialog-note"></p>
         <div class="dialog-actions">
           <button
@@ -1937,6 +1968,7 @@
       let applicationPage = 1;
       let contractPage = 1;
       let reviewHistoryPage = 1;
+      let activeDocumentPreviewUrl = null;
       const PROFILE_PAGE_SIZE = 5;
       const APPLICATION_PAGE_SIZE = 5;
       const CONTRACT_PAGE_SIZE = 5;
@@ -1948,13 +1980,64 @@
         const response = await fetch(`${API_BASE}${path}`, options);
         if (!response.ok) {
           const problem = await response.json().catch(() => null);
-          throw new Error(
+          const error = new Error(
             problem?.message ??
               problem?.detail ??
               `Yêu cầu thất bại (${response.status}).`,
           );
+          error.status = response.status;
+          throw error;
         }
         return response.status === 204 ? null : response.json();
+      }
+
+      function getApiErrorMessage(error, fallback) {
+        if (error.status === 401)
+          return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        if (error.status === 403)
+          return "Bạn không có quyền thực hiện thao tác với hợp đồng này.";
+        if (error.status === 413)
+          return "Tệp hợp đồng vượt quá dung lượng cho phép.";
+        if (error.status >= 500)
+          return "Máy chủ đang gặp sự cố. Vui lòng thử lại sau.";
+        return /[À-ỹ]/u.test(error.message ?? "") ? error.message : fallback;
+      }
+
+      function contractValidationMessage(input) {
+        const messages = {
+          profileId: "Vui lòng chọn thực tập sinh.",
+          startsAt: "Vui lòng chọn ngày bắt đầu hợp đồng.",
+          expiresAt: "Vui lòng chọn ngày hết hạn hợp đồng.",
+          contractFile: "Vui lòng chọn tệp hợp đồng PDF hoặc DOCX.",
+        };
+        return (
+          messages[input.name] ??
+          "Vui lòng kiểm tra lại thông tin hợp đồng."
+        );
+      }
+
+      async function fetchDocumentBlob(documentId, action) {
+        let response;
+        try {
+          response = await fetch(
+            `${API_BASE}/documents/${encodeURIComponent(documentId)}/${action}`,
+            { credentials: "same-origin" },
+          );
+        } catch {
+          throw new Error("Không thể kết nối để tải tài liệu. Vui lòng thử lại.");
+        }
+        if (!response.ok) {
+          if (response.status === 401)
+            throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          if (response.status === 403)
+            throw new Error("Bạn không có quyền truy cập tài liệu này.");
+          if (response.status === 404)
+            throw new Error("Không tìm thấy tệp hợp đồng.");
+          throw new Error(
+            `Không thể tải tài liệu (mã lỗi ${response.status}).`,
+          );
+        }
+        return response.blob();
       }
 
       async function loadState() {
@@ -1988,7 +2071,10 @@
           return true;
         } catch (error) {
           showToast(
-            error.message || "Không kết nối được API/SQL Server.",
+            getApiErrorMessage(
+              error,
+              "Không kết nối được hệ thống. Vui lòng thử lại sau.",
+            ),
             "error",
           );
           return false;
@@ -2569,12 +2655,16 @@
         document.getElementById("profile-dialog").showModal();
       }
 
-      function openDocumentDialog(documentId) {
+      async function openDocumentDialog(documentId) {
         const documentItem = state.documents.find(
           (item) => String(item.id) === String(documentId),
         );
         if (!documentItem) return;
         activeDocumentId = documentId;
+        if (activeDocumentPreviewUrl) {
+          URL.revokeObjectURL(activeDocumentPreviewUrl);
+          activeDocumentPreviewUrl = null;
+        }
         const profile = getProfile(documentItem.profileId);
         document.getElementById("document-dialog-type").textContent =
           documentItem.type;
@@ -2589,15 +2679,17 @@
           documentItem.status;
         document.getElementById("document-dialog-note").textContent =
           `Phiên bản ${documentItem.version} · Người tải: ${documentItem.uploadedBy} · ${documentItem.startsAt ? "Bắt đầu: " + formatDateTime(documentItem.startsAt) : ""} · ${documentItem.expiresAt ? "Hết hạn: " + formatDateTime(documentItem.expiresAt) : ""} · ${documentItem.note || ""}`;
-        const preview = document.getElementById("sprint-preview");
-        preview.hidden = documentItem.contentType !== "application/pdf";
-        preview.src = preview.hidden
-          ? "about:blank"
-          : `${API_BASE}/documents/${documentItem.id}/preview`;
-        document.getElementById("document-download").href =
-          `${API_BASE}/documents/${documentItem.id}/file`;
-        document.getElementById("document-download").download =
-          documentItem.fileName;
+        const preview = document.getElementById("document-preview-frame");
+        const previewMessage = document.getElementById(
+          "document-preview-message",
+        );
+        preview.src = "about:blank";
+        preview.hidden = true;
+        previewMessage.hidden = false;
+        previewMessage.textContent =
+          documentItem.contentType === "application/pdf"
+            ? "Đang tải bản xem trước..."
+            : "Định dạng này chưa hỗ trợ xem trước. Bạn có thể tải tệp xuống.";
         const isPending =
           documentItem.status === "Chờ duyệt" &&
           documentItem.isCurrent &&
@@ -2605,7 +2697,58 @@
         document.getElementById("document-approve").hidden = !isPending;
         document.getElementById("document-reject").hidden = !isPending;
         document.getElementById("document-dialog").showModal();
+        if (documentItem.contentType !== "application/pdf") return;
+        try {
+          const file = await fetchDocumentBlob(documentItem.id, "preview");
+          if (String(activeDocumentId) !== String(documentId)) return;
+          activeDocumentPreviewUrl = URL.createObjectURL(file);
+          preview.src = activeDocumentPreviewUrl;
+          preview.hidden = false;
+          previewMessage.hidden = true;
+        } catch (error) {
+          if (String(activeDocumentId) !== String(documentId)) return;
+          previewMessage.textContent =
+            "Không tải được bản xem trước. Bạn có thể thử tải tệp xuống.";
+          showToast(error.message, "error");
+        }
       }
+
+      document
+        .getElementById("document-download")
+        .addEventListener("click", async () => {
+          const documentItem = state.documents.find(
+            (item) => String(item.id) === String(activeDocumentId),
+          );
+          if (!documentItem) {
+            showToast("Không tìm thấy thông tin hợp đồng.", "error");
+            return;
+          }
+          try {
+            const file = await fetchDocumentBlob(documentItem.id, "file");
+            const url = URL.createObjectURL(file);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = documentItem.fileName;
+            document.body.append(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast(`Đã tải xuống ${documentItem.fileName}.`);
+          } catch (error) {
+            showToast(error.message, "error");
+          }
+        });
+
+      document
+        .getElementById("document-dialog")
+        .addEventListener("close", () => {
+          document.getElementById("document-preview-frame").src = "about:blank";
+          if (activeDocumentPreviewUrl) {
+            URL.revokeObjectURL(activeDocumentPreviewUrl);
+            activeDocumentPreviewUrl = null;
+          }
+          activeDocumentId = null;
+        });
 
       async function decideDocument(documentId, decision) {
         const status = decision === "approve" ? "Đã duyệt" : "Từ chối";
@@ -2974,21 +3117,8 @@
       document
         .getElementById("applications-list")
         .addEventListener("click", async (event) => {
-          const button = event.target.closest(
-            "[data-application-decision], [data-view-document], [data-document-decision]",
-          );
+          const button = event.target.closest("[data-application-decision]");
           if (!button) return;
-          if (button.dataset.viewDocument) {
-            openDocumentDialog(button.dataset.viewDocument);
-            return;
-          }
-          if (button.dataset.documentDecision) {
-            decideDocument(
-              button.dataset.documentId,
-              button.dataset.documentDecision,
-            );
-            return;
-          }
           const application = state.applications.find(
             (item) => String(item.id) === button.dataset.applicationId,
           );
@@ -3017,6 +3147,21 @@
           }
         });
 
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest(
+          "[data-view-document], [data-document-decision]",
+        );
+        if (!button) return;
+        if (button.dataset.viewDocument) {
+          openDocumentDialog(button.dataset.viewDocument);
+          return;
+        }
+        void decideDocument(
+          button.dataset.documentId,
+          button.dataset.documentDecision,
+        );
+      });
+
       document
         .getElementById("document-approve")
         .addEventListener("click", () =>
@@ -3028,9 +3173,16 @@
           decideDocument(activeDocumentId, "reject"),
         );
 
-      document
-        .getElementById("contract-form")
-        .addEventListener("submit", async (event) => {
+      const contractForm = document.getElementById("contract-form");
+      contractForm.addEventListener(
+        "invalid",
+        (event) => {
+          event.preventDefault();
+          showToast(contractValidationMessage(event.target), "error");
+        },
+        true,
+      );
+      contractForm.addEventListener("submit", async (event) => {
           event.preventDefault();
           const form = event.currentTarget;
           if (!form.reportValidity()) return;
@@ -3072,11 +3224,17 @@
                 body: file,
               },
             );
-            await loadState();
+            if (!(await loadState())) return;
             form.reset();
             showToast(`Đã tải ${file.name} lên SQL Server.`);
           } catch (error) {
-            showToast(error.message || "Không tải được hợp đồng.", "error");
+            showToast(
+              getApiErrorMessage(
+                error,
+                "Không tải được hợp đồng. Vui lòng thử lại.",
+              ),
+              "error",
+            );
           }
         });
 
