@@ -1874,6 +1874,54 @@
       </div>
     </dialog>
 
+    <dialog
+      class="dialog"
+      id="rejection-reason-dialog"
+      aria-labelledby="rejection-reason-title"
+    >
+      <form id="rejection-reason-form">
+        <div class="dialog-head">
+          <div>
+            <p class="dialog-eyebrow">Từ chối hồ sơ</p>
+            <h2 id="rejection-reason-title">Nhập lý do từ chối</h2>
+            <p>Lý do sẽ được lưu trong lịch sử xử lý.</p>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-close-dialog="rejection-reason-dialog"
+            aria-label="Đóng"
+          >
+            ×
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="form-field">
+            <label for="rejection-reason">Lý do từ chối</label>
+            <textarea
+              class="form-control"
+              id="rejection-reason"
+              name="reason"
+              rows="4"
+              maxlength="500"
+              placeholder="Nhập lý do để ứng viên được biết"
+              required
+            ></textarea>
+          </div>
+          <div class="dialog-actions">
+            <button
+              class="secondary-button"
+              type="button"
+              data-close-dialog="rejection-reason-dialog"
+            >
+              Hủy
+            </button>
+            <button class="danger-button" type="submit">Xác nhận từ chối</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="session-bridge.js?v=20261003"></script>
@@ -1937,11 +1985,13 @@
             documents: dashboard.documents,
           };
           renderAll();
+          return true;
         } catch (error) {
           showToast(
             error.message || "Không kết nối được API/SQL Server.",
             "error",
           );
+          return false;
         }
       }
 
@@ -2006,6 +2056,45 @@
         toastTimer = setTimeout(() => {
           toast.hidden = true;
         }, 5000);
+      }
+
+      function requestRejectionReason() {
+        const dialog = document.getElementById("rejection-reason-dialog");
+        const form = document.getElementById("rejection-reason-form");
+        const input = document.getElementById("rejection-reason");
+        form.reset();
+        input.setCustomValidity("");
+
+        return new Promise((resolve) => {
+          const cleanup = () => {
+            form.removeEventListener("submit", handleSubmit);
+            input.removeEventListener("input", clearValidationMessage);
+            dialog.removeEventListener("close", handleClose);
+          };
+          const clearValidationMessage = () => input.setCustomValidity("");
+          const handleClose = () => {
+            cleanup();
+            resolve(null);
+          };
+          const handleSubmit = (event) => {
+            event.preventDefault();
+            const reason = input.value.trim();
+            if (!reason) {
+              input.setCustomValidity("Vui lòng nhập lý do từ chối.");
+              input.reportValidity();
+              return;
+            }
+            cleanup();
+            resolve(reason);
+            dialog.close();
+          };
+
+          form.addEventListener("submit", handleSubmit);
+          input.addEventListener("input", clearValidationMessage);
+          dialog.addEventListener("close", handleClose);
+          dialog.showModal();
+          input.focus();
+        });
       }
 
       function fillFilterOptions(select, values, label) {
@@ -2170,7 +2259,10 @@
             const owner = profile
               ? `${profile.name} · ${profile.studentId}`
               : "Hồ sơ đã xóa";
-            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(item.targetType)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(item.targetLabel)} · ${formatDateTime(item.reviewedAt)}</p></div><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>${item.note ? `<p class="document-file" style="padding: 0 16px 12px">${escapeHtml(item.note)}</p>` : ""}</article>`;
+            const reviewer = item.reviewedBy
+              ? ` · Người xử lý: ${escapeHtml(item.reviewedBy)}`
+              : "";
+            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(item.targetType)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(item.targetLabel)} · ${formatDateTime(item.reviewedAt)}${reviewer}</p></div><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>${item.note ? `<p class="document-file" style="padding: 0 16px 12px">${escapeHtml(item.note)}</p>` : ""}</article>`;
           })
           .join("");
         document.getElementById("review-history-result-count").textContent =
@@ -2517,7 +2609,7 @@
 
       async function decideDocument(documentId, decision) {
         const status = decision === "approve" ? "Đã duyệt" : "Từ chối";
-        const note = status === "Từ chối" ? await window.sprintReason() : null;
+        const note = status === "Từ chối" ? await requestRejectionReason() : null;
         if (status === "Từ chối" && !note) return;
         try {
           await apiRequest(`/hr/documents/${documentId}`, {
@@ -2525,7 +2617,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status, note }),
           });
-          await loadState();
+          if (!(await loadState())) return;
           showToast(
             decision === "approve"
               ? "Đã duyệt tài liệu."
@@ -2906,7 +2998,7 @@
               ? "Đã duyệt"
               : "Từ chối";
           const note =
-            status === "Từ chối" ? await window.sprintReason() : null;
+            status === "Từ chối" ? await requestRejectionReason() : null;
           if (status === "Từ chối" && !note) return;
           try {
             await apiRequest(`/hr/applications/${application.id}`, {
@@ -2914,7 +3006,7 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ status, note }),
             });
-            await loadState();
+            if (!(await loadState())) return;
             showToast(
               status === "Đã duyệt"
                 ? `Đã duyệt đơn của ${application.name}.`
