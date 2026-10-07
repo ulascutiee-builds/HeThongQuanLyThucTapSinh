@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lịch thực tập cá nhân | Career Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #26362e;
+        background: #f5f7f3;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      .app-shell { min-height: 100vh; }
+      .topbar {
+        display: flex;
+        min-height: 72px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px clamp(18px, 5vw, 72px);
+        border-bottom: 1px solid #e4e9e2;
+        background: #fff;
+      }
+      .brand { display: flex; align-items: center; gap: 12px; }
+      .brand-mark {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        place-items: center;
+        border-radius: 50%;
+        background: #eaf2ec;
+        color: #236548;
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .brand strong { display: block; font-size: 13px; letter-spacing: .08em; }
+      .brand small { display: block; margin-top: 3px; color: #7a867d; font-size: 11px; }
+      .role-link { color: #286549; font-size: 12px; font-weight: 700; text-decoration: none; }
+      main { width: min(1080px, calc(100% - 36px)); margin: 38px auto 60px; }
+      .eyebrow { margin: 0 0 8px; color: #377453; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+      h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); letter-spacing: -.035em; }
+      .intro { max-width: 660px; margin: 10px 0 0; color: #738077; font-size: 14px; line-height: 1.6; }
+      .demo-notice {
+        margin: 22px 0;
+        padding: 12px 14px;
+        border: 1px solid #eadcb8;
+        border-radius: 6px;
+        background: #fff9eb;
+        color: #765b25;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .toolbar {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 24px 0 16px;
+      }
+      .filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+      .field { display: grid; gap: 6px; }
+      .field label { color: #6c786f; font-size: 11px; font-weight: 700; }
+      .control {
+        min-height: 40px;
+        padding: 0 11px;
+        border: 1px solid #dce3dc;
+        border-radius: 5px;
+        background: #fff;
+        color: #334239;
+        font-size: 12px;
+      }
+      .search { width: min(300px, 55vw); }
+      .view-switch { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid #e1e7e0; border-radius: 6px; background: #fff; }
+      .view-switch button {
+        min-height: 32px;
+        padding: 0 11px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: #69766e;
+        font-size: 11px;
+      }
+      .view-switch button[aria-pressed="true"] { background: #eaf2ec; color: #245e43; font-weight: 700; }
+      .surface { overflow: hidden; border: 1px solid #e2e8e1; border-radius: 7px; background: #fff; box-shadow: 0 8px 24px rgb(39 62 46 / 4%); }
+      .table-scroll { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; text-align: left; }
+      th, td { padding: 14px 16px; border-bottom: 1px solid #edf0ec; }
+      th { background: #f8faf7; color: #78847c; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+      td { color: #5c6960; font-size: 12px; }
+      tbody tr:last-child td { border-bottom: 0; }
+      td strong { color: #2b3b31; }
+      .status {
+        display: inline-flex;
+        padding: 5px 9px;
+        border-radius: 99px;
+        background: #eef3ea;
+        color: #51694e;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .status[data-status="Đã xác nhận"], .status[data-status="Đang diễn ra"] { background: #e9f4ed; color: #347153; }
+      .status[data-status="Đã hoàn thành"] { background: #edf0ed; color: #58665c; }
+      .status[data-status="Đã hủy"] { background: #faecea; color: #a1463e; }
+      .count { margin: 0; padding: 13px 16px; border-top: 1px solid #edf0ec; color: #7b867e; font-size: 11px; }
+      .calendar-wrap { overflow-x: auto; }
+      .calendar { display: grid; min-width: 740px; grid-template-columns: repeat(7, minmax(100px, 1fr)); }
+      .day { min-height: 165px; padding: 12px 9px; border-right: 1px solid #edf0ec; }
+      .day:last-child { border-right: 0; }
+      .day h2 { margin: -12px -9px 10px; padding: 12px 6px; border-bottom: 1px solid #e9ede8; background: #f8faf7; color: #718078; font-size: 11px; text-align: center; }
+      .shift-card { display: grid; gap: 7px; margin-bottom: 8px; padding: 10px; border: 1px solid #e4eae3; border-radius: 5px; background: #fcfdfb; }
+      .shift-card strong { color: #334239; font-size: 11px; }
+      .shift-card small, .empty { color: #849087; font-size: 10px; }
+      .empty { display: block; padding: 4px 0; }
+      [hidden] { display: none !important; }
+      @media (max-width: 700px) {
+        main { margin-top: 27px; }
+        .topbar { min-height: 64px; }
+        .toolbar { align-items: stretch; flex-direction: column; }
+        .filters { align-items: stretch; flex-direction: column; }
+        .field, .search { width: 100%; }
+        .view-switch { align-self: flex-start; }
+        th, td { padding: 12px 11px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">CG</span>
+          <span><strong>CODEGYM</strong><small>Career Portal · Thực tập sinh</small></span>
+        </div>
+        <a class="role-link" href="hr.html">Mở trang HR demo ↗</a>
+      </header>
+
+      <main>
+        <p class="eyebrow">Kế hoạch thực tập</p>
+        <h1>Lịch cá nhân</h1>
+        <p class="intro">Theo dõi các ca làm việc và cập nhật mới nhất từ HR để chủ động sắp xếp kế hoạch thực tập.</p>
+
+        <p class="demo-notice" role="status" aria-live="polite" id="sync-notice">
+          Bản demo: chọn hồ sơ thực tập sinh bên dưới. Trạng thái đọc từ cùng trình duyệt với trang HR; chưa có đăng nhập hoặc đồng bộ máy chủ.
+        </p>
+
+        <div class="toolbar">
+          <div class="filters">
+            <div class="field">
+              <label for="intern-select">Thực tập sinh demo</label>
+              <select class="control" id="intern-select">
+                <option value="Nguyễn Văn An">Nguyễn Văn An</option>
+                <option value="Trần Thị Bình">Trần Thị Bình</option>
+                <option value="Lê Minh Châu">Lê Minh Châu</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="schedule-search">Tìm ca hoặc ghi chú</label>
+              <input class="control search" id="schedule-search" type="search" placeholder="Ví dụ: họp, onsite">
+            </div>
+          </div>
+          <div class="view-switch" role="group" aria-label="Kiểu hiển thị lịch">
+            <button type="button" data-mode="list" aria-pressed="true">Danh sách</button>
+            <button type="button" data-mode="week" aria-pressed="false">Lịch tuần</button>
+          </div>
+        </div>
+
+        <section class="surface" id="list-view" aria-label="Danh sách lịch thực tập">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Ca / tiêu đề</th><th>Thời gian</th><th>Ghi chú</th><th>Trạng thái từ HR</th></tr>
+              </thead>
+              <tbody id="schedule-list"></tbody>
+            </table>
+          </div>
+          <p class="count" id="schedule-count" aria-live="polite"></p>
+        </section>
+
+        <section class="surface calendar-wrap" id="week-view" aria-label="Lịch tuần" hidden>
+          <div class="calendar" id="schedule-calendar"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (() => {
+        const storageKey = "career-portal:schedule-status:v1";
+        const allowedStatuses = [
+          "Đã lên lịch",
+          "Đã xác nhận",
+          "Đang diễn ra",
+          "Đã hoàn thành",
+          "Đã hủy",
+        ];
+        const shifts = [
+          { title: "Ca sáng", intern: "Nguyễn Văn An", start: "2026-10-06T08:00:00", end: "2026-10-06T12:00:00", note: "Làm việc tại văn phòng" },
+          { title: "Ca chiều", intern: "Nguyễn Văn An", start: "2026-10-07T13:00:00", end: "2026-10-07T17:00:00", note: "Họp nhóm 14:00" },
+          { title: "Ca sáng", intern: "Trần Thị Bình", start: "2026-10-06T08:00:00", end: "2026-10-06T12:00:00", note: "" },
+          { title: "Ca sáng", intern: "Lê Minh Châu", start: "2026-10-08T08:00:00", end: "2026-10-08T12:00:00", note: "Onsite" },
+        ];
+        const internSelect = document.getElementById("intern-select");
+        const search = document.getElementById("schedule-search");
+        const list = document.getElementById("schedule-list");
+        const calendar = document.getElementById("schedule-calendar");
+        const notice = document.getElementById("sync-notice");
+        const listView = document.getElementById("list-view");
+        const weekView = document.getElementById("week-view");
+        let statuses = {};
+        let weekOffset = 0;
+
+        const escapeHtml = (value) =>
+          String(value ?? "").replace(/[&<>"']/g, (character) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[character],
+          );
+        const formatDateTime = (value) =>
+          new Date(value).toLocaleString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        const formatDay = (value) =>
+          new Date(value).toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+          });
+        const startOfWeek = (date) => {
+          const monday = new Date(date);
+          monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+          monday.setHours(0, 0, 0, 0);
+          return monday;
+        };
+        const scheduleKey = (shift) =>
+          [shift.title, shift.intern, formatDateTime(shift.start)].join("|");
+
+        function readStatuses() {
+          try {
+            const raw = window.localStorage.getItem(storageKey);
+            if (!raw) return {};
+            const saved = JSON.parse(raw);
+            if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+              throw new Error("Dữ liệu trạng thái không hợp lệ.");
+            }
+            if (Object.values(saved).some((status) => !allowedStatuses.includes(status))) {
+              throw new Error("Dữ liệu có trạng thái không được hỗ trợ.");
+            }
+            return saved;
+          } catch (error) {
+            notice.textContent = "Không đọc được trạng thái lịch đã lưu trên trình duyệt.";
+            console.error("Không thể đọc trạng thái lịch:", error);
+            return {};
+          }
+        }
+
+        function selectedShifts() {
+          const query = search.value.trim().toLocaleLowerCase("vi");
+          return shifts.filter((shift) => {
+            if (shift.intern !== internSelect.value) return false;
+            return !query || `${shift.title} ${shift.note}`.toLocaleLowerCase("vi").includes(query);
+          });
+        }
+
+        function renderList(items) {
+          list.innerHTML = items.length
+            ? items.map((shift) => {
+                const status = statuses[scheduleKey(shift)] || "Đã lên lịch";
+                return `
+                  <tr>
+                    <td><strong>${escapeHtml(shift.title)}</strong></td>
+                    <td>${escapeHtml(formatDateTime(shift.start))} – ${escapeHtml(formatDateTime(shift.end))}</td>
+                    <td>${escapeHtml(shift.note || "—")}</td>
+                    <td><span class="status" data-status="${escapeHtml(status)}">${escapeHtml(status)}</span></td>
+                  </tr>`;
+              }).join("")
+            : '<tr><td colspan="4"><span class="empty">Chưa có ca phù hợp.</span></td></tr>';
+          document.getElementById("schedule-count").textContent =
+            `${items.length} ca trong lịch cá nhân`;
+        }
+
+        function renderWeek(items) {
+          const base = new Date();
+          base.setDate(base.getDate() + weekOffset * 7);
+          const monday = startOfWeek(base);
+          const labels = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+          calendar.innerHTML = Array.from({ length: 7 }, (_, index) => {
+            const day = new Date(monday);
+            day.setDate(monday.getDate() + index);
+            const dayShifts = items.filter((shift) => {
+              const start = new Date(shift.start);
+              return start.getFullYear() === day.getFullYear() &&
+                start.getMonth() === day.getMonth() &&
+                start.getDate() === day.getDate();
+            });
+            const cards = dayShifts.length
+              ? dayShifts.map((shift) => {
+                  const status = statuses[scheduleKey(shift)] || "Đã lên lịch";
+                  return `
+                    <article class="shift-card">
+                      <strong>${escapeHtml(shift.title)}</strong>
+                      <small>${escapeHtml(formatDateTime(shift.start))} – ${escapeHtml(formatDateTime(shift.end))}</small>
+                      <span class="status" data-status="${escapeHtml(status)}">${escapeHtml(status)}</span>
+                    </article>`;
+                }).join("")
+              : '<span class="empty">Không có ca</span>';
+            return `<section class="day"><h2>${labels[index]} ${formatDay(day)}</h2>${cards}</section>`;
+          }).join("");
+        }
+
+        function render() {
+          const items = selectedShifts();
+          renderList(items);
+          renderWeek(items);
+        }
+
+        document.querySelectorAll("[data-mode]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const showList = button.dataset.mode === "list";
+            listView.hidden = !showList;
+            weekView.hidden = showList;
+            document.querySelectorAll("[data-mode]").forEach((item) => {
+              item.setAttribute("aria-pressed", String(item === button));
+            });
+          });
+        });
+        internSelect.addEventListener("change", render);
+        search.addEventListener("input", render);
+        window.addEventListener("storage", (event) => {
+          if (event.key !== storageKey) return;
+          statuses = readStatuses();
+          notice.textContent = "HR vừa cập nhật trạng thái lịch. Lịch cá nhân đã được làm mới.";
+          render();
+        });
+
+        statuses = readStatuses();
+        render();
+      })();
+    </script>
+  </body>
+</html>
