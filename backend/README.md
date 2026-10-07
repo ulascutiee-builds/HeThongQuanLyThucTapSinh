@@ -33,3 +33,12 @@ Migration `AddInternSchedules` tạo bảng lưu lịch thực tập; không xo�
 - `PATCH /api/hr/schedules/{id}/status`: HR chỉ cập nhật trạng thái.
 
 Các request mẫu để kiểm tra đăng nhập, phân quyền, tạo và cập nhật lịch nằm trong `CareerPortal.Api/InternSchedules.http`. Giao diện thực tập sinh làm mới lịch định kỳ để nhận trạng thái HR vừa cập nhật.
+
+## Báo cáo chấm công
+
+HR nhập hoặc cập nhật chấm công theo từng ca trong lịch. Trạng thái gồm `Có mặt`, `Nghỉ phép` và `Vắng mặt`; trạng thái có mặt cần giờ vào/ra thực tế. Hệ thống đối chiếu giờ thực tế với giờ bắt đầu/kết thúc ca, không áp dụng thời gian miễn trễ.
+
+- `GET /api/attendance/report?from={ISO-8601}&to={ISO-8601}&profileId={id}`: báo cáo theo khoảng thời gian (đầu khoảng bao gồm, cuối khoảng không bao gồm); `profileId` là bộ lọc tùy chọn. Chỉ HR được xem.
+- `PUT /api/hr/attendance/{scheduleId}`: HR nhập hoặc cập nhật công cho ca, gồm ngày công, trạng thái, giờ vào/ra và ghi chú.
+
+Báo cáo trả về tổng ngày công, ngày đi muộn, ngày về sớm, ngày nghỉ phép, ngày vắng mặt, ca chưa chấm và danh sách chi tiết từng ca.

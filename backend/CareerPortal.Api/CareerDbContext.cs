@@ -6,6 +6,7 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):D
     public DbSet<InternApplication> InternApplications => Set<InternApplication>();
     public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
     public DbSet<InternSchedule> InternSchedules => Set<InternSchedule>();
+    public DbSet<InternAttendance> InternAttendances => Set<InternAttendance>();
     public DbSet<MailJob> MailJobs => Set<MailJob>();
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -33,6 +34,16 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):D
             e.HasIndex(x=>new{x.ProfileId,x.StartsAt});
             e.HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);
             e.ToTable(t=>t.HasCheckConstraint("CK_InternSchedule_Dates","[EndsAt] > [StartsAt]"));
+        });
+        b.Entity<InternAttendance>(e=>{
+            e.Property(x=>x.Status).HasMaxLength(30);
+            e.Property(x=>x.Note).HasMaxLength(500);
+            e.Property(x=>x.UpdatedBy).HasMaxLength(160);
+            e.HasIndex(x=>x.ScheduleId).IsUnique();
+            e.HasIndex(x=>new{x.ProfileId,x.WorkDate});
+            e.HasOne(x=>x.Schedule).WithOne(x=>x.Attendance).HasForeignKey<InternAttendance>(x=>x.ScheduleId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.NoAction);
+            e.ToTable(t=>t.HasCheckConstraint("CK_InternAttendance_ClockTimes","[ClockOutAt] IS NULL OR [ClockInAt] IS NULL OR [ClockOutAt] > [ClockInAt]"));
         });
         b.Entity<MailJob>().HasIndex(x=>x.EventKey).IsUnique();b.Entity<MailJob>().Property(x=>x.EventKey).HasMaxLength(150);
     }

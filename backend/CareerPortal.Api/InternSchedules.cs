@@ -124,6 +124,7 @@ public static class InternSchedules
                 return Results.BadRequest(new { message = "Thời gian kết thúc phải sau thời gian bắt đầu." });
 
             var schedule = await db.InternSchedules
+                .Include(item => item.Attendance)
                 .SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
             if (schedule is null) return Results.NotFound();
 
@@ -134,6 +135,8 @@ public static class InternSchedules
 
             schedule.ProfileId = input.ProfileId;
             schedule.Profile = profile;
+            if (schedule.Attendance is not null)
+                schedule.Attendance.ProfileId = input.ProfileId;
             schedule.Title = input.Title.Trim();
             schedule.StartsAt = input.StartsAt;
             schedule.EndsAt = input.EndsAt;

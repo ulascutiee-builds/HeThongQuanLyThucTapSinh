@@ -122,6 +122,44 @@ public sealed record InternScheduleResponse(
     string Status,
     DateTimeOffset UpdatedAt);
 
+public sealed record InternAttendanceReportResponse(
+    int ScheduleId,
+    int ProfileId,
+    string InternName,
+    string StudentId,
+    string ScheduleTitle,
+    DateTimeOffset StartsAt,
+    DateTimeOffset EndsAt,
+    int? AttendanceId,
+    DateOnly? WorkDate,
+    string AttendanceStatus,
+    DateTimeOffset? ClockInAt,
+    DateTimeOffset? ClockOutAt,
+    string? Note,
+    bool IsLate,
+    bool LeftEarly);
+
+public sealed record InternAttendanceSummaryResponse(
+    int TotalWorkdays,
+    int LateDays,
+    int EarlyLeaveDays,
+    int LeaveDays,
+    int AbsentDays,
+    int UnmarkedShifts);
+
+public sealed record InternAttendanceReportResult(
+    InternAttendanceSummaryResponse Summary,
+    IReadOnlyList<InternAttendanceReportResponse> Items);
+
+public sealed record SaveInternAttendanceRequest
+{
+    [Required] public DateOnly? WorkDate { get; init; }
+    [Required, MaxLength(30)] public required string Status { get; init; }
+    public DateTimeOffset? ClockInAt { get; init; }
+    public DateTimeOffset? ClockOutAt { get; init; }
+    [MaxLength(500)] public string? Note { get; init; }
+}
+
 public sealed record DecideStatusRequest
 {
     [Required] public required string Status { get; init; }

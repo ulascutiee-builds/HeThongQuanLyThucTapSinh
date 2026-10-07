@@ -1,0 +1,113 @@
+.attendance-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.attendance-filters .form-field {
+  display: grid;
+  gap: 7px;
+}
+
+.attendance-filters label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.attendance-summary .metric {
+  min-height: 82px;
+  padding: 16px;
+}
+
+.attendance-summary .metric-value {
+  margin-top: 8px;
+  font-size: 25px;
+}
+
+.attendance-status {
+  display: inline-flex;
+  padding: 4px 7px;
+  border-radius: 2px;
+  background: #eef0ed;
+  color: #68736c;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.attendance-status[data-status="Có mặt"] {
+  background: #edf5ef;
+  color: #347153;
+}
+
+.attendance-status[data-status="Đi muộn"],
+.attendance-status[data-status="Về sớm"] {
+  background: #faf1df;
+  color: #a46a17;
+}
+
+.attendance-status[data-status="Nghỉ phép"] {
+  background: #edf2fb;
+  color: #405d91;
+}
+
+.attendance-status[data-status="Vắng mặt"] {
+  background: #f8e9e6;
+  color: #a34f3c;
+}
+
+.attendance-dialog {
+  width: min(100% - 28px, 560px);
+}
+
+.attendance-dialog form {
+  display: grid;
+  gap: 16px;
+}
+
+.attendance-dialog .form-field {
+  display: grid;
+  gap: 7px;
+}
+
+.attendance-dialog label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.attendance-planned-time {
+  padding: 12px;
+  border-radius: 4px;
+  background: #f5f7f3;
+  color: var(--ink);
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .attendance-filters,
+  .attendance-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .attendance-filters,
+  .attendance-summary {
+    grid-template-columns: 1fr;
+  }
+}

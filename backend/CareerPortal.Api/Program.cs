@@ -18,7 +18,7 @@ app.UseAuthentication();app.UseAuthorization();app.UseMiddleware<SprintSecurity>
 var frontend=Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath,"../../frontend"));
 app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=new Microsoft.Extensions.FileProviders.PhysicalFileProvider(frontend)});
 app.UseStaticFiles(new StaticFileOptions{FileProvider=new Microsoft.Extensions.FileProviders.PhysicalFileProvider(frontend)});
-app.MapSprintAuth();app.MapProfiles();app.MapDocuments();app.MapApplications();app.MapInternSchedules();
+app.MapSprintAuth();app.MapProfiles();app.MapDocuments();app.MapApplications();app.MapInternSchedules();app.MapInternAttendance();
 if(app.Environment.IsDevelopment())app.MapOpenApi();
 app.MapGet("/api/health/database",async(CareerDbContext db)=>await db.Database.CanConnectAsync()?Results.Ok(new{connected=true}):Results.StatusCode(503));
 app.Run();

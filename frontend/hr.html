@@ -12,6 +12,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="sprint2-programs.css?v=20261006" />
+    <link rel="stylesheet" href="attendance-report.css?v=20261007" />
     <link rel="stylesheet" href="sprint2-schedules.css?v=20261007" />
     <style>
       :root {
@@ -1185,6 +1186,10 @@
             <span class="nav-item-text"
               ><span class="nav-glyph" aria-hidden="true">◷</span>Lịch làm việc</span
           </button>
+          <button class="nav-item" type="button" data-view="attendance">
+            <span class="nav-item-text"
+              ><span class="nav-glyph" aria-hidden="true">◴</span>Báo cáo chấm công</span
+          </button>
           <button class="nav-item" type="button" data-view="tasks">
             <span class="nav-item-text"
               ><span class="nav-glyph" aria-hidden="true">☑</span>Công việc</span
@@ -1384,6 +1389,8 @@
             </div>
             <div class="program-grid" id="program-list" aria-live="polite"></div>
           </section>
+
+          <section class="view-section" id="view-attendance" hidden aria-labelledby="attendance-title"></section>
 
           <section class="view-section" id="view-schedule" hidden aria-labelledby="schedule-title">
             <div class="page-heading"><div><p class="heading-kicker">Theo dõi lịch</p><h1 id="schedule-title">Lịch làm việc</h1><p class="heading-description">Theo dõi deadline, buổi họp và các mốc quan trọng của thực tập sinh.</p></div><button class="primary-button" type="button" data-sprint-toast="Đã chọn tạo lịch mới.">+ Thêm lịch</button></div>
@@ -2589,6 +2596,7 @@
         documents: "Tài liệu & hợp đồng",
         programs: "Chương trình",
         schedule: "Lịch làm việc",
+        attendance: "Báo cáo chấm công",
         tasks: "Công việc",
         statistics: "Thống kê & đánh giá",
       };
@@ -3263,5 +3271,6 @@
     <script src="sprint1-ui.js?v=20261003-3"></script>
     <script src="sprint2-programs.js?v=20261006"></script>
     <script src="sprint2-schedules.js?v=20261007"></script>
+    <script src="attendance-report.js?v=20261007"></script>
   </body>
 </html>
