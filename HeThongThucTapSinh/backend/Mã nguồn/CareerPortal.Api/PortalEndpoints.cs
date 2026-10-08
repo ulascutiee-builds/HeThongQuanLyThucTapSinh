@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -339,6 +340,73 @@ public static class PortalEndpoints
             return Results.Ok(criteria.Select(x => { var submitted = byCriterion[x.Id];
                 return new { criterionId = x.Id, x.Name, x.MaxScore, score = submitted.Score,
                     comment = submitted.Comment?.Trim() ?? "" }; }).ToList());
+        });
+        app.MapGet("/api/attendance/summary", async (HttpContext c, CareerDbContext db, string? from, string? to, int? profileId) =>
+        {
+            var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Date);
+            if (string.IsNullOrWhiteSpace(from)) from = new DateOnly(today.Year, today.Month, 1).ToString("yyyy-MM-dd");
+            if (string.IsNullOrWhiteSpace(to)) to = today.ToString("yyyy-MM-dd");
+            if (!DateOnly.TryParseExact(from, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fromDate) ||
+                !DateOnly.TryParseExact(to, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var toDate) ||
+                toDate < fromDate || toDate.DayNumber - fromDate.DayNumber > 366)
+                return Error("Khoảng thời gian không hợp lệ; chọn tối đa 367 ngày theo định dạng YYYY-MM-DD.");
+
+            var vnOffset = TimeSpan.FromHours(7);
+            var rangeStart = new DateTimeOffset(fromDate.ToDateTime(TimeOnly.MinValue), vnOffset);
+            var rangeEnd = new DateTimeOffset(toDate.AddDays(1).ToDateTime(TimeOnly.MinValue), vnOffset);
+            var attendanceQuery = PortalWorkflow.Visible(db, c.User, "attendance").AsNoTracking()
+                .Where(x => x.Start >= rangeStart && x.Start < rangeEnd);
+            var shiftQuery = PortalWorkflow.Visible(db, c.User, "shifts").AsNoTracking()
+                .Where(x => x.Start < rangeEnd && x.End > rangeStart);
+            var leaveQuery = PortalWorkflow.Visible(db, c.User, "leave").AsNoTracking()
+                .Where(x => x.Status == "Đã duyệt" && x.Start < rangeEnd && x.End >= rangeStart);
+            if (profileId is int requestedProfile)
+            {
+                attendanceQuery = attendanceQuery.Where(x => x.ProfileId == requestedProfile);
+                shiftQuery = shiftQuery.Where(x => x.ProfileId == requestedProfile);
+                leaveQuery = leaveQuery.Where(x => x.ProfileId == requestedProfile);
+            }
+
+            var attendance = await attendanceQuery.ToListAsync();
+            var shifts = await shiftQuery.ToListAsync();
+            var leaves = await leaveQuery.ToListAsync();
+            var profileIds = attendance.Concat(leaves).Select(x => x.ProfileId).OfType<int>().Distinct().ToList();
+            if (profileId is int requestedId && !profileIds.Contains(requestedId) &&
+                await PortalWorkflow.Visible(db, c.User, "attendance").AnyAsync(x => x.ProfileId == requestedId))
+                profileIds.Add(requestedId);
+            var names = await db.InternProfiles.AsNoTracking().Where(x => profileIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, x => x.Name);
+
+            var daily = new List<(int ProfileId, DateOnly Day, DateTimeOffset CheckIn, DateTimeOffset? CheckOut)>();
+            foreach (var group in attendance.Where(x => x.ProfileId is not null && x.Start is not null)
+                         .GroupBy(x => x.ProfileId!.Value))
+            foreach (var day in group.GroupBy(x => VietnamDate(x.Start)))
+                daily.Add((group.Key, day.Key!.Value, day.Min(x => x.Start!.Value),
+                    day.Where(x => x.End is not null).Select(x => x.End).Max()));
+
+            var summaries = profileIds.Order().Select(id =>
+            {
+                var personDays = daily.Where(x => x.ProfileId == id).ToList();
+                var personShifts = shifts.Where(x => x.ProfileId == id && x.Start is not null && x.End is not null).ToList();
+                var lateDays = personDays.Count(day => personShifts.Any(shift => VietnamDate(shift.Start) == day.Day &&
+                    VietnamDate(shift.End) == day.Day && day.CheckIn > shift.Start));
+                var earlyDays = personDays.Count(day => day.CheckOut is not null && personShifts.Any(shift =>
+                    VietnamDate(shift.Start) == day.Day && VietnamDate(shift.End) == day.Day && day.CheckOut < shift.End));
+                var leaveDates = new HashSet<DateOnly>();
+                foreach (var leave in leaves.Where(x => x.ProfileId == id && x.Start is not null && x.End is not null))
+                {
+                    var first = VietnamDate(leave.Start)!.Value < fromDate ? fromDate : VietnamDate(leave.Start)!.Value;
+                    var last = VietnamDate(leave.End)!.Value > toDate ? toDate : VietnamDate(leave.End)!.Value;
+                    for (var date = first; date <= last; date = date.AddDays(1)) leaveDates.Add(date);
+                }
+                return new { profileId = id, name = names.GetValueOrDefault(id, ""), workDays = personDays.Count,
+                    lateDays, earlyLeaveDays = earlyDays, leaveDays = leaveDates.Count };
+            }).ToList();
+
+            return Results.Ok(new { from = fromDate.ToString("yyyy-MM-dd"), to = toDate.ToString("yyyy-MM-dd"),
+                workDays = summaries.Sum(x => x.workDays), lateDays = summaries.Sum(x => x.lateDays),
+                earlyLeaveDays = summaries.Sum(x => x.earlyLeaveDays), leaveDays = summaries.Sum(x => x.leaveDays),
+                items = summaries });
         });
         app.MapPost("/api/attendance/{action}", async (string action, HttpContext c, CareerDbContext db) =>
         {

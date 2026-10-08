@@ -120,3 +120,9 @@ Với các actor chính là sinh viên, giảng viên, người hướng dẫn, 
 
 Backend Node.js, TypeScript, Express và PostgreSQL cùng hướng dẫn cài đặt/API nằm trong [`backend/README.md`](backend/README.md).
 
+## Tổng hợp chấm công Sprint 2
+
+`GET /api/attendance/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` trả tổng ngày công, đi muộn, về sớm và nghỉ phép đã duyệt trong khoảng ngày được chọn, kèm số liệu theo từng thực tập sinh. Có thể truyền `profileId` để lọc một hồ sơ; quyền xem vẫn được giới hạn theo tài khoản đăng nhập. Khoảng ngày mặc định là từ đầu tháng hiện tại đến hôm nay và tối đa 367 ngày.
+
+Ngày công được tính theo ngày có check-in. Đi muộn và về sớm chỉ được tính khi ngày đó có ca làm (`shifts`) cùng hồ sơ; ngày nghỉ phép đếm các ngày lịch thuộc đơn đã duyệt.
+
