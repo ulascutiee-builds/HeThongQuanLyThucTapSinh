@@ -276,6 +276,8 @@ public static class PortalEndpoints
         app.MapGet("/api/work/{kind}", async (string kind, HttpContext c, CareerDbContext db) =>
             !PortalWorkflow.Kinds.Contains(kind) ? Results.NotFound() : Results.Ok(await PortalWorkflow.Visible(db, c.User, kind).AsNoTracking().OrderByDescending(x => x.Id).ToListAsync()));
         app.MapPost("/api/work/{kind}", async (string kind, WorkItem input, HttpContext c, CareerDbContext db) => await Save(kind, null, input, c, db));
+        app.MapPost("/api/tasks", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("tasks", null, input, c, db));
+        app.MapPost("/api/reports/weekly", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("reports", null, input, c, db));
         app.MapPut("/api/work/{kind}/{id:int}", async (string kind, int id, WorkItem input, HttpContext c, CareerDbContext db) => await Save(kind, id, input, c, db));
         app.MapDelete("/api/work/{kind}/{id:int}", async (string kind, int id, HttpContext c, CareerDbContext db) =>
         {
@@ -285,6 +287,59 @@ public static class PortalEndpoints
             db.WorkItems.Remove(row); await db.SaveChangesAsync(); return Results.NoContent();
         });
         app.MapPost("/api/work/{kind}/{id:int}/action", Action);
+        app.MapGet("/api/evaluations/criteria", async (CareerDbContext db) =>
+            Results.Ok(await db.EvaluationCriteria.AsNoTracking().Where(x => x.Active).OrderBy(x => x.SortOrder).ThenBy(x => x.Id)
+                .Select(x => new { x.Id, x.Name, x.Description, x.MaxScore, x.SortOrder }).ToListAsync()));
+        app.MapGet("/api/evaluations/{id:int}/scores", async (int id, HttpContext c, CareerDbContext db) =>
+        {
+            var evaluation = await PortalWorkflow.Visible(db, c.User, "evaluations").AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            if (evaluation is null) return Results.NotFound();
+            var criteria = await db.EvaluationCriteria.AsNoTracking().Where(x => x.Active).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync();
+            var saved = await db.EvaluationScores.AsNoTracking().Where(x => x.EvaluationId == id)
+                .ToDictionaryAsync(x => x.CriterionId);
+            return Results.Ok(criteria.Select(x =>
+            {
+                saved.TryGetValue(x.Id, out var value);
+                return new { criterionId = x.Id, x.Name, x.Description, x.MaxScore,
+                    score = value is null ? (decimal?)null : value.Score, comment = value?.Comment ?? "" };
+            }).ToList());
+        });
+        app.MapPut("/api/evaluations/{id:int}/scores", async (int id, EvaluationScoreInput[] input, HttpContext c, CareerDbContext db) =>
+        {
+            if (!await PortalWorkflow.CanWrite(db, c.User, "evaluations")) return Results.Forbid();
+            var evaluation = await PortalWorkflow.Visible(db, c.User, "evaluations").FirstOrDefaultAsync(x => x.Id == id);
+            if (evaluation is null) return Results.NotFound();
+            var criteria = await db.EvaluationCriteria.Where(x => x.Active).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).ToListAsync();
+            if (criteria.Count == 0 || input.Length != criteria.Count || input.Select(x => x.CriterionId).Distinct().Count() != input.Length)
+                return Error("Gửi đúng một điểm cho mỗi tiêu chí đang hoạt động.");
+            var byCriterion = input.ToDictionary(x => x.CriterionId);
+            if (criteria.Any(x => !byCriterion.TryGetValue(x.Id, out var score) || score.Score < 0 || score.Score > x.MaxScore || (score.Comment?.Length ?? 0) > 2000) ||
+                input.Any(x => !criteria.Any(criterion => criterion.Id == x.CriterionId)))
+                return Error("Điểm phải nằm trong giới hạn của tiêu chí; nhận xét tối đa 2.000 ký tự.");
+
+            await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var existing = await db.EvaluationScores.Where(x => x.EvaluationId == id).ToListAsync();
+            foreach (var criterion in criteria)
+            {
+                var submitted = byCriterion[criterion.Id];
+                var score = existing.FirstOrDefault(x => x.CriterionId == criterion.Id);
+                if (score is null)
+                {
+                    score = new EvaluationScore { EvaluationId = id, CriterionId = criterion.Id };
+                    db.EvaluationScores.Add(score);
+                }
+                score.Score = submitted.Score;
+                score.Comment = submitted.Comment?.Trim() ?? "";
+                score.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+            if (byCriterion.TryGetValue(1, out var skills)) evaluation.Amount = skills.Score;
+            if (byCriterion.TryGetValue(2, out var attitude)) evaluation.Progress = (int)decimal.Round(attitude.Score, 0, MidpointRounding.AwayFromZero);
+            await db.SaveChangesAsync();
+            await tx.CommitAsync();
+            return Results.Ok(criteria.Select(x => { var submitted = byCriterion[x.Id];
+                return new { criterionId = x.Id, x.Name, x.MaxScore, score = submitted.Score,
+                    comment = submitted.Comment?.Trim() ?? "" }; }).ToList());
+        });
         app.MapPost("/api/attendance/{action}", async (string action, HttpContext c, CareerDbContext db) =>
         {
             if (!c.User.IsInRole("Intern")) return Results.Forbid();
@@ -326,6 +381,8 @@ public static class PortalEndpoints
         app.MapPortalReports();
         PortalMailWorker.Start(app);
     }
+    static DateOnly? VietnamDate(DateTimeOffset? value) => value is null ? null : DateOnly.FromDateTime(value.Value.ToOffset(TimeSpan.FromHours(7)).Date);
+
     static async Task<IResult> Save(string kind, int? id, WorkItem input, HttpContext c, CareerDbContext db)
     {
         if (!PortalWorkflow.Kinds.Contains(kind)) return Results.NotFound();
@@ -345,9 +402,9 @@ public static class PortalEndpoints
         if (kind == "programs" && id is not null)
         {
             var assignments = await db.WorkItems.Where(x => x.Kind == "assignments" && x.ProgramId == id).ToListAsync();
-            foreach (var a in assignments) { a.Start = row.Start; a.End = row.End; var p = await db.InternProfiles.FindAsync(a.ProfileId); if (p is not null) { p.StartDate = row.Start is null ? null : DateOnly.FromDateTime(row.Start.Value.Date); p.EndDate = row.End is null ? null : DateOnly.FromDateTime(row.End.Value.Date); } }
+            foreach (var a in assignments) { a.Start = row.Start; a.End = row.End; var p = await db.InternProfiles.FindAsync(a.ProfileId); if (p is not null) { p.StartDate = VietnamDate(row.Start); p.EndDate = VietnamDate(row.End); } }
         }
-        if (row.ProfileId is int pid && kind == "assignments") { var p = await db.InternProfiles.FindAsync(pid); if (p is not null) { p.StartDate = DateOnly.FromDateTime(row.Start!.Value.Date); p.EndDate = DateOnly.FromDateTime(row.End!.Value.Date); } }
+        if (row.ProfileId is int pid && kind == "assignments") { var p = await db.InternProfiles.FindAsync(pid); if (p is not null) { p.StartDate = VietnamDate(row.Start); p.EndDate = VietnamDate(row.End); } }
         if (row.ProfileId is int target && kind is "tasks" or "meetings" or "assignments" or "shifts") PortalWorkflow.Notify(db, target, row.Title, row.Detail + $"\n{row.Start} - {row.End}", kind == "meetings");
         await db.SaveChangesAsync(); await tx.CommitAsync(); return Results.Ok(row);
     }

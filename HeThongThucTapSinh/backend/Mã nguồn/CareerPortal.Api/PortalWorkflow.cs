@@ -74,7 +74,7 @@ public static class PortalWorkflow
         if (item.Kind == "reports")
         {
             if (item.Start is null) return "Chọn ngày đầu tuần báo cáo.";
-            var day = item.Start.Value.Date;
+            var day = item.Start.Value.ToOffset(TimeSpan.FromHours(7)).Date;
             if (day.DayOfWeek != DayOfWeek.Monday) return "Kỳ báo cáo bắt đầu vào thứ Hai.";
             item.UniqueKey = $"report:{item.ProfileId}:{day:yyyyMMdd}";
             if (await db.WorkItems.AnyAsync(x => x.UniqueKey == item.UniqueKey && x.Id != item.Id)) return "Đã nộp báo cáo kỳ này. Hãy cập nhật báo cáo đã nộp.";

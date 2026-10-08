@@ -40,6 +40,30 @@ public sealed class WorkItem
     [MaxLength(240)] public string? UniqueKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public byte[] Version { get; set; } = [];
+    public ICollection<EvaluationScore> EvaluationScores { get; set; } = new List<EvaluationScore>();
+}
+
+public sealed class EvaluationCriterion
+{
+    public int Id { get; set; }
+    [MaxLength(120)] public string Name { get; set; } = "";
+    [MaxLength(500)] public string Description { get; set; } = "";
+    public decimal MaxScore { get; set; } = 10;
+    public int SortOrder { get; set; }
+    public bool Active { get; set; } = true;
+    public ICollection<EvaluationScore> Scores { get; set; } = new List<EvaluationScore>();
+}
+
+public sealed class EvaluationScore
+{
+    public int Id { get; set; }
+    public int EvaluationId { get; set; }
+    public WorkItem Evaluation { get; set; } = null!;
+    public int CriterionId { get; set; }
+    public EvaluationCriterion Criterion { get; set; } = null!;
+    public decimal Score { get; set; }
+    [MaxLength(2000)] public string Comment { get; set; } = "";
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 public sealed class PortalAudit
 {
@@ -71,3 +95,4 @@ public record AccountInput(
     int? InternProfileId = null);
 public record ActivateAccountInput(string Token, string Password);
 public record ActionInput(string Action, int Progress = 0, string Feedback = "", decimal Amount = 0);
+public sealed record EvaluationScoreInput(int CriterionId, decimal Score, string Comment = "");

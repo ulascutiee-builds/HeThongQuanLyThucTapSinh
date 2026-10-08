@@ -10,6 +10,8 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
 	public DbSet<InternDocument> InternDocuments => Set<InternDocument>();
 	public DbSet<InternApplication> InternApplications => Set<InternApplication>();
 	public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
+	public DbSet<EvaluationCriterion> EvaluationCriteria => Set<EvaluationCriterion>();
+	public DbSet<EvaluationScore> EvaluationScores => Set<EvaluationScore>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -25,6 +27,19 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
         modelBuilder.Entity<WorkItem>().HasIndex(x => new { x.Kind, x.ProfileId });
         modelBuilder.Entity<WorkItem>().HasIndex(x => x.UniqueKey).IsUnique().HasFilter("[UniqueKey] IS NOT NULL");
         modelBuilder.Entity<WorkItem>().Property(x => x.Version).IsRowVersion();
+        modelBuilder.Entity<EvaluationCriterion>().Property(x => x.MaxScore).HasPrecision(6, 2);
+        modelBuilder.Entity<EvaluationCriterion>().HasIndex(x => x.Name).IsUnique();
+        modelBuilder.Entity<EvaluationScore>().Property(x => x.Score).HasPrecision(6, 2);
+        modelBuilder.Entity<EvaluationScore>().HasIndex(x => new { x.EvaluationId, x.CriterionId }).IsUnique();
+        modelBuilder.Entity<EvaluationScore>()
+            .HasOne(x => x.Evaluation).WithMany(x => x.EvaluationScores)
+            .HasForeignKey(x => x.EvaluationId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<EvaluationScore>()
+            .HasOne(x => x.Criterion).WithMany(x => x.Scores)
+            .HasForeignKey(x => x.CriterionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<EvaluationCriterion>().HasData(
+            new EvaluationCriterion { Id = 1, Name = "Kỹ năng chuyên môn", Description = "Mức độ hoàn thành và vận dụng kỹ năng chuyên môn.", MaxScore = 10, SortOrder = 1 },
+            new EvaluationCriterion { Id = 2, Name = "Thái độ và kỷ luật", Description = "Tinh thần trách nhiệm, chủ động và chấp hành nội quy.", MaxScore = 10, SortOrder = 2 });
 		modelBuilder.Entity<InternProfile>(entity =>
 		{
 			entity.HasIndex(profile => profile.StudentId).IsUnique();
