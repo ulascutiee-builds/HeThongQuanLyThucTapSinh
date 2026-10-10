@@ -7,7 +7,7 @@ MAIL=Path(os.environ.get('SPRINT1_TEST_MAIL_DIR',str(Path(__file__).resolve().pa
 TAG=uuid.uuid4().hex[:10]
 checks=0
 def client(): return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-hr,admin,intern,other,mentor,anon=(client() for _ in range(6))
+hr,admin,intern,other,mentor,mentor2,anon=(client() for _ in range(7))
 def req(c,method,path,data=None,expected=200):
     global checks
     body=json.dumps(data).encode() if data is not None else None
@@ -62,6 +62,7 @@ for suffix in ['a','b']:
     uid=result['account']['id'];token=activation(uid,address)
     req(anon,'POST','/auth/activate',{'accountId':uid,'token':token,'password':'TestMentor123!'})
     if suffix=='a':req(mentor,'POST','/auth/login',{'identity':address,'password':'TestMentor123!'})
+    else:req(mentor2,'POST','/auth/login',{'identity':address,'password':'TestMentor123!'})
     mid=req(hr,'POST','/mentors',{'userId':uid,'departmentId':dep,'capacity':1},201)['id'];mentors.append((uid,mid))
 req(hr,'POST','/mentors',{'userId':mentors[0][0],'departmentId':dep,'capacity':1},409)
 assignment=req(hr,'POST','/assignments',{'profileId':pid,'programId':prid,'mentorId':mentors[0][1]},201)['id']
@@ -70,8 +71,9 @@ req(hr,'POST','/assignments',{'profileId':pid,'programId':prid,'mentorId':mentor
 req(hr,'POST','/assignments',{'profileId':otherid,'programId':prid,'mentorId':mentors[0][1]},409)
 req(intern,'PUT',f'/assignments/{assignment}',{'mentorId':mentors[1][1]},403)
 req(hr,'PUT',f'/assignments/{assignment}',{'mentorId':mentors[1][1]})
-check(req(mentor,'GET','/assignments')==[])
+check(req(mentor,'GET','/assignments')==[]);check(len(req(mentor2,'GET','/assignments'))==1)
 req(hr,'PUT',f'/assignments/{assignment}',{'mentorId':mentors[0][1]})
+check(len(req(mentor,'GET','/assignments'))==1);check(req(mentor2,'GET','/assignments')==[])
 evaluation_payload={'profileId':pid,'programId':prid,'skills':5,'attitude':4,'communication':3,'teamwork':None,'comment':'Evaluation '+TAG}
 req(mentor,'POST','/evaluations',evaluation_payload)
 mentor_evaluation=next(item for item in req(mentor,'GET','/evaluations') if item['profileId']==pid)
@@ -140,6 +142,13 @@ s=report['summary'][0];check((s['workDays'],s['lateDays'],s['earlyDays'],s['leav
 check(len(report['details'])==3)
 req(hr,'GET','/attendance/report?from=2026-10-06&to=2026-10-01',expected=400)
 req(hr,'GET','/attendance/report?from=2020-01-01&to=2026-10-01',expected=400)
+cleanup_program=req(hr,'POST','/programs',dict(program,name='Cleanup '+TAG),201)['id']
+cleanup_assignment=req(hr,'POST','/assignments',{'profileId':otherid,'programId':cleanup_program,'mentorId':mentors[1][1]},201)['id']
+check(len(req(mentor2,'GET','/assignments'))==1)
+req(other,'DELETE',f'/assignments/{cleanup_assignment}',expected=403)
+req(hr,'DELETE',f'/assignments/{cleanup_assignment}',expected=204)
+check(req(other,'GET','/assignments')==[] and req(mentor2,'GET','/assignments')==[])
+req(hr,'DELETE',f'/programs/{cleanup_program}',expected=204)
 req(hr,'DELETE',f'/programs/{prid}',expected=409);req(hr,'DELETE',f'/assignments/{assignment}',expected=409)
 req(mentor,'POST','/programs',program,403);check(len(req(mentor,'GET','/programs'))==1)
 print(f'PASS Sprint 2: {checks} HTTP/assertion checks. Tag {TAG}.')
