@@ -304,6 +304,7 @@ class Suite:
         created = self.req(self.admin, "POST", "/accounts", data, 201)
         account = created["account"]
         account_id = account["id"]
+        self.check(account["isActive"] is True, "New account should be active")
         session = self.client()
         self.check(account["requiresActivation"] is True, "New account can bypass activation")
         self.login(session, data["email"], self.password, 401)
@@ -340,6 +341,8 @@ class Suite:
         self.req(self.admin, "PUT", "/roles/Admin/permissions", {"permissions": []}, 400)
 
         self.req(self.admin, "PUT", f"/accounts/{account_id}", {**mentor_only, "isActive": False})
+        disabled_account = next(x for x in self.req(self.admin, "GET", "/accounts")["items"] if x["id"] == account_id)
+        self.check(disabled_account["isActive"] is False, "Disabled account still active")
         self.req(session, "GET", "/auth/me", expected=401)
         self.login(self.client(), edited["email"], self.password, 401)
         self.req(self.admin, "POST", f"/accounts/{account_id}/activation", expected=400)
