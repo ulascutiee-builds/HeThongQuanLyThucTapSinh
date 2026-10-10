@@ -1679,8 +1679,15 @@
             <input class="form-control" id="program-name" name="name" required maxlength="90" placeholder="Ví dụ: Thực tập sinh Web Full-stack" />
           </div>
           <div class="form-field program-field-full">
+            <label for="program-department">Phòng ban</label>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start">
+              <select class="form-control" id="program-department" name="departmentId" required></select>
+              <button class="secondary-button" id="program-department-add" type="button">Thêm phòng ban</button>
+            </div>
+          </div>
+          <div class="form-field program-field-full">
             <label for="program-description">Mô tả</label>
-            <textarea class="form-control program-textarea" id="program-description" name="description" rows="3" maxlength="240" placeholder="Mục tiêu và nội dung chính của chương trình"></textarea>
+            <textarea class="form-control program-textarea" id="program-description" name="description" rows="3" maxlength="2000" placeholder="Mục tiêu và nội dung chính của chương trình"></textarea>
           </div>
           <div class="form-field">
             <label for="program-start-date">Ngày bắt đầu</label>
@@ -1699,15 +1706,25 @@
             </select>
           </div>
           <div class="form-field">
-            <label for="program-seats">Số lượng menter</label>
-            <input class="form-control" id="program-seats" name="seats" type="number" min="0" max="999" value="0" required />
+            <label for="program-seats">Chỉ tiêu thực tập sinh</label>
+            <input class="form-control" id="program-seats" name="capacity" type="number" min="1" max="10000" value="10" required />
           </div>
-          <p class="program-form-note program-field-full"><span aria-hidden="true">ⓘ</span> Thông tin trên màn hình hiện được lưu trên trình duyệt để xem trước giao diện; chưa kết nối API.</p>
         </div>
         <div class="dialog-actions">
           <button class="secondary-button" type="button" data-close-dialog="program-dialog">Hủy</button>
           <button class="primary-button" type="submit">Lưu chương trình</button>
         </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog" id="department-dialog" aria-labelledby="department-dialog-title">
+      <form id="department-form">
+        <div class="dialog-head">
+          <div><p class="dialog-eyebrow">Danh mục tổ chức</p><h2 id="department-dialog-title">Thêm phòng ban</h2><p>Tên phòng ban sẽ xuất hiện trong danh sách chọn chương trình.</p></div>
+          <button class="icon-button" type="button" data-close-dialog="department-dialog" aria-label="Đóng">×</button>
+        </div>
+        <div class="dialog-body"><div class="form-field"><label for="department-name">Tên phòng ban</label><input class="form-control" id="department-name" name="name" maxlength="120" required /></div></div>
+        <div class="dialog-actions"><button class="secondary-button" type="button" data-close-dialog="department-dialog">Hủy</button><button class="primary-button" type="submit">Thêm phòng ban</button></div>
       </form>
     </dialog>
 

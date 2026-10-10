@@ -1,5 +1,4 @@
 (() => {
-  const STORAGE_KEY = "career-portal-hr-programs-preview";
   const offsetDate = (offset) => {
     const date = new Date();
     date.setDate(date.getDate() + offset);
@@ -20,46 +19,22 @@
     const [year, month, day] = value.split("-");
     return `${day}/${month}/${year}`;
   };
-  const createId = () =>
-    globalThis.crypto?.randomUUID?.() ??
-    `program-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-  const demoPrograms = [
-    {
-      id: "web-fullstack",
-      name: "Thực tập sinh Web Full-stack",
-      description:
-        "Phát triển kỹ năng frontend, backend và quy trình làm việc Agile.",
-      startDate: offsetDate(-35),
-      endDate: offsetDate(55),
-      status: "Đang diễn ra",
-      mentees: 24,
-    },
-    {
-      id: "java-backend",
-      name: "Thực tập sinh Java Backend",
-      description:
-        "Đào tạo Java, Spring Boot và xây dựng API doanh nghiệp.",
-      startDate: offsetDate(18),
-      endDate: offsetDate(108),
-      status: "Sắp diễn ra",
-      mentees: 12,
-    },
-    {
-      id: "software-testing",
-      name: "Thực tập sinh kiểm thử",
-      description:
-        "Thực hành kiểm thử phần mềm, xây dựng test case và đảm bảo chất lượng.",
-      startDate: offsetDate(-150),
-      endDate: offsetDate(-60),
-      status: "Đã kết thúc",
-      mentees: 18,
-    },
-  ];
-
-  let programs = demoPrograms;
+  let programs = [];
+  let departments = [];
   let toastTimer;
   const byId = (id) => document.getElementById(id);
+
+  async function api(path, options = {}) {
+    let response;
+    try {
+      response = await fetch(`/api${path}`, { credentials: "same-origin", ...options });
+    } catch {
+      throw new Error("Không thể kết nối máy chủ.");
+    }
+    const data = response.status === 204 ? null : await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.message || data?.title || `Yêu cầu thất bại (${response.status}).`);
+    return data;
+  }
 
   function showNotice(message, kind = "success") {
     const toast = byId("toast");
@@ -72,42 +47,34 @@
     }, 3600);
   }
 
-  function loadPrograms() {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
-      const parsed = JSON.parse(stored);
-      if (
-        !Array.isArray(parsed) ||
-        parsed.some(
-          (program) =>
-            !program.id ||
-            !program.name ||
-            !program.startDate ||
-            !program.endDate ||
-            !program.status,
-        )
-      ) {
-        throw new Error("Danh sách chương trình lưu trên trình duyệt không hợp lệ.");
-      }
-      programs = parsed;
-    } catch (error) {
-      console.error("Không thể đọc dữ liệu xem trước chương trình.", error);
-      showNotice("Không đọc được dữ liệu xem trước; đang dùng danh sách mẫu.", "error");
-      programs = demoPrograms;
-    }
+  function renderDepartmentOptions(selected = "") {
+    const select = byId("program-department");
+    select.innerHTML = departments.length
+      ? departments.map((department) => `<option value="${department.id}">${escapeHtml(department.name)}</option>`).join("")
+      : '<option value="">Thêm phòng ban trước khi tạo chương trình</option>';
+    if (selected) select.value = String(selected);
   }
 
-  function savePrograms(message) {
+  async function loadPrograms() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(programs));
+      const [programRows, departmentRows] = await Promise.all([
+        api("/programs"),
+        api("/departments"),
+      ]);
+      programs = programRows.map((program) => ({
+        ...program,
+        mentees: program.assignedCount ?? 0,
+      }));
+      departments = departmentRows;
+      renderDepartmentOptions();
+      renderPrograms();
     } catch (error) {
-      console.error("Không thể lưu dữ liệu xem trước chương trình.", error);
-      showNotice("Không lưu được thay đổi trên trình duyệt.", "error");
-      return false;
+      programs = [];
+      departments = [];
+      renderDepartmentOptions();
+      renderPrograms();
+      showNotice(error.message || "Không tải được danh sách chương trình.", "error");
     }
-    showNotice(message);
-    return true;
   }
 
   function getProgress(program) {
@@ -155,14 +122,15 @@
             return `<article class="program-card${program.status === "Đang diễn ra" ? " is-active" : ""}">
               <div class="program-card-top">
                 <span class="program-card-status ${statusClass}">${escapeHtml(program.status)}</span>
-                <span class="program-card-meta"><span aria-hidden="true">♙</span> ${Number(program.mentees) || 0} mentee</span>
+                <span class="program-card-meta"><span aria-hidden="true">♙</span> ${Number(program.mentees) || 0} / ${Number(program.capacity) || 0} thực tập sinh</span>
               </div>
               <h3>${escapeHtml(program.name)}</h3>
+              <p class="program-card-meta">${escapeHtml(program.departmentName || "Chưa có phòng ban")}</p>
               <p class="program-card-description">${escapeHtml(program.description || "Chưa có mô tả cho chương trình này.")}</p>
               <div class="program-card-dates"><span aria-hidden="true">▣</span><strong>${formatDate(program.startDate)} — ${formatDate(program.endDate)}</strong></div>
               <div class="sprint-progress" role="progressbar" aria-label="Tiến độ chương trình" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><span style="width:${progress}%"></span></div>
               <div class="program-progress-caption"><span>Tiến độ chương trình</span><strong>${progress}%</strong></div>
-              <div class="program-card-footer"><span class="program-card-code">Mã: ${escapeHtml(program.id.slice(0, 8))}</span><button class="quiet-button" type="button" data-program-edit="${escapeHtml(program.id)}">Chỉnh sửa <span aria-hidden="true">→</span></button></div>
+              <div class="program-card-footer"><span class="program-card-code">Mã: ${escapeHtml(String(program.id).slice(0, 8))}</span><button class="quiet-button" type="button" data-program-edit="${escapeHtml(program.id)}">Chỉnh sửa <span aria-hidden="true">→</span></button></div>
             </article>`;
           })
           .join("")
@@ -173,24 +141,24 @@
     const form = byId("program-form");
     form.reset();
     form.elements.id.value = program?.id ?? "";
+    renderDepartmentOptions(program?.departmentId ?? "");
     byId("program-dialog-title").textContent = program
       ? "Chỉnh sửa chương trình"
       : "Tạo chương trình";
     if (program) {
-      for (const key of ["name", "description", "startDate", "endDate", "status"]) {
+      for (const key of ["name", "description", "startDate", "endDate", "status", "capacity"]) {
         form.elements[key].value = program[key] ?? "";
       }
-      form.elements.seats.value = program.mentees ?? 0;
     } else {
       form.elements.startDate.value = offsetDate(0);
       form.elements.endDate.value = offsetDate(90);
       form.elements.status.value = "Sắp diễn ra";
-      form.elements.seats.value = 0;
+      form.elements.capacity.value = 10;
     }
     byId("program-dialog").showModal();
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
@@ -204,34 +172,64 @@
       form.elements.endDate.setCustomValidity("");
       return;
     }
-    const id = form.elements.id.value || createId();
-    const existing = programs.find((program) => program.id === id);
-    const previousPrograms = programs.map((program) => ({ ...program }));
-    const program = {
-      id,
+    if (!form.elements.departmentId.value) {
+      showNotice("Vui lòng chọn hoặc thêm phòng ban.", "error");
+      return;
+    }
+    const id = form.elements.id.value;
+    const input = {
       name: form.elements.name.value.trim(),
+      departmentId: Number(form.elements.departmentId.value),
       description: form.elements.description.value.trim(),
+      capacity: Number(form.elements.capacity.value),
       startDate,
       endDate,
       status: form.elements.status.value,
-      mentees: Math.max(0, Number(form.elements.seats.value) || 0),
     };
-    if (existing) Object.assign(existing, program);
-    else programs.unshift(program);
-    if (!savePrograms(existing ? "Đã cập nhật thông tin chương trình." : "Đã tạo chương trình mới.")) {
-      programs = previousPrograms;
-      return;
+    try {
+      await api(id ? `/programs/${id}` : "/programs", {
+        method: id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      byId("program-dialog").close();
+      await loadPrograms();
+      showNotice(id ? "Đã cập nhật chương trình." : "Đã tạo chương trình.");
+    } catch (error) {
+      showNotice(error.message || "Không lưu được chương trình.", "error");
     }
-    byId("program-dialog").close();
-    renderPrograms();
   }
+
+  byId("program-department-add").addEventListener("click", () => {
+    byId("department-form").reset();
+    byId("department-dialog").showModal();
+  });
+  byId("department-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+    try {
+      const department = await api("/departments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.elements.name.value.trim() }),
+      });
+      departments.push(department);
+      departments.sort((left, right) => left.name.localeCompare(right.name, "vi"));
+      renderDepartmentOptions(department.id);
+      byId("department-dialog").close();
+      showNotice("Đã thêm phòng ban.");
+    } catch (error) {
+      showNotice(error.message || "Không thêm được phòng ban.", "error");
+    }
+  });
 
   byId("program-add").addEventListener("click", () => openProgramDialog());
   byId("program-status-filter").addEventListener("change", renderPrograms);
   byId("program-list").addEventListener("click", (event) => {
     const button = event.target.closest("[data-program-edit]");
     if (!button) return;
-    const program = programs.find((item) => item.id === button.dataset.programEdit);
+    const program = programs.find((item) => String(item.id) === button.dataset.programEdit);
     if (program) openProgramDialog(program);
   });
   byId("program-form").addEventListener("submit", handleSubmit);
