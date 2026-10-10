@@ -12,6 +12,8 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
 	public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
 	public DbSet<EvaluationCriterion> EvaluationCriteria => Set<EvaluationCriterion>();
 	public DbSet<EvaluationScore> EvaluationScores => Set<EvaluationScore>();
+	public DbSet<Allowance> Allowances => Set<Allowance>();
+	public DbSet<AllowanceHistory> AllowanceHistories => Set<AllowanceHistory>();
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -24,6 +26,7 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
             .HasForeignKey<PortalAccount>(x => x.InternProfileId)
             .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<WorkItem>().Property(x => x.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<WorkItem>().Property(x => x.ProcessedBy).HasMaxLength(120);
         modelBuilder.Entity<WorkItem>().HasIndex(x => new { x.Kind, x.ProfileId });
         modelBuilder.Entity<WorkItem>().HasIndex(x => x.UniqueKey).IsUnique().HasFilter("[UniqueKey] IS NOT NULL");
         modelBuilder.Entity<WorkItem>().Property(x => x.Version).IsRowVersion();
@@ -40,6 +43,23 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) :
         modelBuilder.Entity<EvaluationCriterion>().HasData(
             new EvaluationCriterion { Id = 1, Name = "Kỹ năng chuyên môn", Description = "Mức độ hoàn thành và vận dụng kỹ năng chuyên môn.", MaxScore = 10, SortOrder = 1 },
             new EvaluationCriterion { Id = 2, Name = "Thái độ và kỷ luật", Description = "Tinh thần trách nhiệm, chủ động và chấp hành nội quy.", MaxScore = 10, SortOrder = 2 });
+		modelBuilder.Entity<Allowance>(entity =>
+		{
+			entity.Property(x => x.Amount).HasPrecision(18, 2);
+			entity.Property(x => x.Currency).HasMaxLength(3).IsUnicode(false);
+			entity.Property(x => x.PeriodStart).HasColumnType("date");
+			entity.Property(x => x.PeriodEnd).HasColumnType("date");
+			entity.Property(x => x.Version).IsRowVersion();
+			entity.HasIndex(x => new { x.ProfileId, x.PeriodStart, x.PaymentStatus });
+			entity.HasOne(x => x.Profile).WithMany(x => x.Allowances)
+				.HasForeignKey(x => x.ProfileId).OnDelete(DeleteBehavior.Cascade);
+		});
+		modelBuilder.Entity<AllowanceHistory>(entity =>
+		{
+			entity.HasIndex(x => new { x.AllowanceId, x.ChangedAt });
+			entity.HasOne(x => x.Allowance).WithMany(x => x.History)
+				.HasForeignKey(x => x.AllowanceId).OnDelete(DeleteBehavior.Cascade);
+		});
 		modelBuilder.Entity<InternProfile>(entity =>
 		{
 			entity.HasIndex(profile => profile.StudentId).IsUnique();

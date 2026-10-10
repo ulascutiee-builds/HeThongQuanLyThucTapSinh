@@ -35,6 +35,8 @@ public sealed class WorkItem
     public int Capacity { get; set; }
     public string Feedback { get; set; } = "";
     public string History { get; set; } = "";
+    [MaxLength(120)] public string? ProcessedBy { get; set; }
+    public DateTimeOffset? ProcessedAt { get; set; }
     public string FileName { get; set; } = "";
     [System.Text.Json.Serialization.JsonIgnore] public byte[]? Attachment { get; set; }
     [MaxLength(240)] public string? UniqueKey { get; set; }

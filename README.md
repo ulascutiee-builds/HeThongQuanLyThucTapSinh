@@ -126,3 +126,14 @@ Backend Node.js, TypeScript, Express và PostgreSQL cùng hướng dẫn cài đ
 
 Ngày công được tính theo ngày có check-in. Đi muộn và về sớm chỉ được tính khi ngày đó có ca làm (`shifts`) cùng hồ sơ; ngày nghỉ phép đếm các ngày lịch thuộc đơn đã duyệt.
 
+## Công việc Sprint 3 của Nguyễn Văn Khánh
+
+- `POST /api/leave-requests` tạo đơn nghỉ; `GET /api/leave-requests` liệt kê đơn theo quyền xem của tài khoản.
+- `PUT /api/leave-requests/{id}/status` nhận `{ "status": "Đã duyệt" | "Từ chối", "feedback": "..." }`. Hệ thống ghi phản hồi, người xử lý, thời điểm và nhật ký thao tác.
+- Bảng `Allowances` liên kết khóa ngoại với `InternProfiles`. API `GET/POST /api/allowances` và `PUT /api/allowances/{id}` quản lý loại phụ cấp, số tiền, mã tiền tệ ISO 4217 và kỳ áp dụng; lịch sử được lưu riêng trong `AllowanceHistories`.
+- `PUT /api/allowances/{id}/payment-status` cập nhật `Chưa thanh toán` hoặc `Đã thanh toán`; `GET /api/allowances/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tổng hợp theo kỳ, trạng thái và tiền tệ để không cộng gộp các đơn vị tiền khác nhau.
+- `GET /api/allowances/{id}/history` trả lịch sử thay đổi của một khoản phụ cấp.
+- `POST /api/mentors/assignments` và `PUT /api/mentors/assignments/{id}` tạo/cập nhật phân công, dùng chung kiểm tra chương trình, mentor, chỉ tiêu và hồ sơ thực tập sinh.
+- `GET /api/mentors/statistics/mentees` tổng hợp số mentee và sức chứa theo mentor; `GET /api/statistics/schools-majors` tổng hợp số thực tập sinh theo trường/ngành (HR/Admin).
+- Áp dụng migration `20261010110000_AddSprint3AllowanceAndLeaveProcessing` trước khi gọi các API mới.
+

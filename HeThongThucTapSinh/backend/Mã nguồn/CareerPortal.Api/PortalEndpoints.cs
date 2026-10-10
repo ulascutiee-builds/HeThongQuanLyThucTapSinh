@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-public static class PortalEndpoints
+public static partial class PortalEndpoints
 {
     static IResult Error(string text) => Results.BadRequest(new { message = text });
     static readonly PasswordHasher<PortalAccount> Hasher = new();
@@ -279,6 +279,11 @@ public static class PortalEndpoints
         app.MapPost("/api/work/{kind}", async (string kind, WorkItem input, HttpContext c, CareerDbContext db) => await Save(kind, null, input, c, db));
         app.MapPost("/api/tasks", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("tasks", null, input, c, db));
         app.MapPost("/api/reports/weekly", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("reports", null, input, c, db));
+        app.MapGet("/api/leave-requests", async (HttpContext c, CareerDbContext db) =>
+            Results.Ok(await PortalWorkflow.Visible(db, c.User, "leave").AsNoTracking().OrderByDescending(x => x.Id).ToListAsync()));
+        app.MapPost("/api/leave-requests", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("leave", null, input, c, db));
+        app.MapPost("/api/mentors/assignments", async (WorkItem input, HttpContext c, CareerDbContext db) => await Save("assignments", null, input, c, db));
+        app.MapPut("/api/mentors/assignments/{id:int}", async (int id, WorkItem input, HttpContext c, CareerDbContext db) => await Save("assignments", id, input, c, db));
         app.MapPut("/api/work/{kind}/{id:int}", async (string kind, int id, WorkItem input, HttpContext c, CareerDbContext db) => await Save(kind, id, input, c, db));
         app.MapDelete("/api/work/{kind}/{id:int}", async (string kind, int id, HttpContext c, CareerDbContext db) =>
         {
@@ -370,12 +375,18 @@ public static class PortalEndpoints
             var attendance = await attendanceQuery.ToListAsync();
             var shifts = await shiftQuery.ToListAsync();
             var leaves = await leaveQuery.ToListAsync();
-            var profileIds = attendance.Concat(leaves).Select(x => x.ProfileId).OfType<int>().Distinct().ToList();
-            if (profileId is int requestedId && !profileIds.Contains(requestedId) &&
-                await PortalWorkflow.Visible(db, c.User, "attendance").AnyAsync(x => x.ProfileId == requestedId))
-                profileIds.Add(requestedId);
-            var names = await db.InternProfiles.AsNoTracking().Where(x => profileIds.Contains(x.Id))
-                .ToDictionaryAsync(x => x.Id, x => x.Name);
+            var visibleProfiles = db.InternProfiles.AsNoTracking();
+            if (c.User.IsInRole("Intern")) visibleProfiles = visibleProfiles.Where(x => x.Id == PortalSecurity.UserId(c.User));
+            else if (!PortalSecurity.Manager(c.User))
+            {
+                var assignedProfiles = PortalWorkflow.Visible(db, c.User, "assignments").Select(x => x.ProfileId!.Value);
+                visibleProfiles = visibleProfiles.Where(x => assignedProfiles.Contains(x.Id));
+            }
+            if (profileId is int requestedProfileId) visibleProfiles = visibleProfiles.Where(x => x.Id == requestedProfileId);
+            var visiblePeople = await visibleProfiles.Select(x => new { x.Id, x.Name }).ToListAsync();
+            if (profileId is not null && visiblePeople.Count == 0) return Results.NotFound();
+            var profileIds = visiblePeople.Select(x => x.Id).ToList();
+            var names = visiblePeople.ToDictionary(x => x.Id, x => x.Name);
 
             var daily = new List<(int ProfileId, DateOnly Day, DateTimeOffset CheckIn, DateTimeOffset? CheckOut)>();
             foreach (var group in attendance.Where(x => x.ProfileId is not null && x.Start is not null)
@@ -446,6 +457,7 @@ public static class PortalEndpoints
             if (!c.User.IsInRole("Admin")) return Results.Forbid(); var row = await db.MailJobs.FindAsync(id); if (row is null) return Results.NotFound();
             if (row.Status == "Sent") return Error("Email đã gửi."); row.Status = "Queued"; row.Attempts = 0; row.DueAt = DateTimeOffset.UtcNow; await db.SaveChangesAsync(); return Results.Ok();
         });
+        app.MapSprint3Endpoints();
         app.MapPortalReports();
         PortalMailWorker.Start(app);
     }
@@ -486,7 +498,12 @@ public static class PortalEndpoints
         else if (kind == "reports" && input.Action == "feedback" && (manager || c.User.IsInRole("Mentor"))) { if (string.IsNullOrWhiteSpace(input.Feedback)) return Error("Nhập phản hồi."); row.Feedback = input.Feedback; }
         else if (kind == "notifications" && input.Action == "read" && c.User.IsInRole("Intern")) row.Status = "Đã đọc";
         else if (kind is "leave" or "support" && input.Action is "approve" or "reject" or "close" && manager)
-        { if (input.Action == "reject" && string.IsNullOrWhiteSpace(input.Feedback)) return Error("Nhập lý do từ chối."); row.Status = input.Action == "approve" ? "Đã duyệt" : input.Action == "reject" ? "Từ chối" : "Đã đóng"; row.Feedback = input.Feedback; }
+        {
+            if (input.Action == "reject" && string.IsNullOrWhiteSpace(input.Feedback)) return Error("Nhập lý do từ chối.");
+            row.Status = input.Action == "approve" ? "Đã duyệt" : input.Action == "reject" ? "Từ chối" : "Đã đóng";
+            row.Feedback = input.Feedback.Trim();
+            if (kind == "leave") { row.ProcessedBy = Actor(c.User); row.ProcessedAt = DateTimeOffset.UtcNow; }
+        }
         else if (kind == "allowances" && input.Action == "paid" && manager) row.Status = "Đã thanh toán";
         else return Results.Forbid();
         row.History += $"{DateTimeOffset.UtcNow:O} {c.User.Identity!.Name}: {input.Action} {input.Progress} {input.Feedback}\n";
