@@ -303,9 +303,34 @@
     }
     const sum = key => summary.reduce((total,row) => total+Number(row[key]||0),0);
     $("#s2-report").innerHTML = `<div class="s2-stats">${[["Ngày công",sum("workDays")],["Ngày đi muộn",sum("lateDays")],["Ngày về sớm",sum("earlyDays")],["Ngày nghỉ phép",sum("leaveDays")],["Tổng giờ làm",sum("hours")]].map(([title,value]) => `<div class="s2-stat"><span>${title}</span><strong>${number(value)}</strong></div>`).join("")}</div><section class="s2-card"><h2>Tổng hợp · ${date(f.from)} – ${date(f.to)}</h2>${summary.length ? table(["Thực tập sinh","Ngày công","Đi muộn","Về sớm","Nghỉ phép","Số giờ"],summary.map(r => `<tr><td>${h(r.name)}</td><td>${number(r.workDays)}</td><td>${number(r.lateDays)}</td><td>${number(r.earlyDays)}</td><td>${number(r.leaveDays)}</td><td>${number(r.hours)}</td></tr>`).join("")) : empty("Không có số liệu trong khoảng ngày đã chọn.")}</section><section class="s2-card"><h2>Chi tiết từng ngày (${details.length})</h2>${details.length ? table(["Ngày","Thực tập sinh","Check-in","Check-out","Giờ làm","Muộn / sớm (phút)","Trạng thái"],details.map(r => `<tr><td>${date(r.date)}</td><td>${h(r.name)}</td><td>${time(r.checkIn)}</td><td>${time(r.checkOut)}</td><td>${number(r.hours)}</td><td>${number(r.lateMinutes)} / ${number(r.earlyMinutes)}</td><td>${badge(r.leave ? "Leave" : r.status)}</td></tr>`).join("")) : empty("Không có chấm công hoặc nghỉ phép phù hợp bộ lọc.")}</section>`;
-    const evaluationHost = $("#s2-evaluation-summary");
-    if (evaluationHost) evaluationHost.innerHTML = data.evaluationSummary.length ? data.evaluationSummary.map(group => `<div class="s2-evaluation-group"><div class="s2-toolbar"><strong>${h(group.program || "Chưa gắn chương trình")}</strong><span>${group.count} đánh giá · Điểm trung bình <b>${number(group.average)}/5</b></span></div>${table(["Thực tập sinh","Kỹ năng","Thái độ","Giao tiếp","Nhóm","Điểm TB","Nhận xét"],(group.items || []).map(item => `<tr><td>${h(item.name)}</td><td>${item.skills}/5</td><td>${item.attitude}/5</td><td>${item.communication}/5</td><td>${item.teamwork == null ? "—" : item.teamwork+"/5"}</td><td><strong>${number((item.skills+item.attitude+item.communication+(item.teamwork||0))/(item.teamwork == null ? 3 : 4))}/5</strong></td><td>${h(item.comment||"—")}</td></tr>`).join(""))}</div>`).join("") : empty("Chưa có đánh giá cuối kỳ.");
+    renderEvaluationSummary();
     renderHrLeaves();
+  }
+  function renderEvaluationSummary() {
+    const host = $("#s2-evaluation-summary");
+    if (!host) return;
+    const groups = data.evaluationSummary || [];
+    const filters = data.evaluationFilters ||= {programId:"",departmentId:""};
+    const programs = [...new Map(groups.map(group => {
+      const id = group.programId == null ? "none" : String(group.programId);
+      return [id,{id,name:group.program || "Chưa gắn chương trình"}];
+    })).values()];
+    const departments = [...new Map(groups.map(group => {
+      const id = group.departmentId == null ? "none" : String(group.departmentId);
+      return [id,{id,name:group.department || "Chưa gắn phòng ban"}];
+    })).values()];
+    if (!programs.some(item => item.id === filters.programId)) filters.programId = "";
+    if (!departments.some(item => item.id === filters.departmentId)) filters.departmentId = "";
+    const filtered = groups.filter(group =>
+      (!filters.programId || String(group.programId ?? "none") === filters.programId) &&
+      (!filters.departmentId || String(group.departmentId ?? "none") === filters.departmentId),
+    );
+    const items = filtered.flatMap(group => group.items || []);
+    const averageOf = item => Number(item.average ?? (item.skills + item.attitude + item.communication + (item.teamwork ?? 0)) / (item.teamwork == null ? 3 : 4));
+    const overallAverage = items.length ? items.reduce((total,item) => total + averageOf(item),0) / items.length : 0;
+    host.innerHTML = `<div class="s2-toolbar">${field("Chương trình","evaluation-program",select("evaluation-program",programs,filters.programId,item=>item.name,"id",false))}${field("Phòng ban","evaluation-department",select("evaluation-department",departments,filters.departmentId,item=>item.name,"id",false))}</div><div class="s2-stats"><div class="s2-stat"><span>Lượt đánh giá</span><strong>${items.length}</strong></div><div class="s2-stat"><span>Điểm trung bình</span><strong>${number(overallAverage)}/5</strong></div><div class="s2-stat"><span>Chương trình</span><strong>${new Set(filtered.map(group=>group.programId).filter(id=>id!=null)).size}</strong></div></div>${filtered.length ? filtered.map(group=>`<div class="s2-evaluation-group"><div class="s2-toolbar"><strong>${h(group.program || "Chưa gắn chương trình")} · ${h(group.department || "Chưa gắn phòng ban")}</strong><span>${group.count} đánh giá · Trung bình <b>${number(group.average)}/5</b></span></div>${table(["Thực tập sinh","Kỹ năng","Thái độ","Giao tiếp","Nhóm","Điểm TB","Nhận xét"],(group.items || []).map(item=>`<tr><td>${h(item.name)}</td><td>${item.skills}/5</td><td>${item.attitude}/5</td><td>${item.communication}/5</td><td>${item.teamwork == null ? "—" : item.teamwork+"/5"}</td><td><strong>${number(averageOf(item))}/5</strong></td><td>${h(item.comment||"—")}</td></tr>`).join(""))}</div>`).join("") : empty("Không có đánh giá phù hợp với bộ lọc.")}`;
+    $("select[name=evaluation-program]",host).onchange = event => { filters.programId = event.target.value; renderEvaluationSummary(); };
+    $("select[name=evaluation-department]",host).onchange = event => { filters.departmentId = event.target.value; renderEvaluationSummary(); };
   }
   function renderHrLeaves() {
     const status = $("select[name=leave-status]")?.value || "";
