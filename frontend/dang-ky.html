@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17473b" />
+    <title>Đăng ký thực tập sinh | Career Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --forest: #17473b;
+        --forest-deep: #133a31;
+        --paper: #f7f6f2;
+        --ink: #202e29;
+        --muted: #77817b;
+        --line: #d9ddd7;
+        --accent: #c96c42;
+        --gold: #d2a55d;
+        font-family: "DM Sans", "Segoe UI", sans-serif;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 0;
+        min-height: 100vh;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .login-layout {
+        display: block;
+        min-height: 100vh;
+      }
+
+      .form-panel {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        padding: 68px clamp(36px, 7vw, 100px) 30px;
+        background: var(--paper);
+      }
+
+      .form-content {
+        width: min(100%, 450px);
+        margin-inline: auto;
+        animation: rise-in 0.7s 0.08s ease-out both;
+      }
+
+      .form-eyebrow {
+        margin: 0 0 14px;
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.045em;
+        text-transform: uppercase;
+      }
+
+      .form-content h2 {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(31px, 3vw, 40px);
+        font-weight: 500;
+        letter-spacing: 0;
+        line-height: 1.2;
+        text-wrap: balance;
+      }
+
+      .form-intro {
+        margin: 11px 0 37px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .role-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .role-tab {
+        position: relative;
+        min-height: 48px;
+        padding: 0 8px 14px;
+        border: 0;
+        background: transparent;
+        color: #7c8580;
+        cursor: pointer;
+        font-size: 12px;
+        transition: color 0.18s ease;
+      }
+
+      .role-tab::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 2px;
+        background: transparent;
+        content: "";
+        transition: background-color 0.18s ease;
+      }
+
+      .role-tab[aria-selected="true"] {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .role-tab[aria-selected="true"]::after {
+        background: var(--accent);
+      }
+      .role-number {
+        margin-right: 8px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .role-tab:focus-visible,
+      .text-button:focus-visible,
+      .submit-button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid rgba(201, 108, 66, 0.3);
+        outline-offset: 3px;
+      }
+
+      .field {
+        margin-bottom: 20px;
+      }
+
+      .field-heading {
+        display: flex;
+        min-height: 18px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 9px;
+      }
+
+      .field label {
+        color: #35413b;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .text-button {
+        padding: 2px 0;
+        border: 0;
+        background: transparent;
+        color: var(--accent);
+        cursor: pointer;
+        font-size: 11px;
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .field input:not([type="checkbox"]) {
+        width: 100%;
+        height: 51px;
+        padding: 0 15px;
+        border: 1px solid #d8ddd7;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        font-size: 13px;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
+      }
+
+      .field input:not([type="checkbox"]):focus {
+        border-color: #6c8b7c;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(23, 71, 59, 0.08);
+        outline: 0;
+      }
+
+      .field input::placeholder {
+        color: #a7afaa;
+        opacity: 1;
+      }
+
+      .password-input {
+        padding-right: 62px !important;
+      }
+
+      .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 13px;
+        padding: 5px 2px;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: #64716a;
+        cursor: pointer;
+        font-size: 11px;
+      }
+
+      .remember-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: -1px 0 24px;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .remember-row input {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        accent-color: var(--forest);
+        cursor: pointer;
+      }
+
+      .submit-button {
+        display: flex;
+        width: 100%;
+        min-height: 53px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 17px;
+        border: 0;
+        border-radius: 3px;
+        background: var(--forest);
+        color: white;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        transition:
+          background-color 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .submit-button:hover {
+        transform: translateY(-1px);
+        background: #205847;
+      }
+      .submit-arrow {
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .form-note,
+      .status-message {
+        min-height: 39px;
+        margin: 16px 0 0;
+        color: #87908a;
+        font-size: 11px;
+        line-height: 1.65;
+      }
+
+      .status-message:empty {
+        visibility: hidden;
+      }
+      .status-message {
+        color: var(--forest);
+      }
+      .status-message[data-state="error"] {
+        color: #a74735;
+      }
+
+      .page-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        width: min(100%, 520px);
+        margin: auto auto 0;
+        padding-top: 34px;
+        color: #839087;
+        font-size: 9px;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+      }
+
+      @keyframes rise-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      .login-layout {
+        display: block;
+        min-height: 100vh;
+      }
+
+      body {
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(18, 101, 86, 0.18),
+            transparent 30%
+          ),
+          linear-gradient(135deg, #f8f7f2 0%, #eef4f1 50%, #f5f7f2 100%);
+      }
+
+      .form-panel {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px 24px;
+        background: transparent;
+      }
+
+      .form-content {
+        width: min(100%, 680px);
+        margin-inline: auto;
+        padding: clamp(26px, 4vw, 40px);
+        border: 1px solid rgba(23, 71, 59, 0.08);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 24px 60px rgba(15, 42, 35, 0.12);
+        backdrop-filter: blur(8px);
+      }
+
+      .form-eyebrow {
+        margin-bottom: 12px;
+      }
+
+      .form-content h2 {
+        text-align: center;
+      }
+
+      .form-intro {
+        margin-bottom: 22px;
+      }
+
+      .form-content > p > a {
+        display: inline-flex;
+        margin: 0 0 20px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .form-content > p > a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      #register-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 18px;
+      }
+
+      #register-form .field {
+        min-width: 0;
+        margin-bottom: 16px;
+      }
+
+      #status-message:not(:empty) {
+        grid-column: 1 / -1;
+        min-height: 0;
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        border: 1px solid #e3b6aa;
+        border-radius: 10px;
+        background: #fff2ee;
+        color: #8c382b;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.55;
+      }
+
+      #status-message:empty {
+        display: none;
+      }
+
+      .field-error {
+        margin: 7px 0 0;
+        color: #a74735;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .field input:not([type="checkbox"]) {
+        border-radius: 12px;
+      }
+
+      .field input[aria-invalid="true"] {
+        border-color: #a74735;
+      }
+
+      .submit-button {
+        grid-column: 1 / -1;
+        border-radius: 12px;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--forest) 0%, #1d7a63 100%);
+        box-shadow: 0 12px 24px rgba(23, 71, 59, 0.22);
+      }
+
+      .submit-button:hover {
+        background: linear-gradient(135deg, #205847 0%, #1a6d59 100%);
+      }
+
+      .page-footer {
+        width: min(100%, 680px);
+        margin: 16px auto 0;
+        padding-top: 0;
+      }
+
+      @media (max-width: 900px) {
+        .form-content {
+          width: min(100%, 640px);
+          padding: 28px 24px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .form-panel {
+          min-height: 100vh;
+          padding: 24px 14px 18px;
+        }
+
+        .form-content {
+          width: 100%;
+          padding: 22px 18px;
+          border-radius: 20px;
+        }
+
+        .form-content h2 {
+          font-size: clamp(28px, 7vw, 34px);
+        }
+
+        .form-intro {
+          margin-bottom: 18px;
+          font-size: 13px;
+        }
+
+        #register-form {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 0;
+        }
+
+        #register-form .field {
+          margin-bottom: 14px;
+        }
+
+        .field input:not([type="checkbox"]) {
+          height: 48px;
+          border-radius: 10px;
+        }
+
+        .page-footer {
+          width: calc(100% - 28px);
+          justify-content: center;
+          gap: 12px;
+          text-align: center;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
+  </head>
+  <body class="auth-page register-page">
+    <main class="login-layout">
+      <section class="form-panel" aria-labelledby="form-title">
+        <div class="form-content">
+          <p class="form-eyebrow">Cổng đăng ký</p>
+          <h2 id="form-title">Đăng ký thực tập sinh</h2>
+
+          <p><a href="dang-nhap.html">Quay lại đăng nhập</a></p>
+
+          <form id="register-form" novalidate>
+            <p
+              class="status-message"
+              id="status-message"
+              role="alert"
+              aria-live="assertive"
+              tabindex="-1"
+            ></p>
+            <div class="field">
+              <label for="reg-name">Họ và tên</label>
+              <input
+                id="reg-name"
+                name="name"
+                type="text"
+                required
+                maxlength="120"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-studentId">Mã sinh viên</label>
+              <input
+                id="reg-studentId"
+                name="studentId"
+                type="text"
+                required
+                maxlength="40"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-dateOfBirth">Ngày sinh</label>
+              <input id="reg-dateOfBirth" name="dateOfBirth" type="date" />
+            </div>
+            <div class="field">
+              <label for="reg-phone">Số điện thoại</label>
+              <input
+                id="reg-phone"
+                name="phone"
+                type="tel"
+                required
+                pattern="[+]?[0-9]{9,15}"
+                maxlength="16"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-email">Email</label>
+              <input
+                id="reg-email"
+                name="email"
+                type="email"
+                required
+                maxlength="120"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-school">Trường</label>
+              <input
+                id="reg-school"
+                name="school"
+                type="text"
+                required
+                maxlength="120"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-major">Ngành</label>
+              <input
+                id="reg-major"
+                name="major"
+                type="text"
+                required
+                maxlength="120"
+              />
+            </div>
+            <div class="field">
+              <label for="reg-password">Mật khẩu (ít nhất 8 ký tự)</label>
+              <div class="input-wrap">
+                <input
+                  class="password-input"
+                  id="reg-password"
+                  name="password"
+                  type="password"
+                  required
+                  minlength="8"
+                  maxlength="200"
+                />
+                <button
+                  class="password-toggle"
+                  id="password-toggle"
+                  type="button"
+                  aria-pressed="false"
+                >
+                  Hiện
+                </button>
+              </div>
+            </div>
+            <button class="submit-button" type="submit">Tạo tài khoản</button>
+          </form>
+        </div>
+
+        <footer class="page-footer">
+          <span>© 2026 Career Portal</span>
+          <span>Hỗ trợ đăng nhập</span>
+        </footer>
+      </section>
+    </main>
+
+    <script src="register.js"></script>
+  </body>
+</html>

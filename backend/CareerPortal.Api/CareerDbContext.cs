@@ -1,0 +1,51 @@
+using Microsoft.EntityFrameworkCore;
+public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):DbContext(options)
+{
+    public DbSet<InternProfile> InternProfiles => Set<InternProfile>();
+    public DbSet<InternDocument> InternDocuments => Set<InternDocument>();
+    public DbSet<InternApplication> InternApplications => Set<InternApplication>();
+    public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
+    public DbSet<MailJob> MailJobs => Set<MailJob>();
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<AppRole> AppRoles => Set<AppRole>();
+    public DbSet<AppPermission> AppPermissions => Set<AppPermission>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<InternshipProgram> InternshipPrograms => Set<InternshipProgram>();
+    public DbSet<Mentor> Mentors => Set<Mentor>();
+    public DbSet<InternAssignment> InternAssignments => Set<InternAssignment>();
+    public DbSet<ProgramSchedule> ProgramSchedules => Set<ProgramSchedule>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<InternshipTask> InternshipTasks => Set<InternshipTask>();
+    public DbSet<TaskProgressHistory> TaskProgressHistories => Set<TaskProgressHistory>();
+    public DbSet<WeeklyReport> WeeklyReports => Set<WeeklyReport>();
+    public DbSet<PortalNotification> PortalNotifications => Set<PortalNotification>();
+    public DbSet<InternshipEvaluation> InternshipEvaluations => Set<InternshipEvaluation>();
+    protected override void OnModelCreating(ModelBuilder b)
+    {
+        b.Entity<InternProfile>(e=>{
+            e.ToTable("IN_TERN");e.HasIndex(x=>x.StudentId);e.HasIndex(x=>x.Email).IsUnique();
+            e.HasIndex(x=>x.Phone).IsUnique().HasFilter("[Phone] IS NOT NULL");
+            e.HasIndex(x=>x.School);e.HasIndex(x=>x.Major);e.HasIndex(x=>x.Status);
+            e.Property(x=>x.Name).HasMaxLength(120);e.Property(x=>x.StudentId).HasMaxLength(40);e.Property(x=>x.Email).HasMaxLength(160);
+            e.Property(x=>x.Phone).HasMaxLength(16);e.Property(x=>x.School).HasMaxLength(160);e.Property(x=>x.Major).HasMaxLength(120);
+            e.Property(x=>x.Status).HasMaxLength(40);e.Property(x=>x.PasswordHash).HasMaxLength(500);
+            e.ToTable(t=>t.HasCheckConstraint("CK_Intern_Dates","[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]"));
+        });
+        b.Entity<InternApplication>(e=>{e.HasIndex(x=>x.ProfileId).IsUnique();e.HasOne(x=>x.Profile).WithOne(x=>x.Application).HasForeignKey<InternApplication>(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);});
+        b.Entity<InternDocument>(e=>{
+            e.HasOne(x=>x.Profile).WithMany(x=>x.Documents).HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);
+            e.Property(x=>x.Type).HasMaxLength(60);e.Property(x=>x.FileName).HasMaxLength(255);e.Property(x=>x.ContentType).HasMaxLength(120);
+            e.HasIndex(x=>new{x.ProfileId,x.Type,x.Version}).IsUnique();
+        });
+        b.Entity<InternReviewHistory>().HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<InternReviewHistory>().HasIndex(x=>new{x.ProfileId,x.ReviewedAt});
+        b.Entity<MailJob>().HasIndex(x=>x.EventKey).IsUnique();b.Entity<MailJob>().Property(x=>x.EventKey).HasMaxLength(150);
+        b.ConfigureAccounts();
+        b.ConfigureSprint2();
+        b.ConfigureSprint3();
+    }
+}

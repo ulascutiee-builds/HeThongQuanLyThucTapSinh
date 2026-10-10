@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17473b" />
+    <title>Đăng nhập hệ thống | Career Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --forest: #17473b;
+        --forest-deep: #133a31;
+        --paper: #f7f6f2;
+        --ink: #202e29;
+        --muted: #77817b;
+        --line: #d9ddd7;
+        --accent: #c96c42;
+        --gold: #d2a55d;
+        font-family: "DM Sans", "Segoe UI", sans-serif;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(18, 101, 86, 0.18),
+            transparent 30%
+          ),
+          linear-gradient(135deg, #f8f7f2 0%, #eef4f1 50%, #f5f7f2 100%);
+        color: var(--ink);
+      }
+
+      a,
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .login-layout {
+        min-height: 100vh;
+      }
+
+      .form-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 48px 20px;
+        background: transparent;
+      }
+
+      .form-content {
+        width: min(100%, 520px);
+        padding: clamp(28px, 4vw, 42px);
+        border: 1px solid rgba(23, 71, 59, 0.08);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 24px 60px rgba(15, 42, 35, 0.12);
+        backdrop-filter: blur(8px);
+      }
+
+      .form-eyebrow {
+        margin: 0 0 14px;
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.045em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .form-content h2 {
+        margin: 0;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(31px, 3vw, 40px);
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .form-intro {
+        margin: 11px 0 28px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .field {
+        margin-bottom: 20px;
+      }
+
+      .field-error {
+        margin: 0 0 16px;
+        color: #a74735;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .field-error[hidden] {
+        display: none;
+      }
+
+      .password-input[aria-invalid="true"] {
+        border-color: #a74735;
+        box-shadow: 0 0 0 3px rgba(167, 71, 53, 0.12);
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 9px;
+        color: #35413b;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .field input {
+        width: 100%;
+        height: 51px;
+        padding: 0 15px;
+        border: 1px solid #d8ddd7;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        font-size: 13px;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .field input:focus {
+        border-color: #6c8b7c;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(23, 71, 59, 0.08);
+        outline: 0;
+      }
+
+      .password-wrap {
+        position: relative;
+      }
+      .password-wrap input {
+        padding-right: 62px;
+      }
+
+      .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 13px;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: #64716a;
+        cursor: pointer;
+        font-size: 11px;
+      }
+
+      .remember-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: -1px 0 24px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .remember-row input {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        accent-color: var(--forest);
+      }
+
+      .submit-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 53px;
+        padding: 0 17px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--forest) 0%, #1d7a63 100%);
+        color: white;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 12px 24px rgba(23, 71, 59, 0.22);
+      }
+
+      .submit-button:hover {
+        background: linear-gradient(135deg, #205847 0%, #1a6d59 100%);
+      }
+
+      .submit-arrow {
+        font-size: 18px;
+      }
+
+      .bottom-links {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .bottom-links a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .status-message {
+        min-height: 39px;
+        margin: 16px 0 0;
+        color: var(--forest);
+        font-size: 11px;
+        line-height: 1.65;
+      }
+
+      .status-message[data-state="error"] {
+        color: #a74735;
+      }
+      .status-message:empty {
+        visibility: hidden;
+      }
+
+      .page-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        width: min(100%, 520px);
+        margin: 18px auto 0;
+        color: #839087;
+        font-size: 9px;
+        letter-spacing: 0.025em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 900px) {
+        .form-content {
+          width: min(100%, 500px);
+          padding: 26px 22px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .form-panel {
+          min-height: auto;
+          padding: 28px 14px 22px;
+        }
+
+        .form-content {
+          width: 100%;
+          padding: 22px 18px;
+          border-radius: 20px;
+        }
+
+        .form-content h2 {
+          font-size: clamp(28px, 7vw, 34px);
+        }
+
+        .form-intro {
+          margin-bottom: 20px;
+          font-size: 13px;
+        }
+
+        .field {
+          margin-bottom: 16px;
+        }
+
+        .field input {
+          height: 48px;
+          border-radius: 10px;
+        }
+
+        .remember-row {
+          align-items: flex-start;
+          line-height: 1.5;
+        }
+
+        .bottom-links {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .page-footer {
+          width: calc(100% - 28px);
+          margin-top: 12px;
+          justify-content: center;
+          gap: 12px;
+          text-align: center;
+        }
+      }
+
+    </style>
+    <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
+  </head>
+  <body class="auth-page">
+    <main class="login-layout">
+      <section class="form-panel" aria-labelledby="form-title">
+        <div class="form-content">
+          <p class="form-eyebrow">Cổng đăng nhập</p>
+          <h2 id="form-title">Chào mừng trở lại</h2>
+          <p class="form-intro">Đăng nhập để tiếp tục công việc của bạn.<br /></p>
+
+          <form id="login-form">
+            <p class="field-error" id="password-error" role="alert" aria-live="polite" hidden></p>
+            <div class="field">
+              <label for="identity">Email</label>
+              <input
+                id="identity"
+                name="identity"
+                type="email"
+                placeholder="email@truong.edu.vn"
+                autocomplete="username"
+                aria-describedby="password-error"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="password">Mật khẩu</label>
+              <div class="password-wrap">
+                <input
+                  class="password-input"
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Nhập mật khẩu"
+                  autocomplete="current-password"
+                  aria-describedby="password-error"
+                  required
+                />
+                <button
+                  class="password-toggle"
+                  id="password-toggle"
+                  type="button"
+                  aria-pressed="false"
+                >
+                  Hiện
+                </button>
+              </div>
+            </div>
+
+            <label class="remember-row" for="remember-me">
+              <input id="remember-me" name="remember-me" type="checkbox" />
+              <span>Ghi nhớ email trên thiết bị này</span>
+            </label>
+
+            <button class="submit-button" type="submit">
+              <span>Đăng nhập</span>
+            </button>
+
+            <div class="bottom-links">
+              <a href="dang-ky.html">Đăng ký thực tập sinh</a>
+              <a href="#" id="forgot-password">Quên mật khẩu?</a>
+            </div>
+          </form>
+
+          <p
+            class="status-message"
+            id="status-message"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="session-bridge.js?v=20261009-blue"></script>
+    <script>
+      const API_BASE = location.origin + "/api";
+      const SESSION_KEY = "sprint1-intern-profile-id";
+      const loginForm = document.getElementById("login-form");
+      const status = document.getElementById("status-message");
+      const passwordError = document.getElementById("password-error");
+      const passwordInput = document.getElementById("password");
+      const rememberedEmail = localStorage.getItem("career-portal-email");
+      if (rememberedEmail) {
+        document.getElementById("identity").value = rememberedEmail;
+        document.getElementById("remember-me").checked = true;
+      }
+
+      function clearPasswordError() {
+        passwordError.hidden = true;
+        passwordError.textContent = "";
+        passwordInput.removeAttribute("aria-invalid");
+      }
+
+      function showPasswordError(message) {
+        passwordError.textContent = message;
+        passwordError.hidden = false;
+        passwordInput.setAttribute("aria-invalid", "true");
+      }
+
+      loginForm.addEventListener("input", clearPasswordError);
+
+      const verification = new URLSearchParams(location.search);
+      if (verification.has("registered")) {
+        status.dataset.state = "success";
+        status.textContent = "Đăng ký thành công. Hãy mở liên kết xác thực trong email đã gửi trước khi nộp hồ sơ. Bạn có thể đăng nhập để hoàn thiện thông tin.";
+      }
+      if (verification.has("verify")) {
+        status.dataset.state = "info";
+        status.textContent = "Đang xác thực email...";
+        fetch(`${API_BASE}/auth/verify-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: Number(verification.get("profileId")),
+            token: verification.get("verify"),
+          }),
+        })
+          .then(async (response) => {
+            const result = await response.json().catch(() => null);
+            if (!response.ok)
+              throw new Error(
+                result?.message || "Liên kết xác thực không hợp lệ hoặc hết hạn.",
+              );
+            status.dataset.state = "success";
+            status.textContent =
+              result?.message || "Email đã xác thực. Bạn có thể nộp hồ sơ.";
+          })
+          .catch((error) => {
+            status.dataset.state = "error";
+            status.textContent =
+              error instanceof Error
+                ? error.message
+                : "Không thể xác thực email. Vui lòng thử lại.";
+          })
+          .finally(() => history.replaceState(null, "", location.pathname));
+      }
+
+      document
+        .getElementById("password-toggle")
+        .addEventListener("click", () => {
+          const input = document.getElementById("password");
+          const button = document.getElementById("password-toggle");
+          const showing = input.type === "text";
+          input.type = showing ? "password" : "text";
+          button.textContent = showing ? "Hiện" : "Ẩn";
+          button.setAttribute("aria-pressed", String(!showing));
+        });
+
+      document
+        .getElementById("forgot-password")
+        .addEventListener("click", (event) => {
+          event.preventDefault();
+          status.dataset.state = "info";
+          status.textContent = "Vui lòng liên hệ với admin để được hỗ trợ.";
+        });
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!event.currentTarget.reportValidity()) return;
+        clearPasswordError();
+
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        const formData = new FormData(loginForm);
+        submitButton.disabled = true;
+        status.dataset.state = "info";
+        status.textContent = "Đang xác thực...";
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              identity: String(formData.get("identity")).trim(),
+              password: String(formData.get("password")),
+            }),
+          });
+
+          const result = await response.json().catch(() => null);
+          if (!response.ok) {
+            if (response.status === 401) {
+              status.textContent = "";
+              showPasswordError("Email hoặc mật khẩu không đúng.");
+              return;
+            }
+            throw new Error(result?.message || "Không thể đăng nhập. Vui lòng thử lại.");
+          }
+
+          clearPasswordError();
+          status.textContent = "";
+          if (document.getElementById("remember-me").checked) localStorage.setItem("career-portal-email", String(formData.get("identity")).trim());
+          else localStorage.removeItem("career-portal-email");
+          if (result.profileId) {
+            const profileId = String(result.profileId);
+            if (document.getElementById("remember-me").checked) {
+              localStorage.setItem(SESSION_KEY, profileId);
+              sessionStorage.removeItem(SESSION_KEY);
+            } else {
+              sessionStorage.setItem(SESSION_KEY, profileId);
+              localStorage.removeItem(SESSION_KEY);
+            }
+          }
+
+          window.location.assign(result?.href || "thuc-tap-sinh.html");
+        } catch (error) {
+          status.dataset.state = "error";
+          status.textContent =
+            error instanceof Error
+              ? error.message
+              : "Không thể đăng nhập. Vui lòng thử lại.";
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
