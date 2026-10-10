@@ -178,6 +178,14 @@ class Suite:
         created = self.req(self.hr, "POST", "/hr/profiles", hr_data, 201)
         self.check(created["dateOfBirth"] == hr_data["dateOfBirth"] and created["status"] == "Đang thực tập", "HR profile DOB/status missing")
         self.req(self.hr, "POST", "/hr/profiles", {**hr_data, "studentId": "DUP" + self.tag}, 409)
+        review_query = urllib.parse.urlencode({"type": "CV", "fileName": "review-rejection.pdf"})
+        review_document = self.req(self.hr, "POST", f"/interns/{created['id']}/documents?{review_query}", PDF, 201)
+        review_reason = "Vui lòng bổ sung tài liệu hợp lệ " + self.tag
+        rejected_document = self.req(self.hr, "PATCH", f"/hr/documents/{review_document['id']}",
+                         {"status": "Từ chối", "note": review_reason})
+        self.check(rejected_document["status"] == "Từ chối" and rejected_document["note"] == review_reason
+               and rejected_document["reviewedBy"] and rejected_document["reviewedAt"],
+               "Document rejection reason/reviewer metadata missing")
         self.req(self.hr, "GET", "/interns?page=0", expected=400)
         query = urllib.parse.urlencode({"search": self.tag, "school": self.school, "major": self.major, "pageSize": 1})
         first = self.req(self.hr, "GET", "/interns?" + query)
