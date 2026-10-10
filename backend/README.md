@@ -91,3 +91,17 @@ The email worker is disabled by default. To enable delivery, configure `SMTP_HOS
 ## Current integration boundary
 
 The initial schema is owned by this backend implementation because the repository's `main` branch had no server or database schema. Before combining with a teammate's database work, align table and column names and merge rather than applying this schema over an existing database. Approval, authentication, and actual file-transfer endpoints remain with their assigned owners; the services above provide their persistence hooks.
+
+## Sprint 3: attendance, leave, allowances, and mentor statistics
+
+The Sprint 3 tables are included in `database/schema.sql`. For a database already created from the earlier schema, apply `database/migrations/003_sprint3.sql` once before starting these endpoints.
+
+- `GET /api/attendance/summary?from=YYYY-MM-DD&to=YYYY-MM-DD&internId=<uuid>` returns workdays, late days, early-leave days, and approved leave days per intern. `from` and `to` default to the current month and today. `POST /api/attendance/records` stores a validated source record with its scheduled shift times.
+- `POST /api/leave-requests` accepts `{ "internId": "<uuid>", "leaveType": "...", "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "reason": "..." }`. `GET /api/leave-requests` accepts optional `internId` and `status` filters.
+- `PUT /api/leave-requests/{id}/status` accepts `{ "status": "APPROVED" | "REJECTED", "feedback": "...", "processedBy": "..." }`. Only pending requests can be processed. The processor, timestamp, feedback, and status history are persisted together.
+- `GET/POST /api/allowances` and `PUT /api/allowances/{id}` manage an intern's allowance. Writes accept `internId`, `title`, non-negative `amount`, ISO 4217 `currency`, `periodStart`, `periodEnd`, optional `note`, and `changedBy`. Amounts, currency codes, and date periods are validated, and each write creates an audit record.
+- `PUT /api/allowances/{id}/payment-status` accepts `{ "status": "UNPAID" | "PAID", "feedback": "...", "changedBy": "..." }`. `GET /api/allowances/summary` groups totals by period, payment status, and currency; `GET /api/allowances/{id}/history` returns the audit trail.
+- `POST /api/mentors/assignments` and `PUT /api/mentors/assignments/{id}` accept `mentorId`, `internId`, `startDate`, optional `endDate`, and `assignedBy`. They reject inactive/missing mentors, duplicate overlapping intern assignments, and assignments over mentor capacity.
+- `GET /api/mentors/statistics/mentees` returns mentee counts and remaining capacity per mentor. `GET /api/statistics/schools-majors` returns intern counts grouped by university and major, with optional `university` and `major` filters.
+
+These endpoints follow the current integration boundary and do not add an authentication middleware. In deployment, restrict them to the authenticated application/gateway and populate `processedBy`, `changedBy`, and `assignedBy` from its verified identity rather than accepting arbitrary client values.

@@ -120,20 +120,12 @@ Với các actor chính là sinh viên, giảng viên, người hướng dẫn, 
 
 Backend Node.js, TypeScript, Express và PostgreSQL cùng hướng dẫn cài đặt/API nằm trong [`backend/README.md`](backend/README.md).
 
-## Tổng hợp chấm công Sprint 2
-
-`GET /api/attendance/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` trả tổng ngày công, đi muộn, về sớm và nghỉ phép đã duyệt trong khoảng ngày được chọn, kèm số liệu theo từng thực tập sinh. Có thể truyền `profileId` để lọc một hồ sơ; quyền xem vẫn được giới hạn theo tài khoản đăng nhập. Khoảng ngày mặc định là từ đầu tháng hiện tại đến hôm nay và tối đa 367 ngày.
-
-Ngày công được tính theo ngày có check-in. Đi muộn và về sớm chỉ được tính khi ngày đó có ca làm (`shifts`) cùng hồ sơ; ngày nghỉ phép đếm các ngày lịch thuộc đơn đã duyệt.
-
 ## Công việc Sprint 3 của Nguyễn Văn Khánh
 
-- `POST /api/leave-requests` tạo đơn nghỉ; `GET /api/leave-requests` liệt kê đơn theo quyền xem của tài khoản.
-- `PUT /api/leave-requests/{id}/status` nhận `{ "status": "Đã duyệt" | "Từ chối", "feedback": "..." }`. Hệ thống ghi phản hồi, người xử lý, thời điểm và nhật ký thao tác.
-- Bảng `Allowances` liên kết khóa ngoại với `InternProfiles`. API `GET/POST /api/allowances` và `PUT /api/allowances/{id}` quản lý loại phụ cấp, số tiền, mã tiền tệ ISO 4217 và kỳ áp dụng; lịch sử được lưu riêng trong `AllowanceHistories`.
-- `PUT /api/allowances/{id}/payment-status` cập nhật `Chưa thanh toán` hoặc `Đã thanh toán`; `GET /api/allowances/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tổng hợp theo kỳ, trạng thái và tiền tệ để không cộng gộp các đơn vị tiền khác nhau.
-- `GET /api/allowances/{id}/history` trả lịch sử thay đổi của một khoản phụ cấp.
-- `POST /api/mentors/assignments` và `PUT /api/mentors/assignments/{id}` tạo/cập nhật phân công, dùng chung kiểm tra chương trình, mentor, chỉ tiêu và hồ sơ thực tập sinh.
-- `GET /api/mentors/statistics/mentees` tổng hợp số mentee và sức chứa theo mentor; `GET /api/statistics/schools-majors` tổng hợp số thực tập sinh theo trường/ngành (HR/Admin).
-- Áp dụng migration `20261010110000_AddSprint3AllowanceAndLeaveProcessing` trước khi gọi các API mới.
+- `GET /api/attendance/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tính ngày công, ngày đi muộn, ngày về sớm và ngày nghỉ phép đã duyệt theo từng hồ sơ. `POST /api/attendance/records` ghi bản chấm công nguồn cùng giờ ca để tổng hợp.
+- `POST /api/leave-requests` tạo yêu cầu nghỉ; `GET /api/leave-requests` liệt kê và lọc yêu cầu. `PUT /api/leave-requests/{id}/status` nhận trạng thái `APPROVED` hoặc `REJECTED`, phản hồi và `processedBy`; hệ thống lưu người xử lý, thời điểm cùng lịch sử thay đổi.
+- Bảng `allowances` có khóa ngoại tới `interns`. `GET/POST /api/allowances` và `PUT /api/allowances/{id}` quản lý phụ cấp, mã tiền tệ ISO 4217 và kỳ áp dụng; lịch sử được lưu ở `allowance_histories`.
+- `PUT /api/allowances/{id}/payment-status` cập nhật `UNPAID` hoặc `PAID`; `GET /api/allowances/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tổng hợp theo kỳ, trạng thái và tiền tệ, không cộng chéo các tiền tệ. `GET /api/allowances/{id}/history` trả lịch sử thay đổi.
+- `POST /api/mentors/assignments` và `PUT /api/mentors/assignments/{id}` tạo/cập nhật phân công, kiểm tra hồ sơ, mentor hoạt động, trùng thời gian và chỉ tiêu. `GET /api/mentors/statistics/mentees` tổng hợp mentee/sức chứa; `GET /api/statistics/schools-majors` tổng hợp thực tập sinh theo trường/ngành.
+- Cấu trúc database và hướng dẫn nâng cấp nằm trong `backend/database/schema.sql` và `backend/database/migrations/003_sprint3.sql`.
 

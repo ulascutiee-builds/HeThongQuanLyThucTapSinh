@@ -18,8 +18,15 @@ export const errorHandler: ErrorRequestHandler = (error, _request, response, _ne
 
   if (isPostgresUniqueViolation(error)) {
     const constraint = error.constraint ?? '';
-    const field = constraint.includes('student_id') ? 'studentId' : 'email';
-    response.status(409).json({ error: `${field === 'email' ? 'Email' : 'Mã sinh viên'} đã được sử dụng`, field });
+    if (constraint.includes('student_id')) {
+      response.status(409).json({ error: 'Mã sinh viên đã được sử dụng', field: 'studentId' });
+      return;
+    }
+    if (constraint.includes('email')) {
+      response.status(409).json({ error: 'Email đã được sử dụng', field: 'email' });
+      return;
+    }
+    response.status(409).json({ error: 'Dữ liệu bị trùng lặp' });
     return;
   }
 
