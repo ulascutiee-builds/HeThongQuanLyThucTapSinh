@@ -119,7 +119,7 @@ form.addEventListener("submit", async (event) => {
         ),
       );
     }
-    window.location.assign("dang-nhap.html");
+    window.location.assign("dang-nhap.html?registered=1");
   } catch (e) {
     status.textContent =
       e instanceof Error ? e.message : "Không kết nối được API.";

@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#173e34" />
     <title>Khu vực thực tập sinh | CODEGYM</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
     <style>
       :root {
         color-scheme: light;
@@ -1132,8 +1126,11 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
   </head>
-  <body>
+  <body class="portal-page">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Điều hướng thực tập sinh">
         <a
@@ -1165,6 +1162,9 @@
             <span class="nav-glyph" aria-hidden="true">▧</span
             ><span>Hợp đồng</span>
           </button>
+          <a class="nav-item permission-denied" href="attendance.html" data-permission="schedule.read,attendance.write" style="text-decoration:none">
+            <span class="nav-glyph" aria-hidden="true">◷</span><span>Lịch &amp; chấm công</span>
+          </a>
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-note">
@@ -1907,7 +1907,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="session-bridge.js?v=20261003"></script>
+    <script src="session-bridge.js?v=20261009-blue"></script>
     <script>
       const API_BASE =
         location.port === "8000"
@@ -1962,9 +1962,11 @@
       }
 
       async function loadWorkspace() {
+        const identity = await window.sessionReady;
         const profileId =
-          localStorage.getItem(SESSION_KEY) ||
-          sessionStorage.getItem(SESSION_KEY);
+          identity?.profileId ||
+          sessionStorage.getItem(SESSION_KEY) ||
+          localStorage.getItem(SESSION_KEY);
         if (!profileId) {
           window.location.replace("dang-nhap.html");
           return;
@@ -2606,12 +2608,13 @@
             !state.contractDocumentId
           )
             return;
-          if (
-            !confirm(
-              "Bạn chỉ được xác nhận một lần cho phiên bản này. Bạn đã đọc và đồng ý với hợp đồng?",
-            )
-          )
-            return;
+          const accepted = window.portalConfirm
+            ? await window.portalConfirm(
+                "Bạn chỉ được xác nhận một lần cho phiên bản này. Bạn đã đọc và đồng ý với hợp đồng?",
+                "Xác nhận hợp đồng",
+              )
+            : true;
+          if (!accepted) return;
           try {
             await apiRequest(
               `/interns/${state.profile.id}/documents/${state.contractDocumentId}/confirm-contract`,
