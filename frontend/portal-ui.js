@@ -117,7 +117,22 @@
     notificationBadge.hidden = !unread;
     notificationButton?.setAttribute("aria-label", unread ? `Thông báo, ${unread} chưa đọc` : "Thông báo");
   }
-  function openNotifications() {
+  async function markNotificationRead(item, row) {
+    if (item.isRead) return true;
+    try {
+      const response = await fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"});
+      if (!response.ok) throw new Error("Không thể cập nhật trạng thái thông báo.");
+      item.isRead = true;
+      renderNotificationBadge(notificationItems.filter(notification => !notification.isRead).length);
+      row.classList.remove("unread"); row.classList.add("read");
+      return true;
+    } catch {
+      await window.portalAlert?.("Chưa thể đánh dấu thông báo đã đọc. Vui lòng thử lại.");
+      return false;
+    }
+  }
+  async function openNotifications() {
+    await loadNotifications();
     const dialog = el("dialog", null, "portal-guide portal-notifications");
     const heading = el("h2", "Thông báo");
     const intro = el("p", notificationItems.length ? "Cập nhật mới nhất từ hệ thống." : "Bạn chưa có thông báo mới.");
@@ -126,12 +141,12 @@
       const row = el("article", null, "portal-notification-item" + (item.isRead ? " read" : " unread"));
       const copy = el("div"); copy.append(el("strong", item.title || "Thông báo"), el("p", item.message || ""), el("time", notificationDate(item.createdAt)));
       row.append(copy);
-      if (item.link) { const link = el("a", "Mở", "portal-notification-link"); link.href = item.link; link.onclick = () => { if (!item.isRead) fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"}).catch(()=>{}); }; row.append(link); }
-      row.onclick = async event => { if (event.target.closest("a")) return; if (!item.isRead) { item.isRead = true; await fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"}).catch(()=>{}); renderNotificationBadge(notificationItems.filter(x => !x.isRead).length); row.classList.remove("unread"); row.classList.add("read"); } };
+      if (item.link) { const link = el("a", "Mở", "portal-notification-link"); link.href = item.link; link.onclick = async event => { event.preventDefault(); if (await markNotificationRead(item,row)) location.assign(link.href); }; row.append(link); }
+      row.onclick = async event => { if (event.target.closest("a")) return; await markNotificationRead(item,row); };
       list.append(row);
     });
     const footer = el("footer"); const all = button("Đánh dấu tất cả đã đọc", "btn", "file"); const close = button("Đóng", "btn primary");
-    all.disabled = !notificationItems.some(x => !x.isRead); all.onclick = async () => { await fetch("/api/notifications/read-all", {method:"POST", credentials:"same-origin"}).catch(()=>{}); notificationItems.forEach(x => x.isRead = true); renderNotificationBadge(0); dialog.close(); };
+    all.disabled = !notificationItems.some(x => !x.isRead); all.onclick = async () => { try { const response = await fetch("/api/notifications/read-all", {method:"POST", credentials:"same-origin"}); if (!response.ok) throw new Error(); notificationItems.forEach(x => x.isRead = true); renderNotificationBadge(0); dialog.close(); } catch { await window.portalAlert?.("Chưa thể đánh dấu tất cả thông báo đã đọc. Vui lòng thử lại."); } };
     close.onclick = () => dialog.close(); footer.append(all, close); dialog.append(heading, intro, list, footer); dialog.addEventListener("close", () => dialog.remove()); document.body.append(dialog); dialog.showModal(); close.focus();
   }
   async function loadNotifications() {
