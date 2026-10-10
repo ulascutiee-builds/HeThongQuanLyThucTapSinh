@@ -75,6 +75,18 @@ req(hr,'PUT',f'/assignments/{assignment}',{'mentorId':mentors[0][1]})
 req(hr,'PUT',f'/programs/{prid}',dict(program,departmentId=dept2),400)
 req(hr,'PUT',f'/programs/{prid}',dict(program,startDate=(today-timedelta(days=1)).isoformat()))
 check(req(intern,'GET',f'/interns/{pid}/workspace')['profile']['startDate']==(today-timedelta(days=1)).isoformat())
+week_start=today-timedelta(days=today.weekday())
+on_time_payload={'weekStart':week_start.isoformat(),'summary':'On-time report '+TAG,'blockers':'','evidenceUrl':'https://example.test/evidence/on-time'}
+on_time=req(intern,'POST','/reports/weekly',on_time_payload,201)
+check(on_time['status']=='Submitted' and on_time['weekStart']==week_start.isoformat() and on_time['submittedAt'] is not None)
+replacement_payload={**on_time_payload,'summary':'Replacement report '+TAG,'evidenceUrl':'https://example.test/evidence/replacement'}
+replaced=req(intern,'PUT',f"/reports/weekly/{on_time['id']}",replacement_payload)
+check(replaced['id']==on_time['id'] and replaced['summary']==replacement_payload['summary'] and replaced['status']=='Submitted')
+req(intern,'POST','/reports/weekly',on_time_payload,409)
+late_week=week_start-timedelta(days=14)
+check(late_week+timedelta(days=6)<today)
+late=req(intern,'POST','/reports/weekly',{'weekStart':late_week.isoformat(),'summary':'Late report '+TAG,'blockers':'','evidenceUrl':None},201)
+check(late['weekStart']==late_week.isoformat() and late['status']=='Submitted' and late['submittedAt'] is not None)
 def schedule(day,begin='09:00:00',finish='17:00:00',kind='Shift'):
     return {'programId':prid,'date':day.isoformat(),'startTime':begin,'endTime':finish,'title':'Shift '+TAG,'kind':kind}
 req(intern,'POST','/attendance/check-out',expected=400)
