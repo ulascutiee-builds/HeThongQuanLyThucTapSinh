@@ -21,6 +21,142 @@ namespace CareerPortal.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AppPermission", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("APP_PERMISSION", (string)null);
+                });
+
+            modelBuilder.Entity("AppRole", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("APP_ROLE", (string)null);
+                });
+
+            modelBuilder.Entity("AppUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("ActivationExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ActivationHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<bool>("HasCustomPermissions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("RequiresActivation")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("ProfileId")
+                        .IsUnique()
+                        .HasFilter("[ProfileId] IS NOT NULL");
+
+                    b.ToTable("APP_USER", (string)null);
+                });
+
+            modelBuilder.Entity("AttendanceRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CheckIn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("CheckOut")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Device")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EarlyMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("LateMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("ProfileId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("ATTENDANCE", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Attendance_Time", "[CheckOut] IS NULL OR [CheckOut] >= [CheckIn]");
+                        });
+                });
+
             modelBuilder.Entity("Department", b =>
                 {
                     b.Property<int>("Id")
@@ -80,7 +216,7 @@ namespace CareerPortal.Api.Migrations
                     b.ToTable("InternApplications");
                 });
 
-            modelBuilder.Entity("InternAttendance", b =>
+            modelBuilder.Entity("InternAssignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,49 +224,28 @@ namespace CareerPortal.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("ClockInAt")
+                    b.Property<DateTimeOffset>("AssignedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTimeOffset?>("ClockOutAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("MentorId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ScheduleId")
+                    b.Property<int>("ProgramId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("nvarchar(160)");
-
-                    b.Property<DateOnly>("WorkDate")
-                        .HasColumnType("date");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ScheduleId")
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.HasIndex("ProfileId", "WorkDate");
+                    b.HasIndex("ProgramId");
 
-                    b.ToTable("InternAttendances", t =>
-                        {
-                            t.HasCheckConstraint("CK_InternAttendance_ClockTimes", "[ClockOutAt] IS NULL OR [ClockInAt] IS NULL OR [ClockOutAt] > [ClockInAt]");
-                        });
+                    b.ToTable("ASSIGNMENT", (string)null);
                 });
 
             modelBuilder.Entity("InternDocument", b =>
@@ -340,7 +455,7 @@ namespace CareerPortal.Api.Migrations
                     b.ToTable("InternReviewHistories");
                 });
 
-            modelBuilder.Entity("InternSchedule", b =>
+            modelBuilder.Entity("InternshipEvaluation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -348,39 +463,51 @@ namespace CareerPortal.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Detail")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("Attitude")
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("EndsAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<int>("Communication")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MentorId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("StartsAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<int?>("ProgramId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                    b.Property<int>("Skills")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
+                    b.Property<int?>("Teamwork")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProfileId", "StartsAt");
+                    b.HasIndex("MentorId");
 
-                    b.ToTable("InternSchedules", t =>
+                    b.HasIndex("ProgramId");
+
+                    b.HasIndex("ProfileId", "ProgramId")
+                        .IsUnique()
+                        .HasFilter("[ProgramId] IS NOT NULL");
+
+                    b.ToTable("INTERNSHIP_EVALUATION", null, t =>
                         {
-                            t.HasCheckConstraint("CK_InternSchedule_Dates", "[EndsAt] > [StartsAt]");
+                            t.HasCheckConstraint("CK_Evaluation_Scores", "[Skills] BETWEEN 1 AND 5 AND [Attitude] BETWEEN 1 AND 5 AND [Communication] BETWEEN 1 AND 5");
                         });
                 });
 
@@ -416,8 +543,8 @@ namespace CareerPortal.Api.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -428,6 +555,116 @@ namespace CareerPortal.Api.Migrations
                             t.HasCheckConstraint("CK_Program_Capacity", "[Capacity] > 0");
 
                             t.HasCheckConstraint("CK_Program_Dates", "[EndDate] >= [StartDate]");
+                        });
+                });
+
+            modelBuilder.Entity("InternshipTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("MentorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProgramId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("ProgramId");
+
+                    b.HasIndex("ProfileId", "Status");
+
+                    b.ToTable("INTERNSHIP_TASK", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Task_Progress", "[Progress] >= 0 AND [Progress] <= 100");
+                        });
+                });
+
+            modelBuilder.Entity("LeaveRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("From")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateOnly>("To")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId", "From", "To");
+
+                    b.ToTable("LEAVE_REQUEST", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Leave_Dates", "[To] >= [From]");
                         });
                 });
 
@@ -483,6 +720,283 @@ namespace CareerPortal.Api.Migrations
                     b.ToTable("MailJobs");
                 });
 
+            modelBuilder.Entity("Mentor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("MENTOR", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Mentor_Capacity", "[Capacity] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("PortalNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(180)
+                        .HasColumnType("nvarchar(180)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "IsRead", "CreatedAt");
+
+                    b.ToTable("PORTAL_NOTIFICATION", (string)null);
+                });
+
+            modelBuilder.Entity("ProgramSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ProgramId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramId", "Date");
+
+                    b.ToTable("SCHEDULE", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Schedule_Time", "[EndTime] > [StartTime]");
+                        });
+                });
+
+            modelBuilder.Entity("RolePermission", b =>
+                {
+                    b.Property<string>("RoleName")
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("PermissionKey")
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("RoleName", "PermissionKey");
+
+                    b.HasIndex("PermissionKey");
+
+                    b.ToTable("ROLE_PERMISSION", (string)null);
+                });
+
+            modelBuilder.Entity("TaskProgressHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ChangedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Progress")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId", "ChangedAt");
+
+                    b.ToTable("TASK_PROGRESS_HISTORY", (string)null);
+                });
+
+            modelBuilder.Entity("UserPermission", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PermissionKey")
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("UserId", "PermissionKey");
+
+                    b.HasIndex("PermissionKey");
+
+                    b.ToTable("USER_PERMISSION", (string)null);
+                });
+
+            modelBuilder.Entity("UserRole", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("UserId", "RoleName");
+
+                    b.HasIndex("RoleName");
+
+                    b.ToTable("USER_ROLE", (string)null);
+                });
+
+            modelBuilder.Entity("WeeklyReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Blockers")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MentorFeedback")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(6000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("WeekStart")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId", "WeekStart")
+                        .IsUnique();
+
+                    b.ToTable("WEEKLY_REPORT", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Report_Status", "[Status] IN ('Submitted','Reviewed','ChangesRequested')");
+                        });
+                });
+
+            modelBuilder.Entity("AppUser", b =>
+                {
+                    b.HasOne("InternProfile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("AppUser", "ProfileId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("AttendanceRecord", b =>
+                {
+                    b.HasOne("InternProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProgramSchedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Schedule");
+                });
+
             modelBuilder.Entity("InternApplication", b =>
                 {
                     b.HasOne("InternProfile", "Profile")
@@ -494,23 +1008,31 @@ namespace CareerPortal.Api.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("InternAttendance", b =>
+            modelBuilder.Entity("InternAssignment", b =>
                 {
+                    b.HasOne("Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("InternProfile", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InternSchedule", "Schedule")
-                        .WithOne("Attendance")
-                        .HasForeignKey("InternAttendance", "ScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("InternshipProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Mentor");
 
                     b.Navigation("Profile");
 
-                    b.Navigation("Schedule");
+                    b.Navigation("Program");
                 });
 
             modelBuilder.Entity("InternDocument", b =>
@@ -535,15 +1057,30 @@ namespace CareerPortal.Api.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("InternSchedule", b =>
+            modelBuilder.Entity("InternshipEvaluation", b =>
                 {
+                    b.HasOne("Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("InternProfile", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InternshipProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Mentor");
+
                     b.Navigation("Profile");
+
+                    b.Navigation("Program");
                 });
 
             modelBuilder.Entity("InternshipProgram", b =>
@@ -557,16 +1094,169 @@ namespace CareerPortal.Api.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("InternshipTask", b =>
+                {
+                    b.HasOne("Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InternProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InternshipProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Mentor");
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Program");
+                });
+
+            modelBuilder.Entity("LeaveRequest", b =>
+                {
+                    b.HasOne("InternProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Mentor", b =>
+                {
+                    b.HasOne("Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ProgramSchedule", b =>
+                {
+                    b.HasOne("InternshipProgram", "Program")
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Program");
+                });
+
+            modelBuilder.Entity("RolePermission", b =>
+                {
+                    b.HasOne("AppPermission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionKey")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppRole", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("TaskProgressHistory", b =>
+                {
+                    b.HasOne("InternshipTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("UserPermission", b =>
+                {
+                    b.HasOne("AppPermission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionKey")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppUser", "User")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserRole", b =>
+                {
+                    b.HasOne("AppRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleName")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppUser", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WeeklyReport", b =>
+                {
+                    b.HasOne("InternProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("AppRole", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("AppUser", b =>
+                {
+                    b.Navigation("UserPermissions");
+
+                    b.Navigation("UserRoles");
+                });
+
             modelBuilder.Entity("InternProfile", b =>
                 {
                     b.Navigation("Application");
 
                     b.Navigation("Documents");
-                });
-
-            modelBuilder.Entity("InternSchedule", b =>
-                {
-                    b.Navigation("Attendance");
                 });
 #pragma warning restore 612, 618
         }

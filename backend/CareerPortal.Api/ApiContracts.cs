@@ -27,6 +27,9 @@ public sealed record UpdateInternProfileRequest
     public DateOnly? DateOfBirth { get; init; }
     [Required, MaxLength(160)] public required string School { get; init; }
     [Required, MaxLength(120)] public required string Major { get; init; }
+    public DateOnly? StartDate { get; init; }
+    public DateOnly? EndDate { get; init; }
+    [MaxLength(40)] public string? Status { get; init; }
 }
 
 public sealed record CreateHrProfileRequest
@@ -46,10 +49,12 @@ public sealed record CreateHrProfileRequest
 public sealed record UpdateHrProfileRequest
 {
     [Required, MaxLength(120)] public required string Name { get; init; }
+    [MaxLength(40)] public string? StudentId { get; init; }
     [Required, EmailAddress, MaxLength(160)] public required string Email { get; init; }
     [RegularExpression(@"^\+?[0-9]{9,15}$"), MaxLength(16)] public string? Phone { get; init; }
     [Required, MaxLength(160)] public required string School { get; init; }
     [Required, MaxLength(120)] public required string Major { get; init; }
+    public DateOnly? DateOfBirth { get; init; }
     public DateOnly? StartDate { get; init; }
     public DateOnly? EndDate { get; init; }
     [Required] public required string Status { get; init; }
@@ -82,83 +87,6 @@ public sealed record HrDashboardResponse(
     IReadOnlyList<InternApplicationResponse> Applications,
     IReadOnlyList<InternDocumentResponse> Documents,
     IReadOnlyList<InternReviewHistoryResponse> ReviewHistory);
-
-/// <summary>Payload for creating a schedule entry for an intern.</summary>
-public sealed record CreateInternScheduleRequest
-{
-    [Range(1, int.MaxValue)] public int ProfileId { get; init; }
-    [Required, MaxLength(120)] public required string Title { get; init; }
-    public DateTimeOffset StartsAt { get; init; }
-    public DateTimeOffset EndsAt { get; init; }
-    [MaxLength(500)] public string? Detail { get; init; }
-}
-
-/// <summary>Payload for updating a schedule entry and its status.</summary>
-public sealed record UpdateInternScheduleRequest
-{
-    [Range(1, int.MaxValue)] public int ProfileId { get; init; }
-    [Required, MaxLength(120)] public required string Title { get; init; }
-    public DateTimeOffset StartsAt { get; init; }
-    public DateTimeOffset EndsAt { get; init; }
-    [MaxLength(500)] public string? Detail { get; init; }
-    [Required, MaxLength(40)] public required string Status { get; init; }
-}
-
-/// <summary>Payload for updating only a schedule entry status.</summary>
-public sealed record UpdateInternScheduleStatusRequest
-{
-    [Required, MaxLength(40)] public required string Status { get; init; }
-}
-
-/// <summary>Schedule information returned to HR and the assigned intern.</summary>
-public sealed record InternScheduleResponse(
-    int Id,
-    int ProfileId,
-    string InternName,
-    string Title,
-    DateTimeOffset StartsAt,
-    DateTimeOffset EndsAt,
-    string? Detail,
-    string Status,
-    DateTimeOffset UpdatedAt);
-
-public sealed record InternAttendanceReportResponse(
-    int ScheduleId,
-    int ProfileId,
-    string InternName,
-    string StudentId,
-    string ScheduleTitle,
-    DateTimeOffset StartsAt,
-    DateTimeOffset EndsAt,
-    int? AttendanceId,
-    DateOnly? WorkDate,
-    string AttendanceStatus,
-    DateTimeOffset? ClockInAt,
-    DateTimeOffset? ClockOutAt,
-    string? Note,
-    bool IsLate,
-    bool LeftEarly);
-
-public sealed record InternAttendanceSummaryResponse(
-    int TotalWorkdays,
-    int LateDays,
-    int EarlyLeaveDays,
-    int LeaveDays,
-    int AbsentDays,
-    int UnmarkedShifts);
-
-public sealed record InternAttendanceReportResult(
-    InternAttendanceSummaryResponse Summary,
-    IReadOnlyList<InternAttendanceReportResponse> Items);
-
-public sealed record SaveInternAttendanceRequest
-{
-    [Required] public DateOnly? WorkDate { get; init; }
-    [Required, MaxLength(30)] public required string Status { get; init; }
-    public DateTimeOffset? ClockInAt { get; init; }
-    public DateTimeOffset? ClockOutAt { get; init; }
-    [MaxLength(500)] public string? Note { get; init; }
-}
 
 public sealed record DecideStatusRequest
 {

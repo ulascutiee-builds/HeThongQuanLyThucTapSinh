@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#173e34" />
     <title>Quản lý nhân sự | Career Portal</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="sprint2-programs.css?v=20261006" />
-    <link rel="stylesheet" href="attendance-report.css?v=20261007" />
-    <link rel="stylesheet" href="sprint2-schedules.css?v=20261007" />
     <style>
       :root {
         color-scheme: light;
@@ -83,18 +74,28 @@
       .brand {
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 11px;
         padding: 0 9px 28px;
         color: inherit;
         text-decoration: none;
       }
       .brand-logo {
         display: block;
-        width: 92px;
+        width: 48px;
         aspect-ratio: 1;
         flex: 0 0 auto;
         border-radius: 50%;
         object-fit: contain;
+      }
+      .brand-text {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.035em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+      .brand-text span {
+        color: var(--gold);
       }
       .nav-label {
         margin: 0 10px 9px;
@@ -908,13 +909,6 @@
         color: var(--forest);
         font-size: 11px;
       }
-      .document-preview-frame {
-        display: block;
-        width: 100%;
-        min-height: 56vh;
-        border: 0;
-        background: #f8f9f6;
-      }
       .toast {
         position: fixed;
         right: 22px;
@@ -1114,44 +1108,21 @@
           transition-duration: 0.01ms !important;
         }
       }
-      .sprint-grid { display: grid; gap: 18px; }
-      .sprint-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .sprint-card, .sprint-task { background: var(--surface, #fff); border: 1px solid var(--line, #e5e7eb); border-radius: 18px; padding: 22px; box-shadow: 0 8px 24px rgba(21, 35, 55, .05); }
-      .sprint-card h2, .sprint-task h2 { margin: 12px 0 8px; font-size: 18px; color: var(--ink, #182230); }
-      .sprint-card p, .sprint-task p { color: var(--muted, #6b7280); line-height: 1.55; }
-      .sprint-card-featured { border-color: #8bc8bb; background: linear-gradient(145deg, #f3fbf8, #fff); }
-      .sprint-badge { display: inline-flex; border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 700; }
-      .sprint-badge-active { color: #146b5b; background: #d9f4eb; }
-      .sprint-badge-planned { color: #8a5a08; background: #fff1c7; }
-      .sprint-badge-closed { color: #64748b; background: #edf1f5; }
-      .sprint-card-meta { display: flex; justify-content: space-between; gap: 10px; margin: 20px 0 12px; font-size: 12px; color: var(--muted, #6b7280); }
-      .sprint-card-meta strong { color: var(--ink, #182230); }
-      .sprint-progress { height: 7px; margin: 8px 0; overflow: hidden; border-radius: 99px; background: #e7eeec; }
-      .sprint-progress span { display: block; height: 100%; border-radius: inherit; background: #2b9b83; }
-      .sprint-card small, .sprint-table small { color: var(--muted, #6b7280); }
-      .sprint-toolbar { display: flex; gap: 16px; margin: 22px 0; padding: 16px; border-radius: 14px; background: #f4f7f7; }
-      .sprint-toolbar label { display: grid; gap: 7px; min-width: 250px; color: var(--muted, #6b7280); font-size: 13px; font-weight: 700; }
-      .sprint-table-wrap { overflow-x: auto; border: 1px solid var(--line, #e5e7eb); border-radius: 16px; background: #fff; }
-      .sprint-table { width: 100%; border-collapse: collapse; text-align: left; }
-      .sprint-table th, .sprint-table td { padding: 16px 18px; border-bottom: 1px solid #edf0f2; white-space: nowrap; }
-      .sprint-table th { background: #f8faf9; color: var(--muted, #6b7280); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-      .sprint-table td small { display: block; margin-top: 4px; }
-      .sprint-task-list { display: grid; gap: 14px; }
-      .sprint-task { display: flex; justify-content: space-between; gap: 24px; align-items: center; }
-      .sprint-task-progress { width: 180px; text-align: right; color: #146b5b; }
-      @media (max-width: 980px) { .sprint-grid-3 { grid-template-columns: 1fr; } .sprint-toolbar { flex-direction: column; } .sprint-toolbar label { min-width: 0; } }
-      @media (max-width: 600px) { .sprint-task { align-items: flex-start; flex-direction: column; } .sprint-task-progress { width: 100%; text-align: left; } .sprint-card-meta { align-items: flex-start; flex-direction: column; } }
     </style>
+    <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
   </head>
-  <body>
+  <body class="portal-page">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Điều hướng HR">
         <a class="brand" href="dang-nhap.html">
           <img
             class="brand-logo"
-            src="codegym-logo.png"
+            src="codegym-logo.svg"
             alt="CODEGYM - Hệ thống đào tạo lập trình hiện đại"
           />
+          <span class="brand-text">CODEGYM</span>
         </a>
         <p class="nav-label">Không gian nhân sự</p>
         <nav class="nav-list" aria-label="Chức năng quản lý">
@@ -1178,26 +1149,12 @@
             >
             <span class="nav-count" id="document-count">0</span>
           </button>
-          <button class="nav-item" type="button" data-view="programs">
-            <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">◫</span>Chương trình</span
-          </button>
-          <button class="nav-item" type="button" data-view="schedule">
-            <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">◷</span>Lịch làm việc</span
-          </button>
-          <button class="nav-item" type="button" data-view="attendance">
-            <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">◴</span>Báo cáo chấm công</span
-          </button>
-          <button class="nav-item" type="button" data-view="tasks">
-            <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">☑</span>Công việc</span
-          </button>
-          <button class="nav-item" type="button" data-view="statistics">
-            <span class="nav-item-text"
-              ><span class="nav-glyph" aria-hidden="true">▥</span>Đánh giá</span
-          </button>
+          <a class="nav-item permission-denied" href="programs.html" data-permission="programs.manage,assignments.manage" style="text-decoration:none">
+            <span class="nav-item-text"><span class="nav-glyph" aria-hidden="true">▦</span>Chương trình &amp; phân công</span>
+          </a>
+          <a class="nav-item permission-denied" href="attendance.html" data-permission="attendance.report" style="text-decoration:none">
+            <span class="nav-item-text"><span class="nav-glyph" aria-hidden="true">◷</span>Báo cáo chuyên cần</span>
+          </a>
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -1219,7 +1176,7 @@
             <strong id="breadcrumb-current">Hồ sơ thực tập</strong>
           </div>
           <div class="topbar-right">
-            <a class="login-link" href="hr-dang-nhap.html">Đăng xuất</a>
+            <a class="login-link" href="dang-nhap.html">Đăng xuất</a>
           </div>
         </header>
 
@@ -1364,50 +1321,6 @@
                 </div>
               </div>
             </div>
-          </section>
-          
-          <section class="view-section" id="view-programs" hidden aria-labelledby="programs-title">
-            <div class="page-heading program-page-heading">
-              <div>
-                <p class="heading-kicker">Không gian thực tập</p>
-                <h1 id="programs-title">Chương trình thực tập</h1>
-                <p class="heading-description">Theo dõi danh sách, trạng thái và thời gian triển khai của các chương trình.</p>
-              </div>
-              <button class="primary-button" id="program-add" type="button"><span class="plus" aria-hidden="true">+</span> Tạo chương trình</button>
-            </div>
-            <div class="program-overview" id="program-overview" aria-label="Tổng quan chương trình"></div>
-            <div class="program-section-heading">
-              <div><h2 class="section-title">Danh sách chương trình</h2><p class="section-subtitle">Cấu hình thời gian và trạng thái hiển thị cho từng đợt thực tập.</p></div>
-              <label class="program-status-filter">Trạng thái
-                <select class="control" id="program-status-filter" aria-label="Lọc chương trình theo trạng thái">
-                  <option value="all">Tất cả chương trình</option>
-                  <option value="Đang diễn ra">Đang diễn ra</option>
-                  <option value="Sắp diễn ra">Sắp diễn ra</option>
-                  <option value="Đã kết thúc">Đã kết thúc</option>
-                </select>
-              </label>
-            </div>
-            <div class="program-grid" id="program-list" aria-live="polite"></div>
-          </section>
-
-          <section class="view-section" id="view-attendance" hidden aria-labelledby="attendance-title"></section>
-
-          <section class="view-section" id="view-schedule" hidden aria-labelledby="schedule-title">
-            <div class="page-heading"><div><p class="heading-kicker">Theo dõi lịch</p><h1 id="schedule-title">Lịch làm việc</h1><p class="heading-description">Theo dõi deadline, buổi họp và các mốc quan trọng của thực tập sinh.</p></div><button class="primary-button" type="button" data-sprint-toast="Đã chọn tạo lịch mới.">+ Thêm lịch</button></div>
-            <div class="sprint-toolbar"><label>Tìm kiếm <input class="form-control" id="schedule-search" type="search" placeholder="Tên công việc hoặc thực tập sinh"></label><label>Trạng thái <select class="form-control" id="schedule-filter"><option value="all">Tất cả</option><option value="urgent">Sắp đến hạn</option><option value="done">Đã hoàn thành</option></select></label></div>
-            <div class="sprint-table-wrap"><table class="sprint-table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Người phụ trách</th><th>Chương trình</th><th>Trạng thái</th></tr></thead><tbody id="schedule-list"></tbody></table></div>
-          </section>
-
-          <section class="view-section" id="view-tasks" hidden aria-labelledby="tasks-title">
-            <div class="page-heading"><div><p class="heading-kicker">Quản lý tiến độ</p><h1 id="tasks-title">Công việc</h1><p class="heading-description">Giao việc và cập nhật tiến độ thực hiện của từng thực tập sinh.</p></div><button class="primary-button" type="button" data-sprint-toast="Đã chọn giao công việc mới.">+ Giao công việc</button></div>
-            <div class="metrics"><article class="metric"><p class="metric-label">Tổng công việc</p><p class="metric-value">42</p><span class="metric-hint">trong chương trình</span></article><article class="metric"><p class="metric-label">Đang thực hiện</p><p class="metric-value">18</p><span class="metric-hint">cần theo dõi</span></article><article class="metric"><p class="metric-label">Hoàn thành</p><p class="metric-value">21</p><span class="metric-hint">đúng hạn</span></article><article class="metric"><p class="metric-label">Trễ hạn</p><p class="metric-value metric-accent">3</p><span class="metric-hint">cần hỗ trợ</span></article></div>
-            <div class="sprint-task-list"><article class="sprint-task"><div><span class="sprint-badge sprint-badge-active">Đang thực hiện</span><h2>Xây dựng trang đăng nhập</h2><p>Nguyễn Minh Anh · Hạn 18/06/2026</p></div><div class="sprint-task-progress"><strong>75%</strong><div class="sprint-progress"><span style="width:75%"></span></div></div></article><article class="sprint-task"><div><span class="sprint-badge sprint-badge-planned">Chờ bắt đầu</span><h2>Viết tài liệu API</h2><p>Trần Hoàng Nam · Hạn 20/06/2026</p></div><div class="sprint-task-progress"><strong>0%</strong><div class="sprint-progress"><span style="width:0%"></span></div></div></article><article class="sprint-task"><div><span class="sprint-badge sprint-badge-closed">Hoàn thành</span><h2>Thiết kế cơ sở dữ liệu</h2><p>Lê Thu Hà · Hoàn thành 12/06/2026</p></div><div class="sprint-task-progress"><strong>100%</strong><div class="sprint-progress"><span style="width:100%"></span></div></div></article></div>
-          </section>
-
-          <section class="view-section" id="view-statistics" hidden aria-labelledby="statistics-title">
-            <div class="page-heading"><div><p class="heading-kicker">Báo cáo chương trình</p><h1 id="statistics-title">Thống kê & đánh giá</h1><p class="heading-description">Tổng hợp kết quả đánh giá kỹ năng, thái độ và tiến độ của thực tập sinh.</p></div><button class="secondary-button" type="button" data-sprint-toast="Báo cáo đã sẵn sàng để xuất.">Xuất báo cáo</button></div>
-            <div class="metrics"><article class="metric"><p class="metric-label">Điểm trung bình</p><p class="metric-value">8.4</p><span class="metric-hint">/ 10 điểm</span></article><article class="metric"><p class="metric-label">Đạt yêu cầu</p><p class="metric-value">86%</p><span class="metric-hint">trên tổng số</span></article><article class="metric"><p class="metric-label">Đánh giá chờ duyệt</p><p class="metric-value metric-accent">5</p><span class="metric-hint">cần phản hồi</span></article></div>
-            <div class="sprint-table-wrap"><table class="sprint-table"><thead><tr><th>Thực tập sinh</th><th>Kỹ năng</th><th>Thái độ</th><th>Tiến độ</th><th>Kết quả</th></tr></thead><tbody><tr><td><strong>Nguyễn Minh Anh</strong><small>WEB001</small></td><td>8.8</td><td>9.0</td><td>92%</td><td><span class="sprint-badge sprint-badge-active">Tốt</span></td></tr><tr><td><strong>Trần Hoàng Nam</strong><small>WEB002</small></td><td>7.5</td><td>8.0</td><td>78%</td><td><span class="sprint-badge sprint-badge-planned">Khá</span></td></tr><tr><td><strong>Lê Thu Hà</strong><small>WEB003</small></td><td>9.2</td><td>9.5</td><td>100%</td><td><span class="sprint-badge sprint-badge-active">Xuất sắc</span></td></tr></tbody></table></div>
           </section>
 
           <section
@@ -1562,26 +1475,6 @@
                   ></select>
                 </div>
                 <div class="form-field">
-                  <label for="contract-starts-at">Ngày bắt đầu</label>
-                  <input
-                    class="form-control"
-                    id="contract-starts-at"
-                    name="startsAt"
-                    type="date"
-                    required
-                  />
-                </div>
-                <div class="form-field">
-                  <label for="contract-expires-at">Ngày hết hạn</label>
-                  <input
-                    class="form-control"
-                    id="contract-expires-at"
-                    name="expiresAt"
-                    type="date"
-                    required
-                  />
-                </div>
-                <div class="form-field">
                   <label for="contract-file">Tệp hợp đồng (PDF, DOCX)</label
                   ><input
                     class="form-control"
@@ -1661,72 +1554,6 @@
         </main>
       </div>
     </div>
-
-    <dialog class="dialog program-dialog" id="program-dialog" aria-labelledby="program-dialog-title">
-      <form id="program-form">
-        <div class="dialog-head">
-          <div>
-            <p class="dialog-eyebrow">Cấu hình chương trình</p>
-            <h2 id="program-dialog-title">Tạo chương trình</h2>
-            <p>Nhập thời gian triển khai và trạng thái của chương trình.</p>
-          </div>
-          <button class="icon-button" type="button" data-close-dialog="program-dialog" aria-label="Đóng">×</button>
-        </div>
-        <div class="dialog-body program-form-grid">
-          <input type="hidden" name="id" />
-          <div class="form-field program-field-full">
-            <label for="program-name">Tên chương trình</label>
-            <input class="form-control" id="program-name" name="name" required maxlength="90" placeholder="Ví dụ: Thực tập sinh Web Full-stack" />
-          </div>
-          <div class="form-field program-field-full">
-            <label for="program-department">Phòng ban</label>
-            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start">
-              <select class="form-control" id="program-department" name="departmentId" required></select>
-              <button class="secondary-button" id="program-department-add" type="button">Thêm phòng ban</button>
-            </div>
-          </div>
-          <div class="form-field program-field-full">
-            <label for="program-description">Mô tả</label>
-            <textarea class="form-control program-textarea" id="program-description" name="description" rows="3" maxlength="2000" placeholder="Mục tiêu và nội dung chính của chương trình"></textarea>
-          </div>
-          <div class="form-field">
-            <label for="program-start-date">Ngày bắt đầu</label>
-            <input class="form-control" id="program-start-date" name="startDate" type="date" required />
-          </div>
-          <div class="form-field">
-            <label for="program-end-date">Ngày kết thúc</label>
-            <input class="form-control" id="program-end-date" name="endDate" type="date" required />
-          </div>
-          <div class="form-field">
-            <label for="program-status">Trạng thái</label>
-            <select class="form-control" id="program-status" name="status" required>
-              <option value="Sắp diễn ra">Sắp diễn ra</option>
-              <option value="Đang diễn ra">Đang diễn ra</option>
-              <option value="Đã kết thúc">Đã kết thúc</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="program-seats">Chỉ tiêu thực tập sinh</label>
-            <input class="form-control" id="program-seats" name="capacity" type="number" min="1" max="10000" value="10" required />
-          </div>
-        </div>
-        <div class="dialog-actions">
-          <button class="secondary-button" type="button" data-close-dialog="program-dialog">Hủy</button>
-          <button class="primary-button" type="submit">Lưu chương trình</button>
-        </div>
-      </form>
-    </dialog>
-
-    <dialog class="dialog" id="department-dialog" aria-labelledby="department-dialog-title">
-      <form id="department-form">
-        <div class="dialog-head">
-          <div><p class="dialog-eyebrow">Danh mục tổ chức</p><h2 id="department-dialog-title">Thêm phòng ban</h2><p>Tên phòng ban sẽ xuất hiện trong danh sách chọn chương trình.</p></div>
-          <button class="icon-button" type="button" data-close-dialog="department-dialog" aria-label="Đóng">×</button>
-        </div>
-        <div class="dialog-body"><div class="form-field"><label for="department-name">Tên phòng ban</label><input class="form-control" id="department-name" name="name" maxlength="120" required /></div></div>
-        <div class="dialog-actions"><button class="secondary-button" type="button" data-close-dialog="department-dialog">Hủy</button><button class="primary-button" type="submit">Thêm phòng ban</button></div>
-      </form>
-    </dialog>
 
     <dialog
       class="dialog"
@@ -1849,7 +1676,8 @@
             </div>
           </div>
           <p class="dialog-note">
-            Hồ sơ sẽ được lưu vào cơ sở dữ liệu của hệ thống.
+            Hồ sơ mới được lưu cùng tài khoản thực tập sinh. Email kích hoạt sẽ
+            hướng dẫn người dùng tự đặt mật khẩu trước khi đăng nhập.
           </p>
           <div class="dialog-actions">
             <button
@@ -1896,23 +1724,19 @@
             <div>
               <strong id="document-dialog-file"></strong
               ><span
-                id="document-preview-message"
-                >Đang tải bản xem trước...</span
+                >Tệp được lưu trong SQL Server. Dùng liên kết bên dưới để mở
+                hoặc tải xuống.</span
               >
             </div>
           </div>
-          <iframe
-            class="document-preview-frame"
-            id="document-preview-frame"
-            title="Bản xem trước hợp đồng"
-            hidden
-          ></iframe>
         </div>
-        <button
+        <a
           class="secondary-button document-download"
           id="document-download"
-          type="button"
-        >Tải tệp xuống</button>
+          target="_blank"
+          rel="noopener"
+          >Mở / tải tệp</a
+        >
         <p class="dialog-note" id="document-dialog-note"></p>
         <div class="dialog-actions">
           <button
@@ -1930,57 +1754,9 @@
       </div>
     </dialog>
 
-    <dialog
-      class="dialog"
-      id="rejection-reason-dialog"
-      aria-labelledby="rejection-reason-title"
-    >
-      <form id="rejection-reason-form">
-        <div class="dialog-head">
-          <div>
-            <p class="dialog-eyebrow">Từ chối hồ sơ</p>
-            <h2 id="rejection-reason-title">Nhập lý do từ chối</h2>
-            <p>Lý do sẽ được lưu trong lịch sử xử lý.</p>
-          </div>
-          <button
-            class="icon-button"
-            type="button"
-            data-close-dialog="rejection-reason-dialog"
-            aria-label="Đóng"
-          >
-            ×
-          </button>
-        </div>
-        <div class="dialog-body">
-          <div class="form-field">
-            <label for="rejection-reason">Lý do từ chối</label>
-            <textarea
-              class="form-control"
-              id="rejection-reason"
-              name="reason"
-              rows="4"
-              maxlength="500"
-              placeholder="Nhập lý do để ứng viên được biết"
-              required
-            ></textarea>
-          </div>
-          <div class="dialog-actions">
-            <button
-              class="secondary-button"
-              type="button"
-              data-close-dialog="rejection-reason-dialog"
-            >
-              Hủy
-            </button>
-            <button class="danger-button" type="submit">Xác nhận từ chối</button>
-          </div>
-        </div>
-      </form>
-    </dialog>
-
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="session-bridge.js?v=20261003"></script>
+    <script src="session-bridge.js?v=20261009-blue"></script>
     <script>
       const API_BASE =
         location.port === "8000"
@@ -1993,7 +1769,6 @@
       let applicationPage = 1;
       let contractPage = 1;
       let reviewHistoryPage = 1;
-      let activeDocumentPreviewUrl = null;
       const PROFILE_PAGE_SIZE = 5;
       const APPLICATION_PAGE_SIZE = 5;
       const CONTRACT_PAGE_SIZE = 5;
@@ -2005,64 +1780,14 @@
         const response = await fetch(`${API_BASE}${path}`, options);
         if (!response.ok) {
           const problem = await response.json().catch(() => null);
-          const error = new Error(
+          throw new Error(
             problem?.message ??
               problem?.detail ??
+              (problem?.errors ? Object.values(problem.errors).flat().join(" ") : null) ??
               `Yêu cầu thất bại (${response.status}).`,
           );
-          error.status = response.status;
-          throw error;
         }
         return response.status === 204 ? null : response.json();
-      }
-
-      function getApiErrorMessage(error, fallback) {
-        if (error.status === 401)
-          return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
-        if (error.status === 403)
-          return "Bạn không có quyền thực hiện thao tác với hợp đồng này.";
-        if (error.status === 413)
-          return "Tệp hợp đồng vượt quá dung lượng cho phép.";
-        if (error.status >= 500)
-          return "Máy chủ đang gặp sự cố. Vui lòng thử lại sau.";
-        return /[À-ỹ]/u.test(error.message ?? "") ? error.message : fallback;
-      }
-
-      function contractValidationMessage(input) {
-        const messages = {
-          profileId: "Vui lòng chọn thực tập sinh.",
-          startsAt: "Vui lòng chọn ngày bắt đầu hợp đồng.",
-          expiresAt: "Vui lòng chọn ngày hết hạn hợp đồng.",
-          contractFile: "Vui lòng chọn tệp hợp đồng PDF hoặc DOCX.",
-        };
-        return (
-          messages[input.name] ??
-          "Vui lòng kiểm tra lại thông tin hợp đồng."
-        );
-      }
-
-      async function fetchDocumentBlob(documentId, action) {
-        let response;
-        try {
-          response = await fetch(
-            `${API_BASE}/documents/${encodeURIComponent(documentId)}/${action}`,
-            { credentials: "same-origin" },
-          );
-        } catch {
-          throw new Error("Không thể kết nối để tải tài liệu. Vui lòng thử lại.");
-        }
-        if (!response.ok) {
-          if (response.status === 401)
-            throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-          if (response.status === 403)
-            throw new Error("Bạn không có quyền truy cập tài liệu này.");
-          if (response.status === 404)
-            throw new Error("Không tìm thấy tệp hợp đồng.");
-          throw new Error(
-            `Không thể tải tài liệu (mã lỗi ${response.status}).`,
-          );
-        }
-        return response.blob();
       }
 
       async function loadState() {
@@ -2093,16 +1818,11 @@
             documents: dashboard.documents,
           };
           renderAll();
-          return true;
         } catch (error) {
           showToast(
-            getApiErrorMessage(
-              error,
-              "Không kết nối được hệ thống. Vui lòng thử lại sau.",
-            ),
+            error.message || "Không kết nối được API/SQL Server.",
             "error",
           );
-          return false;
         }
       }
 
@@ -2167,45 +1887,6 @@
         toastTimer = setTimeout(() => {
           toast.hidden = true;
         }, 5000);
-      }
-
-      function requestRejectionReason() {
-        const dialog = document.getElementById("rejection-reason-dialog");
-        const form = document.getElementById("rejection-reason-form");
-        const input = document.getElementById("rejection-reason");
-        form.reset();
-        input.setCustomValidity("");
-
-        return new Promise((resolve) => {
-          const cleanup = () => {
-            form.removeEventListener("submit", handleSubmit);
-            input.removeEventListener("input", clearValidationMessage);
-            dialog.removeEventListener("close", handleClose);
-          };
-          const clearValidationMessage = () => input.setCustomValidity("");
-          const handleClose = () => {
-            cleanup();
-            resolve(null);
-          };
-          const handleSubmit = (event) => {
-            event.preventDefault();
-            const reason = input.value.trim();
-            if (!reason) {
-              input.setCustomValidity("Vui lòng nhập lý do từ chối.");
-              input.reportValidity();
-              return;
-            }
-            cleanup();
-            resolve(reason);
-            dialog.close();
-          };
-
-          form.addEventListener("submit", handleSubmit);
-          input.addEventListener("input", clearValidationMessage);
-          dialog.addEventListener("close", handleClose);
-          dialog.showModal();
-          input.focus();
-        });
       }
 
       function fillFilterOptions(select, values, label) {
@@ -2370,10 +2051,7 @@
             const owner = profile
               ? `${profile.name} · ${profile.studentId}`
               : "Hồ sơ đã xóa";
-            const reviewer = item.reviewedBy
-              ? ` · Người xử lý: ${escapeHtml(item.reviewedBy)}`
-              : "";
-            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(item.targetType)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(item.targetLabel)} · ${formatDateTime(item.reviewedAt)}${reviewer}</p></div><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>${item.note ? `<p class="document-file" style="padding: 0 16px 12px">${escapeHtml(item.note)}</p>` : ""}</article>`;
+            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(item.targetType)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(item.targetLabel)} · ${formatDateTime(item.reviewedAt)}</p></div><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></div>${item.note ? `<p class="document-file" style="padding: 0 16px 12px">${escapeHtml(item.note)}</p>` : ""}</article>`;
           })
           .join("");
         document.getElementById("review-history-result-count").textContent =
@@ -2611,28 +2289,7 @@
         profiles: "Hồ sơ thực tập",
         applications: "Đơn xin",
         documents: "Tài liệu & hợp đồng",
-        programs: "Chương trình",
-        schedule: "Lịch làm việc",
-        attendance: "Báo cáo chấm công",
-        tasks: "Công việc",
-        statistics: "Thống kê & đánh giá",
       };
-      const sprintSchedule = [
-        ["18/06/2026", "Nộp báo cáo tuần 3", "Nguyễn Minh Anh", "Web Full-stack", "urgent"],
-        ["20/06/2026", "Review tiến độ công việc", "Trần Hoàng Nam", "Web Full-stack", "urgent"],
-        ["12/06/2026", "Họp định hướng chương trình", "Lê Thu Hà", "Web Full-stack", "done"],
-      ];
-      function renderSprintSchedule() {
-        const search = (document.getElementById("schedule-search")?.value || "").toLowerCase();
-        const filter = document.getElementById("schedule-filter")?.value || "all";
-        const rows = sprintSchedule.filter((item) =>
-          (filter === "all" || item[4] === filter) &&
-          item.slice(1, 4).join(" ").toLowerCase().includes(search),
-        );
-        document.getElementById("schedule-list").innerHTML = rows.length
-          ? rows.map((item) => `<tr><td><strong>${item[0]}</strong></td><td>${item[1]}</td><td>${item[2]}</td><td>${item[3]}</td><td><span class="sprint-badge ${item[4] === "done" ? "sprint-badge-active" : "sprint-badge-planned"}">${item[4] === "done" ? "Đã hoàn thành" : "Sắp đến hạn"}</span></td></tr>`).join("")
-          : '<tr><td colspan="5"><div class="empty-state">Không có lịch phù hợp.</div></td></tr>';
-      }
       function showView(view) {
         document.querySelectorAll(".view-section").forEach((section) => {
           section.hidden = section.id !== `view-${view}`;
@@ -2681,16 +2338,12 @@
         document.getElementById("profile-dialog").showModal();
       }
 
-      async function openDocumentDialog(documentId) {
+      function openDocumentDialog(documentId) {
         const documentItem = state.documents.find(
           (item) => String(item.id) === String(documentId),
         );
         if (!documentItem) return;
         activeDocumentId = documentId;
-        if (activeDocumentPreviewUrl) {
-          URL.revokeObjectURL(activeDocumentPreviewUrl);
-          activeDocumentPreviewUrl = null;
-        }
         const profile = getProfile(documentItem.profileId);
         document.getElementById("document-dialog-type").textContent =
           documentItem.type;
@@ -2705,17 +2358,15 @@
           documentItem.status;
         document.getElementById("document-dialog-note").textContent =
           `Phiên bản ${documentItem.version} · Người tải: ${documentItem.uploadedBy} · ${documentItem.startsAt ? "Bắt đầu: " + formatDateTime(documentItem.startsAt) : ""} · ${documentItem.expiresAt ? "Hết hạn: " + formatDateTime(documentItem.expiresAt) : ""} · ${documentItem.note || ""}`;
-        const preview = document.getElementById("document-preview-frame");
-        const previewMessage = document.getElementById(
-          "document-preview-message",
-        );
-        preview.src = "about:blank";
-        preview.hidden = true;
-        previewMessage.hidden = false;
-        previewMessage.textContent =
-          documentItem.contentType === "application/pdf"
-            ? "Đang tải bản xem trước..."
-            : "Định dạng này chưa hỗ trợ xem trước. Bạn có thể tải tệp xuống.";
+        const preview = document.getElementById("sprint-preview");
+        preview.hidden = documentItem.contentType !== "application/pdf";
+        preview.src = preview.hidden
+          ? "about:blank"
+          : `${API_BASE}/documents/${documentItem.id}/preview`;
+        document.getElementById("document-download").href =
+          `${API_BASE}/documents/${documentItem.id}/file`;
+        document.getElementById("document-download").download =
+          documentItem.fileName;
         const isPending =
           documentItem.status === "Chờ duyệt" &&
           documentItem.isCurrent &&
@@ -2723,62 +2374,11 @@
         document.getElementById("document-approve").hidden = !isPending;
         document.getElementById("document-reject").hidden = !isPending;
         document.getElementById("document-dialog").showModal();
-        if (documentItem.contentType !== "application/pdf") return;
-        try {
-          const file = await fetchDocumentBlob(documentItem.id, "preview");
-          if (String(activeDocumentId) !== String(documentId)) return;
-          activeDocumentPreviewUrl = URL.createObjectURL(file);
-          preview.src = activeDocumentPreviewUrl;
-          preview.hidden = false;
-          previewMessage.hidden = true;
-        } catch (error) {
-          if (String(activeDocumentId) !== String(documentId)) return;
-          previewMessage.textContent =
-            "Không tải được bản xem trước. Bạn có thể thử tải tệp xuống.";
-          showToast(error.message, "error");
-        }
       }
-
-      document
-        .getElementById("document-download")
-        .addEventListener("click", async () => {
-          const documentItem = state.documents.find(
-            (item) => String(item.id) === String(activeDocumentId),
-          );
-          if (!documentItem) {
-            showToast("Không tìm thấy thông tin hợp đồng.", "error");
-            return;
-          }
-          try {
-            const file = await fetchDocumentBlob(documentItem.id, "file");
-            const url = URL.createObjectURL(file);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = documentItem.fileName;
-            document.body.append(link);
-            link.click();
-            link.remove();
-            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-            showToast(`Đã tải xuống ${documentItem.fileName}.`);
-          } catch (error) {
-            showToast(error.message, "error");
-          }
-        });
-
-      document
-        .getElementById("document-dialog")
-        .addEventListener("close", () => {
-          document.getElementById("document-preview-frame").src = "about:blank";
-          if (activeDocumentPreviewUrl) {
-            URL.revokeObjectURL(activeDocumentPreviewUrl);
-            activeDocumentPreviewUrl = null;
-          }
-          activeDocumentId = null;
-        });
 
       async function decideDocument(documentId, decision) {
         const status = decision === "approve" ? "Đã duyệt" : "Từ chối";
-        const note = status === "Từ chối" ? await requestRejectionReason() : null;
+        const note = status === "Từ chối" ? await window.sprintReason() : null;
         if (status === "Từ chối" && !note) return;
         try {
           await apiRequest(`/hr/documents/${documentId}`, {
@@ -2786,7 +2386,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status, note }),
           });
-          if (!(await loadState())) return;
+          await loadState();
           showToast(
             decision === "approve"
               ? "Đã duyệt tài liệu."
@@ -3089,7 +2689,7 @@
         const values = Object.fromEntries(new FormData(profileForm).entries());
         if (!values.profileId && !values.dateOfBirth) {
           profileForm.elements.dateOfBirth.setCustomValidity(
-            "Vui lòng nhập ngày sinh để tạo mật khẩu mặc định.",
+            "Vui lòng nhập ngày sinh để hoàn thiện hồ sơ.",
           );
           profileForm.elements.dateOfBirth.reportValidity();
           return;
@@ -3098,6 +2698,7 @@
         const existing = values.profileId ? getProfile(values.profileId) : null;
         const profile = {
           name: values.name.trim(),
+          studentId: values.studentId.trim(),
           dateOfBirth: values.dateOfBirth || null,
           phone: values.phone || null,
           email: values.email.trim(),
@@ -3113,11 +2714,7 @@
             {
               method: existing ? "PUT" : "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(
-                existing
-                  ? profile
-                  : { ...profile, studentId: values.studentId.trim() },
-              ),
+              body: JSON.stringify(profile),
             },
           );
           await loadState();
@@ -3125,7 +2722,7 @@
           showToast(
             existing
               ? "Đã cập nhật hồ sơ trong SQL Server."
-              : "Đã thêm hồ sơ vào SQL Server.",
+              : "Đã tạo hồ sơ và gửi email kích hoạt tài khoản.",
           );
         } catch (error) {
           const message = error.message || "Không lưu được hồ sơ.";
@@ -3137,14 +2734,28 @@
           } else {
             console.error("Không lưu được hồ sơ.", error);
           }
+          showToast(message, "error");
         }
       });
 
       document
         .getElementById("applications-list")
         .addEventListener("click", async (event) => {
-          const button = event.target.closest("[data-application-decision]");
+          const button = event.target.closest(
+            "[data-application-decision], [data-view-document], [data-document-decision]",
+          );
           if (!button) return;
+          if (button.dataset.viewDocument) {
+            openDocumentDialog(button.dataset.viewDocument);
+            return;
+          }
+          if (button.dataset.documentDecision) {
+            decideDocument(
+              button.dataset.documentId,
+              button.dataset.documentDecision,
+            );
+            return;
+          }
           const application = state.applications.find(
             (item) => String(item.id) === button.dataset.applicationId,
           );
@@ -3154,7 +2765,7 @@
               ? "Đã duyệt"
               : "Từ chối";
           const note =
-            status === "Từ chối" ? await requestRejectionReason() : null;
+            status === "Từ chối" ? await window.sprintReason() : null;
           if (status === "Từ chối" && !note) return;
           try {
             await apiRequest(`/hr/applications/${application.id}`, {
@@ -3162,7 +2773,7 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ status, note }),
             });
-            if (!(await loadState())) return;
+            await loadState();
             showToast(
               status === "Đã duyệt"
                 ? `Đã duyệt đơn của ${application.name}.`
@@ -3172,21 +2783,6 @@
             showToast(error.message || "Không cập nhật được đơn.", "error");
           }
         });
-
-      document.addEventListener("click", (event) => {
-        const button = event.target.closest(
-          "[data-view-document], [data-document-decision]",
-        );
-        if (!button) return;
-        if (button.dataset.viewDocument) {
-          openDocumentDialog(button.dataset.viewDocument);
-          return;
-        }
-        void decideDocument(
-          button.dataset.documentId,
-          button.dataset.documentDecision,
-        );
-      });
 
       document
         .getElementById("document-approve")
@@ -3199,16 +2795,9 @@
           decideDocument(activeDocumentId, "reject"),
         );
 
-      const contractForm = document.getElementById("contract-form");
-      contractForm.addEventListener(
-        "invalid",
-        (event) => {
-          event.preventDefault();
-          showToast(contractValidationMessage(event.target), "error");
-        },
-        true,
-      );
-      contractForm.addEventListener("submit", async (event) => {
+      document
+        .getElementById("contract-form")
+        .addEventListener("submit", async (event) => {
           event.preventDefault();
           const form = event.currentTarget;
           if (!form.reportValidity()) return;
@@ -3250,17 +2839,11 @@
                 body: file,
               },
             );
-            if (!(await loadState())) return;
+            await loadState();
             form.reset();
             showToast(`Đã tải ${file.name} lên SQL Server.`);
           } catch (error) {
-            showToast(
-              getApiErrorMessage(
-                error,
-                "Không tải được hợp đồng. Vui lòng thử lại.",
-              ),
-              "error",
-            );
+            showToast(error.message || "Không tải được hợp đồng.", "error");
           }
         });
 
@@ -3276,18 +2859,9 @@
           if (event.target === dialog) dialog.close();
         }),
       );
-      document.querySelectorAll("[data-sprint-toast]").forEach((button) =>
-        button.addEventListener("click", () => showToast(button.dataset.sprintToast)),
-      );
-      document.getElementById("schedule-search")?.addEventListener("input", renderSprintSchedule);
-      document.getElementById("schedule-filter")?.addEventListener("change", renderSprintSchedule);
 
-      renderSprintSchedule();
       loadState();
     </script>
     <script src="sprint1-ui.js?v=20261003-3"></script>
-    <script src="sprint2-programs.js?v=20261006"></script>
-    <script src="sprint2-schedules.js?v=20261007"></script>
-    <script src="attendance-report.js?v=20261007"></script>
   </body>
 </html>

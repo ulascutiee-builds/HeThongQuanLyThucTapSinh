@@ -157,6 +157,31 @@
         if (btn) openProfileDialog(getProfile(btn.dataset.appDetail));
       });
   }
+  if (intern) {
+    const verification = el("div");
+    verification.style.cssText = "padding:16px;margin:16px 0;border:1px solid #d5aa65;border-radius:8px;background:#fff8e8";
+    verification.hidden = true;
+    verification.append(el("p", "Xác thực email trước khi nộp hồ sơ. Hãy mở liên kết trong email xác thực đã gửi đến địa chỉ đăng ký."));
+    const resend = el("button", "Gửi lại email xác thực");
+    resend.type = "button";
+    resend.className = "button button-secondary";
+    verification.append(resend);
+    document.getElementById("submit-application").parentElement.before(verification);
+    resend.onclick = async () => {
+      resend.disabled = true;
+      try {
+        const result = await apiRequest("/auth/resend-verification", { method: "POST" });
+        showToast(result.message || "Đã gửi lại email xác thực.");
+      } catch (error) { showApiError(error); }
+      finally { resend.disabled = false; }
+    };
+    const render = renderAll;
+    renderAll = function () {
+      render();
+      verification.hidden = state.profile?.emailVerified !== false;
+      if (!verification.hidden) document.getElementById("submit-application").disabled = true;
+    };
+  }
   const query = new URLSearchParams(location.search);
   if (query.has("verify"))
     fetch("/api/auth/verify-email", {

@@ -39,15 +39,4 @@ public static class ApiMapping
         history.Status,
         history.Note,
         history.ReviewedAt, history.ReviewedBy);
-
-    public static InternScheduleResponse ToResponse(this InternSchedule schedule) => new(
-        schedule.Id,
-        schedule.ProfileId,
-        schedule.Profile?.Name ?? "",
-        schedule.Title,
-        schedule.StartsAt,
-        schedule.EndsAt,
-        schedule.Detail,
-        schedule.Status,
-        schedule.UpdatedAt);
 }

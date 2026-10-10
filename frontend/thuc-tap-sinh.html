@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#173e34" />
     <title>Khu vực thực tập sinh | CODEGYM</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
     <style>
       :root {
         color-scheme: light;
@@ -236,175 +230,6 @@
       }
       .view-section {
         animation: enter 0.28s ease-out both;
-      }
-      .schedule-toolbar {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 14px;
-      }
-      .schedule-view-switch {
-        display: flex;
-        gap: 6px;
-      }
-      .schedule-view-switch .is-selected {
-        border-color: var(--forest);
-        background: var(--forest);
-        color: #fff;
-      }
-      .schedule-search-label {
-        display: grid;
-        width: min(100%, 280px);
-        gap: 6px;
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 700;
-      }
-      .schedule-search {
-        min-height: 37px;
-        padding: 0 10px;
-        border: 1px solid var(--line);
-        border-radius: 3px;
-        background: #fff;
-        color: var(--ink);
-        font-size: 11px;
-      }
-      .schedule-panel,
-      .schedule-week-panel {
-        background: #fff;
-      }
-      .schedule-table-scroll {
-        overflow-x: auto;
-      }
-      .schedule-table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-      }
-      .schedule-table th,
-      .schedule-table td {
-        padding: 12px 14px;
-        border-bottom: 1px solid #edf0eb;
-      }
-      .schedule-table th {
-        background: #f8f9f6;
-        color: #818b84;
-        font-size: 9px;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
-      .schedule-table td {
-        color: #59655e;
-        font-size: 11px;
-      }
-      .schedule-table tbody tr:last-child td {
-        border-bottom: 0;
-      }
-      .schedule-table td strong {
-        color: #29372f;
-      }
-      .schedule-status {
-        display: inline-flex;
-        padding: 4px 8px;
-        border-radius: 99px;
-        background: #faf1df;
-        color: #a46a17;
-        font-size: 9px;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      .schedule-status[data-status="Đã xác nhận"],
-      .schedule-status[data-status="Đang diễn ra"] {
-        background: #edf5ef;
-        color: #347153;
-      }
-      .schedule-status[data-status="Đã hoàn thành"] {
-        background: #eef0ed;
-        color: #68736c;
-      }
-      .schedule-status[data-status="Đã hủy"] {
-        background: #f8e9e6;
-        color: #ad4939;
-      }
-      .schedule-count,
-      .schedule-message {
-        margin: 0;
-        padding: 12px 14px;
-        color: var(--muted);
-        font-size: 10px;
-      }
-      .schedule-message:empty {
-        display: none;
-      }
-      .schedule-count {
-        border-top: 1px solid var(--line);
-      }
-      .schedule-week-heading {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 12px;
-        border-bottom: 1px solid var(--line);
-      }
-      .schedule-week-heading strong {
-        color: var(--ink);
-        font-size: 11px;
-      }
-      .schedule-week-grid {
-        display: grid;
-        min-width: 740px;
-        grid-template-columns: repeat(7, minmax(100px, 1fr));
-      }
-      .schedule-week-day {
-        min-height: 150px;
-        padding: 0 8px 9px;
-        border-right: 1px solid #edf0eb;
-      }
-      .schedule-week-day:last-child {
-        border-right: 0;
-      }
-      .schedule-week-day h2 {
-        margin: 0 -8px 9px;
-        padding: 12px 4px;
-        border-bottom: 1px solid #e1e5df;
-        background: #f8f9f6;
-        color: #818b84;
-        font-size: 9px;
-        text-align: center;
-      }
-      .schedule-week-item {
-        display: grid;
-        gap: 6px;
-        margin-bottom: 7px;
-        padding: 8px;
-        border: 1px solid var(--line);
-        border-radius: 3px;
-        background: #fbfcf9;
-        font-size: 9px;
-      }
-      .schedule-week-item strong {
-        color: #26362e;
-      }
-      .schedule-week-item small,
-      .schedule-week-empty {
-        color: #89938d;
-        font-size: 9px;
-      }
-      @media (max-width: 720px) {
-        .schedule-toolbar {
-          align-items: stretch;
-          flex-direction: column;
-        }
-        .schedule-search-label {
-          width: 100%;
-        }
-        .schedule-week-heading .button {
-          padding-inline: 8px;
-          font-size: 9px;
-        }
       }
       .page-heading {
         display: flex;
@@ -1301,8 +1126,11 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
   </head>
-  <body>
+  <body class="portal-page">
     <div class="app-shell">
       <aside class="sidebar" aria-label="Điều hướng thực tập sinh">
         <a
@@ -1330,14 +1158,13 @@
             <span class="nav-glyph" aria-hidden="true">▤</span
             ><span>Hồ sơ & tài liệu</span>
           </button>
-          <button class="nav-item" type="button" data-view="schedule">
-            <span class="nav-glyph" aria-hidden="true">◷</span
-            ><span>Lịch thực tập</span>
-          </button>
           <button class="nav-item" type="button" data-view="contract">
             <span class="nav-glyph" aria-hidden="true">▧</span
             ><span>Hợp đồng</span>
           </button>
+          <a class="nav-item permission-denied" href="attendance.html" data-permission="schedule.read,attendance.write" style="text-decoration:none">
+            <span class="nav-glyph" aria-hidden="true">◷</span><span>Lịch &amp; chấm công</span>
+          </a>
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-note">
@@ -1620,120 +1447,6 @@
                   <div class="panel-content" id="profile-summary-content"></div>
                 </section>
               </div>
-            </div>
-          </section>
-
-          <section
-            class="view-section"
-            id="view-schedule"
-            aria-labelledby="schedule-title"
-            hidden
-          >
-            <div class="page-heading">
-              <div>
-                <p class="heading-kicker">Kế hoạch thực tập</p>
-                <h1 id="schedule-title">Lịch cá nhân</h1>
-                <p class="heading-description">
-                  Theo dõi các ca làm việc và trạng thái lịch do HR cập nhật.
-                </p>
-              </div>
-              <button
-                class="button button-secondary"
-                id="schedule-refresh"
-                type="button"
-              >
-                Làm mới lịch
-              </button>
-            </div>
-            <p
-              class="schedule-message"
-              id="schedule-update-message"
-              role="status"
-              aria-live="polite"
-            ></p>
-            <div class="schedule-toolbar">
-              <div
-                class="schedule-view-switch"
-                role="group"
-                aria-label="Kiểu hiển thị lịch"
-              >
-                <button
-                  class="button button-secondary is-selected"
-                  type="button"
-                  data-schedule-view="list"
-                  aria-pressed="true"
-                >
-                  Danh sách
-                </button>
-                <button
-                  class="button button-secondary"
-                  type="button"
-                  data-schedule-view="week"
-                  aria-pressed="false"
-                >
-                  Lịch tuần
-                </button>
-              </div>
-              <label class="schedule-search-label" for="schedule-search">
-                Tìm ca hoặc ghi chú
-                <input
-                  class="schedule-search"
-                  id="schedule-search"
-                  type="search"
-                  placeholder="Ví dụ: họp, onsite"
-                />
-              </label>
-            </div>
-            <div
-              class="section-panel schedule-panel"
-              id="schedule-list-view"
-              aria-label="Danh sách lịch thực tập"
-            >
-              <div class="schedule-table-scroll">
-                <table class="schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Ca / tiêu đề</th>
-                      <th>Thời gian</th>
-                      <th>Ghi chú</th>
-                      <th>Trạng thái từ HR</th>
-                    </tr>
-                  </thead>
-                  <tbody id="schedule-list">
-                    <tr>
-                      <td colspan="4" class="schedule-message">
-                        Chọn “Lịch thực tập” để tải lịch cá nhân của bạn.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="schedule-count" id="schedule-count"></p>
-            </div>
-            <div
-              class="section-panel schedule-week-panel"
-              id="schedule-week-view"
-              aria-label="Lịch tuần"
-              hidden
-            >
-              <div class="schedule-week-heading">
-                <button
-                  class="button button-secondary"
-                  id="schedule-week-previous"
-                  type="button"
-                >
-                  ‹ Tuần trước
-                </button>
-                <strong id="schedule-week-label"></strong>
-                <button
-                  class="button button-secondary"
-                  id="schedule-week-next"
-                  type="button"
-                >
-                  Tuần sau ›
-                </button>
-              </div>
-              <div class="schedule-week-grid" id="schedule-week-grid"></div>
             </div>
           </section>
 
@@ -2194,7 +1907,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="session-bridge.js?v=20261003"></script>
+    <script src="session-bridge.js?v=20261009-blue"></script>
     <script>
       const API_BASE =
         location.port === "8000"
@@ -2249,9 +1962,11 @@
       }
 
       async function loadWorkspace() {
+        const identity = await window.sessionReady;
         const profileId =
-          localStorage.getItem(SESSION_KEY) ||
-          sessionStorage.getItem(SESSION_KEY);
+          identity?.profileId ||
+          sessionStorage.getItem(SESSION_KEY) ||
+          localStorage.getItem(SESSION_KEY);
         if (!profileId) {
           window.location.replace("dang-nhap.html");
           return;
@@ -2337,12 +2052,9 @@
         const titles = {
           overview: "Tổng quan",
           documents: "Hồ sơ & tài liệu",
-          schedule: "Lịch thực tập",
           contract: "Hợp đồng",
         };
         document.getElementById("breadcrumb-title").textContent = titles[view];
-        if (view === "schedule")
-          window.dispatchEvent(new CustomEvent("intern-schedule:show"));
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
@@ -2896,12 +2608,13 @@
             !state.contractDocumentId
           )
             return;
-          if (
-            !confirm(
-              "Bạn chỉ được xác nhận một lần cho phiên bản này. Bạn đã đọc và đồng ý với hợp đồng?",
-            )
-          )
-            return;
+          const accepted = window.portalConfirm
+            ? await window.portalConfirm(
+                "Bạn chỉ được xác nhận một lần cho phiên bản này. Bạn đã đọc và đồng ý với hợp đồng?",
+                "Xác nhận hợp đồng",
+              )
+            : true;
+          if (!accepted) return;
           try {
             await apiRequest(
               `/interns/${state.profile.id}/documents/${state.contractDocumentId}/confirm-contract`,
@@ -2923,6 +2636,5 @@
       loadWorkspace();
     </script>
     <script src="sprint1-ui.js?v=20261002.2"></script>
-    <script src="intern-schedule.js?v=20261007"></script>
   </body>
 </html>

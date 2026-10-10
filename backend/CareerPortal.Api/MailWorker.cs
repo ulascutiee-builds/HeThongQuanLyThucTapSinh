@@ -20,7 +20,7 @@ public sealed class MailWorker(IServiceScopeFactory scopes,IConfiguration config
             var claimed=await db.MailJobs.Where(x=>x.Id==job.Id&&x.DueAt<=now&&(x.Status=="Queued"||x.Status=="Processing")).ExecuteUpdateAsync(s=>s.SetProperty(x=>x.Status,"Processing").SetProperty(x=>x.DueAt,now.AddMinutes(5)).SetProperty(x=>x.Attempts,x=>x.Attempts+1),stop);if(claimed==0)continue;
             try{
                 using var smtp=new SmtpClient();var host=config["Email:SmtpHost"];
-                if(string.IsNullOrWhiteSpace(host)){var path=Path.Combine(env.ContentRootPath,"App_Data","mail");Directory.CreateDirectory(path);smtp.DeliveryMethod=SmtpDeliveryMethod.SpecifiedPickupDirectory;smtp.PickupDirectoryLocation=path;}
+                if(string.IsNullOrWhiteSpace(host)){var path=Path.Combine(config["Runtime:DataDirectory"]??Path.Combine(env.ContentRootPath,"App_Data"),"mail");Directory.CreateDirectory(path);smtp.DeliveryMethod=SmtpDeliveryMethod.SpecifiedPickupDirectory;smtp.PickupDirectoryLocation=path;}
                 else{smtp.Host=host;smtp.Port=config.GetValue("Email:Port",587);smtp.EnableSsl=config.GetValue("Email:EnableSsl",true);smtp.Credentials=new NetworkCredential(config["Email:Username"],config["Email:Password"]);smtp.Timeout=15000;}
                 using var message=new MailMessage(config["Email:From"]??"noreply@sprint1.local",job.Recipient,job.Subject,job.Body){IsBodyHtml=job.IsHtml};await smtp.SendMailAsync(message,stop);
                 await db.MailJobs.Where(x=>x.Id==job.Id).ExecuteUpdateAsync(s=>s.SetProperty(x=>x.Status,"Sent").SetProperty(x=>x.SentAt,DateTimeOffset.UtcNow).SetProperty(x=>x.LastError,(string?)null),stop);

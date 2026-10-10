@@ -68,33 +68,3 @@ public sealed class InternReviewHistory
     public string ReviewedBy { get; set; } = "";
     public InternProfile? Profile { get; set; }
 }
-
-public sealed class InternSchedule
-{
-    public int Id { get; set; }
-    public int ProfileId { get; set; }
-    public required string Title { get; set; }
-    public DateTimeOffset StartsAt { get; set; }
-    public DateTimeOffset EndsAt { get; set; }
-    public string? Detail { get; set; }
-    public string Status { get; set; } = "Đã lên lịch";
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public InternProfile? Profile { get; set; }
-    public InternAttendance? Attendance { get; set; }
-}
-
-public sealed class InternAttendance
-{
-    public int Id { get; set; }
-    public int ScheduleId { get; set; }
-    public int ProfileId { get; set; }
-    public DateOnly WorkDate { get; set; }
-    public required string Status { get; set; }
-    public DateTimeOffset? ClockInAt { get; set; }
-    public DateTimeOffset? ClockOutAt { get; set; }
-    public string? Note { get; set; }
-    public required string UpdatedBy { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public InternSchedule? Schedule { get; set; }
-    public InternProfile? Profile { get; set; }
-}
