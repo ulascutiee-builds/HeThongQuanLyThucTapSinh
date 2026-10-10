@@ -152,7 +152,9 @@ class Suite:
         admin = self.login(self.admin, self.admin_email, self.admin_password)
         self.check(hr["role"] == "HR" and hr["href"] == "hr.html", "HR role/route incorrect")
         self.check(admin["role"] == "Admin" and admin["href"] == "admin.html", "Admin role/route incorrect")
+        self.req(self.hr, "GET", "/hr/dashboard")
         self.req(self.hr, "GET", "/accounts", expected=403)
+        self.req(self.hr, "PUT", "/roles/Mentor/permissions", {"permissions": []}, expected=403)
 
         data = self.registration()
         for fields in ({"email": "invalid"}, {"phone": "abc"}, {"phone": ""}, {"name": ""}, {"password": "short"},
@@ -164,6 +166,8 @@ class Suite:
         self.login(self.student, data["email"], data["password"])
         self.req(self.student, "GET", "/hr/dashboard", expected=403)
         self.req(self.student, "GET", "/HR/dashboard", expected=403)
+        self.req(self.student, "GET", "/accounts", expected=403)
+        self.req(self.student, "PUT", "/roles/Mentor/permissions", {"permissions": []}, expected=403)
         self.req(self.student, "POST", "/auth/logout", expected=403, headers={"Origin": "https://untrusted.example"})
         self.req(self.student, "POST", f"/interns/{pid}/applications", expected=400)
         self.verify_registration_if_needed(profile)
@@ -322,6 +326,8 @@ class Suite:
         mentor_only = {**edited, "roles": ["Mentor"]}
         self.req(self.admin, "PUT", f"/accounts/{account_id}", mentor_only)
         self.req(session, "GET", "/hr/dashboard", expected=403)
+        self.req(session, "GET", "/accounts", expected=403)
+        self.req(session, "PUT", "/roles/Mentor/permissions", {"permissions": []}, expected=403)
         self.check(self.req(session, "GET", "/auth/me")["href"] == "mentor.html", "Existing session retained removed HR role")
 
         roles = self.req(self.admin, "GET", "/accounts")["roles"]
