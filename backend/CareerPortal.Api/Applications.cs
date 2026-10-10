@@ -9,6 +9,9 @@ public static class Applications
             if(input.Status is not("Đã duyệt" or "Từ chối")||(input.Status=="Từ chối"&&string.IsNullOrWhiteSpace(input.Note)))return Results.BadRequest(new{message="Nhập trạng thái hợp lệ và lý do từ chối."});
             await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var a=await db.InternApplications.Include(x=>x.Profile).SingleOrDefaultAsync(x=>x.Id==id);if(a is null)return Results.NotFound();if(a.Status!="Chờ duyệt")return Results.Conflict(new{message="Hồ sơ không còn chờ duyệt."});
+            if(input.Status=="Đã duyệt")
+                foreach(var type in new[]{"CV","Đơn xin thực tập"})
+                    if(!await db.InternDocuments.AnyAsync(x=>x.ProfileId==a.ProfileId&&x.Type==type&&x.IsCurrent&&x.Status=="Đã duyệt"))return Results.BadRequest(new{message="Vui lòng duyệt CV và đơn xin thực tập trước khi duyệt hồ sơ."});
             a.Status=input.Status;a.Note=input.Note?.Trim();a.ReviewedAt=DateTimeOffset.UtcNow;a.ReviewedBy=c.User.Identity!.Name;
             a.Profile!.Status=input.Status=="Đã duyệt"?"Đang thực tập":"Từ chối";
             if(input.Status=="Đã duyệt")
@@ -19,9 +22,10 @@ public static class Applications
                     applicationDocument.Status="Đã duyệt";
                     applicationDocument.ReviewedBy=a.ReviewedBy;
                     applicationDocument.ReviewedAt=a.ReviewedAt;
+                    db.InternReviewHistories.Add(new(){ProfileId=a.ProfileId,TargetType="Tài liệu",TargetId=applicationDocument.Id,TargetLabel=applicationDocument.Type,Status=applicationDocument.Status,ReviewedAt=a.ReviewedAt.Value,ReviewedBy=a.ReviewedBy!});
                 }
             }
-            else
+            else if(SprintSecurity.HR(c))
             {
                 var applicationDocuments=await db.InternDocuments.Where(x=>x.ProfileId==a.ProfileId&&x.IsCurrent&&(x.Type=="CV"||x.Type=="Đơn xin thực tập")&&x.Status=="Chờ duyệt").ToListAsync();
                 foreach(var applicationDocument in applicationDocuments)
@@ -30,6 +34,7 @@ public static class Applications
                     applicationDocument.Note=a.Note;
                     applicationDocument.ReviewedBy=a.ReviewedBy;
                     applicationDocument.ReviewedAt=a.ReviewedAt;
+                    db.InternReviewHistories.Add(new(){ProfileId=a.ProfileId,TargetType="Tài liệu",TargetId=applicationDocument.Id,TargetLabel=applicationDocument.Type,Status=applicationDocument.Status,Note=a.Note,ReviewedAt=a.ReviewedAt.Value,ReviewedBy=a.ReviewedBy!});
                 }
             }
             db.InternReviewHistories.Add(new(){ProfileId=a.ProfileId,TargetType="Hồ sơ",TargetId=a.Id,TargetLabel="Hồ sơ đăng ký",Status=a.Status,Note=a.Note,ReviewedBy=a.ReviewedBy!});
