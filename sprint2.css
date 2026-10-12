@@ -17,5 +17,14 @@
 .mentor-schedule-card{scroll-margin-top:20px}
 /* [SỬA NÚT QUAY LẠI] Canh hàng nút quay về và nút làm mới ở các trang con. */
 .mentor-page-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* [SỬA GIAO DIỆN CA LÀM] Chia màn hình tạo ca và gán nhóm thành hai khu vực thao tác rõ ràng. */
+.shift-management-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.shift-form-actions{display:flex;justify-content:flex-end;align-items:center}
+.shift-members{display:grid;gap:9px;padding:14px;border:1px solid var(--line);border-radius:5px;background:#fafbf8}
+.shift-members>strong{font-size:13px}
+.shift-members label{display:flex;align-items:center;gap:8px;padding:9px;border-bottom:1px solid #edf0e9;font-size:13px}
+.shift-members label:last-child{border-bottom:0}
+.shift-members small{margin-left:auto;color:var(--muted);font-size:11px}
+@media(max-width:900px){.shift-management-grid{grid-template-columns:1fr}}
 /* [SỬA RESPONSIVE] Xếp lại bộ lọc và thẻ tải mentor trên màn hình nhỏ. */
 @media(max-width:720px){.mentor-dashboard-head{display:grid}.mentor-dashboard-tools{min-width:0}.mentor-load-cards{grid-template-columns:1fr 1fr}.mentor-load-cards div:last-child{grid-column:1/-1}}

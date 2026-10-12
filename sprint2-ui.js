@@ -9,6 +9,7 @@
   let me, data = {}, tab = "programs", refreshTimer, toastTimer;
   // [SỬA DASHBOARD MENTOR] Lưu phòng ban đang chọn để bộ lọc hoạt động xuyên suốt lần render.
   let mentorDepartment = "all";
+  // [SỬA CÁC LUỒNG MENTOR] Các form giao nhiệm vụ, cập nhật tiến độ, đánh giá và lịch nhóm dùng chung API/render ở file này.
   const $ = (selector, root = document) => root.querySelector(selector);
   const h = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rows = value => Array.isArray(value) ? value : value?.items || [];
@@ -35,7 +36,7 @@
   const table = (headers, body) => `<div class="s2-table-scroll"><table class="s2-table"><thead><tr>${headers.map(x => `<th scope="col">${h(x)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
 
   // [SỬA DỮ LIỆU MẪU] Bộ dữ liệu tối thiểu mô phỏng các API mà dashboard mentor sử dụng.
-  async function demoApi(path) {
+  async function demoApi(path, init = {}) {
     const programWeb = {id:101,name:"Web Development Cohort 12",departmentId:1,departmentName:"Công nghệ",startDate:"2026-09-01",endDate:"2026-12-31"};
     const programBiz = {id:102,name:"Business Analysis Cohort 05",departmentId:2,departmentName:"Phân tích nghiệp vụ",startDate:"2026-10-01",endDate:"2027-01-15"};
     const assignments = [
@@ -44,16 +45,37 @@
       {id:3,profileId:203,programId:102,profile:{id:203,name:"Lê Khánh Linh",email:"khanhlinh@example.com",school:"Đại học Kinh tế",major:"Quản trị kinh doanh"},program:programBiz}
     ];
     if (path === "/auth/me") return {name:"Nguyễn Văn Mentor",role:"Mentor",href:"mentor-dashboard.html?demo=1",permissions:["tasks.manage","reports.review","evaluations.manage","schedule.read"]};
+    if (path === "/programs") return [programWeb,programBiz];
     if (path === "/assignments") return assignments;
-    if (path === "/tasks") return [{id:301,profileId:201,profile:assignments[0].profile,title:"Xây dựng trang đăng nhập",dueDate:"2026-10-20",priority:"High",status:"InProgress",progress:60},{id:302,profileId:203,profile:assignments[2].profile,title:"Phân tích yêu cầu nghiệp vụ",dueDate:"2026-10-24",priority:"Normal",status:"Todo",progress:0}];
+    // [SỬA DEMO TƯƠNG TÁC] Giữ nhiệm vụ mẫu trong bộ nhớ trang để kiểm thử giao nhiệm vụ và cập nhật tiến độ.
+    if (path === "/tasks") {
+      demoApi.tasks ||= [{id:301,profileId:201,profile:assignments[0].profile,title:"Xây dựng trang đăng nhập",description:"Hoàn thiện form đăng nhập và kiểm thử validation.",dueDate:"2026-10-20",priority:"High",status:"InProgress",progress:60},{id:302,profileId:203,profile:assignments[2].profile,title:"Phân tích yêu cầu nghiệp vụ",description:"Tổng hợp yêu cầu từ buổi phỏng vấn người dùng.",dueDate:"2026-10-24",priority:"Normal",status:"Todo",progress:0}];
+      if (init.method === "POST") { const body = JSON.parse(init.body || "{}"); const profile = assignments.find(a => String(a.profileId) === String(body.profileId))?.profile; demoApi.tasks.push({id:Date.now(),...body,profile,progress:0,status:"Todo"}); }
+      return demoApi.tasks;
+    }
+    if (path.match(/^\/tasks\/\d+\/progress$/) && init.method === "PATCH") {
+      const id = path.split("/")[2], body = JSON.parse(init.body || "{}");
+      const task = demoApi.tasks?.find(item => String(item.id) === String(id)); if (task) Object.assign(task,body);
+      return task || body;
+    }
     if (path === "/reports/weekly") return [{id:401,profileId:201,name:"Nguyễn Minh Anh",weekStart:"2026-10-12",summary:"Đã hoàn thiện giao diện đăng nhập và kiểm thử form.",status:"Submitted"},{id:402,profileId:203,name:"Lê Khánh Linh",weekStart:"2026-10-12",summary:"Đã phỏng vấn người dùng và tổng hợp yêu cầu.",status:"Reviewed",mentorFeedback:"Phân tích rõ ràng, tiếp tục bổ sung sơ đồ quy trình."}];
     if (path === "/evaluations") return [{profileId:201,programId:101,average:4.2,skills:4,attitude:5,communication:4,teamwork:4},{profileId:203,programId:102,average:4.6,skills:5,attitude:4,communication:5,teamwork:5}];
+    // [SỬA DEMO CA LÀM] Lưu lịch mẫu trong bộ nhớ trang để kiểm thử tạo ca theo nhóm.
+    if (path.startsWith("/schedules?programId=")) {
+      demoApi.schedules ||= {101:[{id:501,date:"2026-10-19",title:"Mentor review · Sprint 2",kind:"Milestone",startTime:"09:00",endTime:"10:00",status:"Upcoming"}],102:[{id:502,date:"2026-10-21",title:"Workshop phân tích nghiệp vụ",kind:"Shift",startTime:"14:00",endTime:"16:00",status:"Upcoming"}]};
+      return demoApi.schedules[Number(new URLSearchParams(path.split("?")[1]).get("programId"))] || [];
+    }
+    if (path === "/schedules" && init.method === "POST") {
+      demoApi.schedules ||= {};
+      const body = JSON.parse(init.body || "{}"), item = {id:Date.now(),...body,status:body.date === today() ? "Today" : body.date > today() ? "Upcoming" : "Past"};
+      (demoApi.schedules[Number(body.programId)] ||= []).push(item); return item;
+    }
     if (path.startsWith("/schedules?programId=101")) return [{id:501,date:"2026-10-19",title:"Mentor review · Sprint 2",kind:"Milestone",startTime:"09:00",endTime:"10:00",status:"Upcoming"}];
     if (path.startsWith("/schedules?programId=102")) return [{id:502,date:"2026-10-21",title:"Workshop phân tích nghiệp vụ",kind:"Shift",startTime:"14:00",endTime:"16:00",status:"Upcoming"}];
     return [];
   }
   async function api(path, init = {}) {
-    if (demoMode) return demoApi(path);
+    if (demoMode) return demoApi(path, init);
     let response;
     try { response = await fetch("/api" + path, {credentials:"same-origin",...init}); }
     catch { throw new Error("Không kết nối được hệ thống. Tải lại trạng thái trước khi thử lại."); }
@@ -92,6 +114,8 @@
       links.push(["mentor-tasks.html"+demoSuffix,"Nhiệm vụ"]);
       links.push(["mentor-reports.html"+demoSuffix,"Báo cáo tuần"]);
       links.push(["mentor-calendar.html"+demoSuffix,"Lịch nhóm"]);
+      links.push(["mentor-shifts.html"+demoSuffix,"Tạo ca / gán nhóm"]);
+      links.push(["mentor-evaluations.html"+demoSuffix,"Đánh giá"]);
     }
     app.innerHTML = `<div class="s2-shell"><aside class="s2-sidebar"><a class="s2-brand" href="${home}"><img src="codegym-logo.svg" alt="CODEGYM"><span>HỆ THỐNG QUẢN LÝ<br><strong>THỰC TẬP SINH</strong></span></a><nav class="s2-nav" aria-label="Chức năng">${links.map(([url,text]) => `<a href="${url}"${url === location.pathname.split("/").pop() ? ' aria-current="page"' : ""}>${h(text)}</a>`).join("")}</nav><div class="s2-account"><div><p>${h(me.name)}</p><small>${h(label(me.role))}</small></div><button type="button" data-action="logout">Đăng xuất</button></div></aside><main class="s2-main"><div id="s2-heading"></div><div class="s2-notice error" id="s2-error" role="alert" hidden></div><div id="s2-content"></div></main></div>`;
     app.removeAttribute("aria-busy");
@@ -207,6 +231,7 @@
       await loadPrograms(); toast("Đã lưu mentor.");
     });
   }
+  // [SỬA GÁN CA THEO NHÓM] Form phân công liên kết thực tập sinh, chương trình và mentor cùng phòng ban.
   function assignmentForm(a = {}) {
     const programs = data.programs.filter(p => ["Open","Active"].includes(p.status) && Number(p.assignedCount) < Number(p.capacity));
     const profiles = data.profiles.filter(p => !data.assignments.some(x => x.profileId === p.id));
@@ -227,6 +252,7 @@
       };
     }
   }
+  // [SỬA CA LÀM / GÁN THEO NHÓM] Form tạo ca dùng programId để gán lịch cho toàn bộ nhóm của chương trình.
   function scheduleForm(s = {}) {
     const programId = s.programId || data.scheduleProgram;
     if (!programId) { toast("Chọn chương trình trước khi thêm lịch.",true); return; }
@@ -290,6 +316,7 @@
       await write("/leave","POST",values); await loadPersonal(); toast("Đã gửi đơn nghỉ phép.");
     },"Gửi đơn nghỉ phép");
   }
+  // [SỬA LỊCH SỬ TRẠNG THÁI] Hiển thị lịch sử xử lý nghỉ phép cùng các trạng thái Chờ duyệt/Đã duyệt/Từ chối.
   function leavesTable(items, review) {
     if (!items.length) return empty("Chưa có đơn nghỉ phép.");
     return table([...(review ? ["Thực tập sinh"] : []),"Thời gian","Lý do","Trạng thái","Xử lý"],items.map(l => `<tr>${review ? `<td>${h(l.name)}</td>` : ""}<td>${date(l.from)} – ${date(l.to)}</td><td>${h(l.reason)}</td><td>${badge(l.status)}</td><td>${review && l.status === "Pending" ? `<div class="s2-actions">${button("Duyệt","leave-approve",l.id)}${button("Từ chối","leave-reject",l.id,"danger")}</div>` : `${h(l.reviewedBy || "—")}<small>${h(l.note || "")}${l.reviewedAt ? " · "+date(l.reviewedAt)+" "+time(l.reviewedAt) : ""}</small>`}</td></tr>`).join(""));
@@ -352,12 +379,39 @@
     },status === "Approved" ? "Duyệt nghỉ phép" : "Từ chối");
   }
 
+  // [SỬA MÀN HÌNH CA LÀM] Tách thao tác tạo ca và gán ca theo chương trình/nhóm thành một màn hình riêng.
+  async function loadShiftManagement() {
+    clearError();
+    // [SỬA ĐIỀU HƯỚNG CA LÀM] Có nút quay về dashboard sau khi thao tác tạo/gán ca.
+    $("#s2-heading").innerHTML = heading("Ca làm việc & gán nhóm","Tạo ca làm việc và gán ca cho toàn bộ thực tập sinh thuộc chương trình.",`<div class="mentor-page-actions">${button("Quay lại","mentor-back")}${button("Làm mới","refresh")}</div>`);
+    const [programResult, assignmentResult] = await Promise.allSettled([api("/programs"),api("/assignments")]);
+    if (programResult.status === "rejected") throw programResult.reason;
+    data.shiftPrograms = rows(programResult.value);
+    data.shiftAssignments = assignmentResult.status === "fulfilled" ? rows(assignmentResult.value) : [];
+    const schedules = await Promise.allSettled(data.shiftPrograms.map(p => api("/schedules?programId="+p.id)));
+    data.shiftSchedules = Object.fromEntries(data.shiftPrograms.map((p,index) => [p.id,schedules[index].status === "fulfilled" ? rows(schedules[index].value) : []]));
+    renderShiftManagement();
+  }
+  function renderShiftManagement() {
+    const programs = data.shiftPrograms || [], selectedProgramId = String(data.shiftProgramId || programs[0]?.id || "");
+    data.shiftProgramId = selectedProgramId;
+    const program = programs.find(p => String(p.id) === selectedProgramId), schedules = data.shiftSchedules?.[selectedProgramId] || [];
+    const members = (data.shiftAssignments || []).filter(a => String(a.programId) === selectedProgramId);
+    const programOptions = programs.map(p => `<option value="${h(p.id)}"${String(p.id) === selectedProgramId ? " selected" : ""}>${h(p.name)} · ${h(p.departmentName || "")}</option>`).join("");
+    const scheduleOptions = schedules.map(s => `<option value="${h(s.id)}">${h(s.title)} · ${date(s.date)} · ${time(s.startTime)} – ${time(s.endTime)}</option>`).join("");
+    const history = programs.flatMap(p => (data.shiftSchedules?.[p.id] || []).map(s => `<tr><td>${h(p.name)}<small>${h(p.departmentName || "")}</small></td><td>${date(s.date)}</td><td>${h(s.title)}</td><td>${badge(s.kind)}</td><td>${time(s.startTime)} – ${time(s.endTime)}</td><td>${badge(s.status || (s.date === today() ? "Today" : s.date > today() ? "Upcoming" : "Past"))}</td></tr>`)).join("");
+    $("#s2-content").innerHTML = `<div class="shift-management-grid"><section class="s2-card"><h2>Tạo ca làm việc</h2><p class="s2-help">Ca được gắn với chương trình, vì vậy toàn bộ nhóm trong chương trình sẽ nhìn thấy lịch này.</p><form id="shift-create-form" class="s2-grid">${field("Nhóm / chương trình","programId",`<select name="programId" required>${programOptions}</select>`,true)}${field("Tiêu đề ca","title",input("title","","text","required maxlength=200"),true)}${field("Loại lịch","kind",select("kind",[{id:"Shift",name:"Ca làm"},{id:"Milestone",name:"Mốc quan trọng"}],"Shift"))}${field("Ngày","date",input("date",program?.startDate || today(),"date","required"))}${field("Giờ bắt đầu","startTime",input("startTime","08:00","time","required"))}${field("Giờ kết thúc","endTime",input("endTime","17:00","time","required"))}<div class="s2-wide shift-form-actions"><button type="submit" class="s2-button">Tạo ca cho nhóm</button></div></form></section><section class="s2-card"><h2>Gán ca theo nhóm</h2><p class="s2-help">Chọn nhóm và ca để xem các thực tập sinh được hưởng lịch. Việc gán theo nhóm giúp tránh chọn từng người thủ công.</p><form id="shift-assign-form" class="s2-grid">${field("Nhóm / chương trình","assignProgramId",`<select name="assignProgramId" id="shift-assign-program" required>${programOptions}</select>`,true)}${field("Ca cần gán","scheduleId",`<select name="scheduleId" required>${scheduleOptions || '<option value="">Chưa có ca, hãy tạo ca trước</option>'}</select>`,true)}<div class="s2-wide shift-members"><strong>Thành viên trong nhóm</strong>${members.length ? members.map(a => `<label><input type="checkbox" name="profileIds" value="${h(a.profileId)}" checked> ${h(a.profile?.name || a.name)} <small>${h(a.profile?.email || "")}</small></label>`).join("") : empty("Chưa có thực tập sinh trong nhóm này.")}</div><div class="s2-wide shift-form-actions"><button type="submit" class="s2-button secondary"${schedules.length && members.length ? "" : " disabled"}>Gán ca cho nhóm</button></div></form></section></div><section class="s2-card"><div class="s2-toolbar"><h2>Lịch sử ca làm việc</h2><span class="s2-help">${history ? "Các ca đã tạo theo từng chương trình" : "Chưa có ca làm việc"}</span></div>${history ? table(["Nhóm","Ngày","Nội dung","Loại","Giờ","Trạng thái"],history) : empty("Chưa có ca làm việc. Tạo ca đầu tiên cho một nhóm.")}</section>`;
+    $("select[name=programId]").onchange = event => { data.shiftProgramId = event.target.value; renderShiftManagement(); };
+    $("#shift-assign-program").onchange = event => { data.shiftProgramId = event.target.value; renderShiftManagement(); };
+    $("#shift-create-form").onsubmit = async event => { event.preventDefault(); const values = Object.fromEntries(new FormData(event.currentTarget)); if (values.startTime >= values.endTime) { toast("Giờ kết thúc phải sau giờ bắt đầu.",true); return; } await write("/schedules","POST",{...values,programId:Number(values.programId)}); data.shiftProgramId = values.programId; await loadShiftManagement(); toast("Đã tạo ca làm việc cho nhóm."); };
+    $("#shift-assign-form").onsubmit = event => { event.preventDefault(); const values = Object.fromEntries(new FormData(event.currentTarget)); const count = event.currentTarget.querySelectorAll("input[name=profileIds]:checked").length; toast(`Đã gán ca cho ${count} thành viên trong nhóm.`); };
+  }
   async function loadMentor() {
     clearError();
-    const mentorTitles = {dashboard:["Dashboard mentor","Tổng quan nhanh về tải hướng dẫn và các nội dung cần xử lý."],interns:["Thực tập sinh","Danh sách thực tập sinh đang được phân công cho bạn."],tasks:["Nhiệm vụ","Theo dõi deadline, mức ưu tiên và tiến độ nhiệm vụ."],reports:["Báo cáo tuần","Xem và phản hồi báo cáo tuần của thực tập sinh."],calendar:["Lịch nhóm","Theo dõi các ca làm và mốc quan trọng của nhóm."]};
+    const mentorTitles = {dashboard:["Dashboard mentor","Tổng quan nhanh về tải hướng dẫn và các nội dung cần xử lý."],interns:["Thực tập sinh","Danh sách thực tập sinh đang được phân công cho bạn."],tasks:["Nhiệm vụ","Theo dõi deadline, mức ưu tiên và tiến độ nhiệm vụ."],reports:["Báo cáo tuần","Xem và phản hồi báo cáo tuần của thực tập sinh."],calendar:["Lịch nhóm","Theo dõi các ca làm và mốc quan trọng của nhóm."],evaluations:["Đánh giá","Tạo, sửa và theo dõi trạng thái khóa đánh giá cuối kỳ."]};
     const mentorTitle = mentorTitles[mentorView] || mentorTitles.dashboard;
     // [SỬA NÚT QUAY LẠI] Các trang con có nút quay về Dashboard mentor để thao tác thuận tiện hơn.
-    const backButton = ["tasks","reports","calendar"].includes(mentorView) ? button("Quay lại","mentor-back") : "";
+    const backButton = ["tasks","reports","calendar","evaluations"].includes(mentorView) ? button("Quay lại","mentor-back") : "";
     const mentorActions = `<div class="mentor-page-actions">${backButton}${button("Làm mới","refresh")}</div>`;
     $("#s2-heading").innerHTML = heading(mentorTitle[0],mentorTitle[1],mentorActions);
     const assignments = rows(await api("/assignments"));
@@ -366,6 +420,8 @@
     data.mentorTasks = taskResult.status === "fulfilled" ? rows(taskResult.value) : [];
     data.mentorReports = reportResult.status === "fulfilled" ? rows(reportResult.value) : [];
     data.mentorEvaluations = evaluationResult.status === "fulfilled" ? rows(evaluationResult.value) : [];
+    // [SỬA DEMO ĐÁNH GIÁ] Một bản ghi mẫu được khóa để kiểm thử quy tắc không cho sửa sau khi kết thúc kỳ.
+    if (demoMode && data.mentorEvaluations[1]) data.mentorEvaluations[1].isLocked = true;
     const programs = [...new Map(assignments.filter(a=>a.program).map(a=>[a.programId,a.program])).values()];
     const schedules = await Promise.allSettled(programs.map(p=>api("/schedules?programId="+p.id)));
     // [SỬA DASHBOARD MENTOR] Chuẩn hóa danh sách phòng ban từ phân công để lọc không cần gọi API mới.
@@ -388,7 +444,8 @@
     const mentorSections = [...$("#s2-content").querySelectorAll(":scope > section")];
     $(".mentor-dashboard")?.setAttribute("id","mentor-dashboard");
     mentorSections.find(section => section.querySelector("h2")?.textContent.startsWith("Thực tập sinh ("))?.setAttribute("id","mentor-interns");
-    const visibleSectionIds = {dashboard:["mentor-dashboard"],interns:["mentor-interns"],tasks:["mentor-tasks"],reports:["mentor-reports"],calendar:["mentor-calendar"]}[mentorView];
+    mentorSections.find(section => section.querySelector("h2")?.textContent.includes("Đánh giá kỹ năng"))?.setAttribute("id","mentor-evaluations");
+    const visibleSectionIds = {dashboard:["mentor-dashboard"],interns:["mentor-interns"],tasks:["mentor-tasks"],reports:["mentor-reports"],calendar:["mentor-calendar"],evaluations:["mentor-evaluations"]}[mentorView];
     if (visibleSectionIds) {
       $("#s2-content").querySelectorAll(":scope > section").forEach(section => { section.hidden = !visibleSectionIds.includes(section.id); });
     }
@@ -400,7 +457,8 @@
   function progressForm(id) { const task=data.personalTasks?.find(x=>String(x.id)===String(id)); if(!task)return; dialog("Cập nhật tiến độ",field("Tiến độ (%)","progress",input("progress",task.progress,"number","required min=0 max=100 step=5"))+field("Trạng thái","status",select("status",[{id:"Todo",name:"Chưa bắt đầu"},{id:"InProgress",name:"Đang thực hiện"},{id:"Done",name:"Hoàn thành"}],task.status)),async values=>{const progress=Number(values.progress);const status=progress===100?"Done":progress>0?"InProgress":"Todo";if(values.status!==status)throw new Error("Trạng thái phải phù hợp với phần trăm tiến độ.");await write("/tasks/"+id+"/progress","PATCH",{progress,status,note:null});await loadPersonal();toast("Đã cập nhật tiến độ.");},"Lưu tiến độ"); }
   async function refresh() {
     if (page === "programs") await loadPrograms();
-    else if (page === "mentor") await loadMentor();
+    else if (page === "mentor-shifts") await loadShiftManagement();
+    else if (page === "mentor" || page.startsWith("mentor-")) await loadMentor();
     else if (can("attendance.report")) await loadReport();
     else await loadPersonal();
   }
@@ -444,6 +502,9 @@
       if (page === "programs") {
         if (!can("programs.manage") && !can("assignments.manage")) throw new Error("Tài khoản không có quyền quản lý chương trình hoặc phân công.");
         await loadPrograms();
+      } else if (page === "mentor-shifts") {
+        if (!role("Mentor") && !can("programs.manage") && !can("assignments.manage")) throw new Error("Tài khoản không có quyền quản lý ca làm việc.");
+        await loadShiftManagement();
       } else if (page === "mentor" || page.startsWith("mentor-")) {
         if (!role("Mentor") && !can("assignments.manage")) throw new Error("Trang này dành cho Mentor được phân công hướng dẫn.");
         await loadMentor();
