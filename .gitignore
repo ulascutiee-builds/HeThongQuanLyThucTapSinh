@@ -1,0 +1,7 @@
+﻿node_modules/
+bin/
+obj/
+.DS_Store
+*.local
+.env
+PHAN_CONG_SPRINT3.csv

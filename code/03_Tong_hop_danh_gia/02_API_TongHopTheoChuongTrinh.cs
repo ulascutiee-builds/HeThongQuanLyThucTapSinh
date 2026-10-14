@@ -1,0 +1,3 @@
+﻿// Original: backend/CareerPortal.Api/Sprint3Endpoints.cs, lines 188-188; Sprint 3 Excel rows 27
+        app.MapGet("/api/evaluations/summary",async(HttpContext c,CareerDbContext db)=>{if(!Can(c,"profiles.read"))return Results.Forbid();var rows=await db.InternshipEvaluations.Include(x=>x.Profile).Include(x=>x.Program).AsNoTracking().ToListAsync();return Results.Ok(rows.GroupBy(x=>new{x.ProgramId,Program=x.Program?.Name}).Select(g=>new{g.Key.ProgramId,g.Key.Program,count=g.Count(),average=Math.Round(g.Average(x=>(x.Skills+x.Attitude+x.Communication+(x.Teamwork??0))/(x.Teamwork.HasValue?4d:3d)),2),items=g.Select(x=>new{ x.ProfileId,name=x.Profile!.Name,x.Skills,x.Attitude,x.Communication,x.Teamwork,x.Comment})}));});
+

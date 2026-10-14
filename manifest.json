@@ -1,0 +1,462 @@
+{
+  "source_zip": "CareerPortal_v4.1.0.zip",
+  "source_excel": "Hệ thống quản lý Thực tập sinh-TTCS_T926_K10S6(1).xlsx",
+  "sprint_sheet": "Sprint 3",
+  "assignee": "Đinh Bảo Khanh",
+  "assignments": [
+    {
+      "excel_row": 7,
+      "user_story": "Là thực tập sinh, tôi muốn cập nhật tiến độ công việc để mentor theo dõi.",
+      "task": "Thiết kế màn hình cập nhật trạng thái và % tiến độ nhiệm vụ.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 21,
+      "user_story": null,
+      "task": "Kiểm thử quyền xem báo cáo và phản hồi.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 27,
+      "user_story": "Là HR, tôi muốn tổng hợp đánh giá thành báo cáo cuối kỳ để gửi cho trường/ban lãnh đạo.",
+      "task": "Thiết kế màn hình tổng hợp đánh giá theo chương trình/phòng ban.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 35,
+      "user_story": null,
+      "task": "Hiển thị lịch theo tuần/tháng và trạng thái áp dụng.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 42,
+      "user_story": "Là HR, tôi muốn thêm mới mentor để phân công cho thực tập sinh.",
+      "task": "Thiết kế form thêm mentor gồm thông tin cá nhân và phòng ban.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 50,
+      "user_story": null,
+      "task": "Hiển thị danh sách mentee của từng mentor.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 56,
+      "user_story": null,
+      "task": "Kiểm thử số liệu và bộ lọc.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    },
+    {
+      "excel_row": 61,
+      "user_story": null,
+      "task": "Kiểm thử email trước/sau lịch họp và nhiều người nhận.",
+      "assignee": "Đinh Bảo Khanh",
+      "status": "Chưa làm",
+      "test": null
+    }
+  ],
+  "assessment": {
+    "7": {
+      "finding": "Có code liên quan",
+      "notes": "UI hiển thị danh sách nhiệm vụ, form cập nhật %/trạng thái và gọi PATCH /api/tasks/{id}/progress. Có ràng buộc 0–100 và xác thực quyền thực tập sinh."
+    },
+    "21": {
+      "finding": "Có code kiểm thử",
+      "notes": "Sprint3Checks có kiểm tra mentor được phân công xem/phản hồi báo cáo, mentor khác bị từ chối, không sửa báo cáo sau khi đã phản hồi; không có bằng chứng đã chạy test thành công trong lần trích xuất."
+    },
+    "27": {
+      "finding": "Một phần",
+      "notes": "Có tổng hợp đánh giá theo CHƯƠNG TRÌNH và bảng điểm. Chưa thấy bộ lọc/nhóm đánh giá trực tiếp theo PHÒNG BAN."
+    },
+    "35": {
+      "finding": "Một phần",
+      "notes": "Có bảng danh sách lịch, sắp xếp theo ngày, phân biệt Shift/Milestone, trạng thái Upcoming/Today/Past. Chưa thấy giao diện lịch theo tuần/tháng (calendar grid) như yêu cầu."
+    },
+    "42": {
+      "finding": "Một phần",
+      "notes": "Có form thêm mentor chọn tài khoản mentor đã tạo, phòng ban, chỉ tiêu; không có form nhập mới tất cả thông tin cá nhân ngay tại màn hình này."
+    },
+    "50": {
+      "finding": "Có code liên quan",
+      "notes": "Mentor xem danh sách thực tập sinh được phân công từ /api/assignments, cùng chương trình, thông tin hồ sơ. Màn HR chưa có danh sách nhóm mentee phân theo từng mentor riêng."
+    },
+    "56": {
+      "finding": "Một phần",
+      "notes": "Có test thống kê ngày công/giờ công và lọc theo khoảng ngày, profile. Chưa thấy kiểm thử tự động bộ lọc của màn hình tổng hợp đánh giá theo chương trình/phòng ban."
+    },
+    "61": {
+      "finding": "Chưa tìm thấy kiểm thử chuyên biệt",
+      "notes": "Có kiểm thử Resend email nói chung, mã gửi email khi thêm/sửa lịch tới nhiều profile và MailWorker gửi job khi đến DueAt. Chưa thấy bài test dành riêng cho email nhắc TRƯỚC/SAU lịch họp hoặc kiểm tra NHIỀU người nhận trong cùng kịch bản lịch họp."
+    }
+  },
+  "files": [
+    {
+      "output": "code/01_Cap_nhat_tien_do/01_UI_DanhSachVaNutCapNhat.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          242,
+          245
+        ],
+        [
+          377,
+          377
+        ],
+        [
+          407,
+          407
+        ]
+      ],
+      "sprint3_excel_rows": [
+        7
+      ],
+      "sha256": "68c483b10e48839ea0962c19eb0b689e5f30fb64dd2e54c10ea6d3f5ae72d34f"
+    },
+    {
+      "output": "code/01_Cap_nhat_tien_do/02_API_CapNhatTienDo.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint3Endpoints.cs",
+      "line_ranges": [
+        [
+          177,
+          178
+        ]
+      ],
+      "sprint3_excel_rows": [
+        7
+      ],
+      "sha256": "8ccf3a56ba939cded4e2310cdd704c214411585ca29acb0ca241a821211d71a9"
+    },
+    {
+      "output": "code/01_Cap_nhat_tien_do/03_ModelVaValidation.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint3Entities.cs",
+      "line_ranges": [
+        [
+          2,
+          3
+        ],
+        [
+          6,
+          6
+        ]
+      ],
+      "sprint3_excel_rows": [
+        7
+      ],
+      "sha256": "b1ebfb39a66e3c12fc31214c668b70c356e6439f3b899ed0d200c50a55181898"
+    },
+    {
+      "output": "code/02_Kiem_thu_quyen_bao_cao_phan_hoi/01_Test_PhanQuyenBaoCao.cs",
+      "original_source": "tests/Sprint3Checks/Program.cs",
+      "line_ranges": [
+        [
+          200,
+          211
+        ],
+        [
+          229,
+          244
+        ],
+        [
+          259,
+          262
+        ]
+      ],
+      "sprint3_excel_rows": [
+        21
+      ],
+      "sha256": "0cb2dfc6a5a3ddaa2b5587fcd0ae7f1e15915e2bd992f26fcbae37d0fe1ebf63"
+    },
+    {
+      "output": "code/02_Kiem_thu_quyen_bao_cao_phan_hoi/02_API_QuyenXemVaPhanHoi.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint3Endpoints.cs",
+      "line_ranges": [
+        [
+          179,
+          180
+        ],
+        [
+          182,
+          182
+        ]
+      ],
+      "sprint3_excel_rows": [
+        21
+      ],
+      "sha256": "e5e1a3adb017ac6d0bc0ba34a137602c081c2a7bb29deee0b9b830a1db0a7c91"
+    },
+    {
+      "output": "code/03_Tong_hop_danh_gia/01_UI_BangTongHopDanhGia.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          265,
+          271
+        ],
+        [
+          288,
+          309
+        ]
+      ],
+      "sprint3_excel_rows": [
+        27
+      ],
+      "sha256": "d72ba0ae685da26042b17c060c96fc97e8e23c27118eaee2d946ba0c8096b754"
+    },
+    {
+      "output": "code/03_Tong_hop_danh_gia/02_API_TongHopTheoChuongTrinh.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint3Endpoints.cs",
+      "line_ranges": [
+        [
+          188,
+          188
+        ]
+      ],
+      "sprint3_excel_rows": [
+        27
+      ],
+      "sha256": "7c73f6853d328eeaaed60624b38640fd2497c5d6516387d31784ff54b4aa04c5"
+    },
+    {
+      "output": "code/04_Hien_thi_lich/01_UI_BangLichTheoChuongTrinh.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          128,
+          146
+        ],
+        [
+          239,
+          240
+        ]
+      ],
+      "sprint3_excel_rows": [
+        35
+      ],
+      "sha256": "bfb52a805d351b96c3734bf7c4146f88855799dce1ec825962304963c58fec72"
+    },
+    {
+      "output": "code/04_Hien_thi_lich/02_API_DanhSachLich.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint2Endpoints.cs",
+      "line_ranges": [
+        [
+          161,
+          165
+        ],
+        [
+          187,
+          192
+        ]
+      ],
+      "sprint3_excel_rows": [
+        35
+      ],
+      "sha256": "959b140fd21959fb0d2975e430a8947510678e7e60c7721fa900881ad49ab377"
+    },
+    {
+      "output": "code/05_Form_them_mentor/01_UI_FormMentor.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          126,
+          127
+        ],
+        [
+          164,
+          177
+        ],
+        [
+          395,
+          396
+        ]
+      ],
+      "sprint3_excel_rows": [
+        42
+      ],
+      "sha256": "34aba4e59e64616fd32675418864803a09202d85b58131d411b9dde6b11ea270"
+    },
+    {
+      "output": "code/05_Form_them_mentor/02_API_ThemVaSuaMentor.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint2Endpoints.cs",
+      "line_ranges": [
+        [
+          108,
+          131
+        ]
+      ],
+      "sprint3_excel_rows": [
+        42
+      ],
+      "sha256": "4edd5f6c5d10445bbe56aa283b6c44299ca33346e3b2c3a3488816ab213704ec"
+    },
+    {
+      "output": "code/06_Danh_sach_mentee/01_UI_NhomThucTap_Mentee.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          323,
+          340
+        ]
+      ],
+      "sprint3_excel_rows": [
+        50
+      ],
+      "sha256": "955090c2487ab7bebdc6aed6696d386b25a42daad9155b3585008b0a5e6b92ef"
+    },
+    {
+      "output": "code/06_Danh_sach_mentee/02_API_PhanCongVaGioiHanHienThi.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint2Endpoints.cs",
+      "line_ranges": [
+        [
+          12,
+          29
+        ],
+        [
+          133,
+          135
+        ]
+      ],
+      "sprint3_excel_rows": [
+        50
+      ],
+      "sha256": "926b459c3922ea5c557201781e96ab6db6b5b11806e855edeba417290e9d9deb"
+    },
+    {
+      "output": "code/07_Kiem_thu_thong_ke_loc/01_Test_BaoCaoChuyenCan.cs",
+      "original_source": "tests/ReportChecks/Program.cs",
+      "line_ranges": [
+        [
+          1,
+          33
+        ]
+      ],
+      "sprint3_excel_rows": [
+        56
+      ],
+      "sha256": "785053ea0c44d8c7fa7c5ae0df441bddf3e4cdb7054427fd85f4a7f33982d686"
+    },
+    {
+      "output": "code/07_Kiem_thu_thong_ke_loc/02_Test_LocKhoangNgay_Profile.py",
+      "original_source": "tests/sprint2_smoke.py",
+      "line_ranges": [
+        [
+          102,
+          102
+        ],
+        [
+          110,
+          115
+        ]
+      ],
+      "sprint3_excel_rows": [
+        56
+      ],
+      "sha256": "ca373935e86fa09186dd06d314a6f8bdb67407683fd3ca9423cd9061d3125254"
+    },
+    {
+      "output": "code/07_Kiem_thu_thong_ke_loc/03_UI_BoLocNgayThangVaBangKetQua.js",
+      "original_source": "frontend/sprint2-ui.js",
+      "line_ranges": [
+        [
+          265,
+          308
+        ]
+      ],
+      "sprint3_excel_rows": [
+        56
+      ],
+      "sha256": "4fd16228d1e69de44670b8232c6f59c5dbe3185cb5846376a2b46a800bc32cc3"
+    },
+    {
+      "output": "code/07_Kiem_thu_thong_ke_loc/04_API_BaoCaoVaLoc.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint2Endpoints.cs",
+      "line_ranges": [
+        [
+          200,
+          200
+        ],
+        [
+          246,
+          290
+        ]
+      ],
+      "sprint3_excel_rows": [
+        56
+      ],
+      "sha256": "73c4636ab2c5c736356e2aae5be6eefafa52d49b744d1450b9964a6de7d4f24b"
+    },
+    {
+      "output": "code/08_Kiem_thu_email_lich/01_Test_ResendMailTongQuat.cs",
+      "original_source": "tests/ResendMailChecks/Program.cs",
+      "line_ranges": [
+        [
+          1,
+          64
+        ]
+      ],
+      "sprint3_excel_rows": [
+        61
+      ],
+      "sha256": "cbaaed81d47d20c761322dad5e58d5875d9f355155b7cae8ce26b437c38520ff"
+    },
+    {
+      "output": "code/08_Kiem_thu_email_lich/02_API_EmailKhiTaoSuaLich.cs",
+      "original_source": "backend/CareerPortal.Api/Sprint2Endpoints.cs",
+      "line_ranges": [
+        [
+          166,
+          181
+        ]
+      ],
+      "sprint3_excel_rows": [
+        61
+      ],
+      "sha256": "85fd9014847163d5d509d35102dc1cab02d0c3d49445eb9e2b6235a12650385b"
+    },
+    {
+      "output": "code/08_Kiem_thu_email_lich/03_MailWorker_HangDoiVaGui.cs",
+      "original_source": "backend/CareerPortal.Api/MailWorker.cs",
+      "line_ranges": [
+        [
+          65,
+          125
+        ],
+        [
+          127,
+          150
+        ]
+      ],
+      "sprint3_excel_rows": [
+        61
+      ],
+      "sha256": "ca70a8d8cc8878fd59d4cf95a49885926925e1dfa9f37d63484f7bf5405866f5"
+    },
+    {
+      "output": "code/08_Kiem_thu_email_lich/04_Test_LichKhongKiemThuEmail.py",
+      "original_source": "tests/sprint2_smoke.py",
+      "line_ranges": [
+        [
+          78,
+          92
+        ]
+      ],
+      "sprint3_excel_rows": [
+        61
+      ],
+      "sha256": "14748871fb6b36a6ec69aadeabde086850a2606637eb393430c5333297cbe7d9"
+    }
+  ]
+}
