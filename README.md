@@ -1,5 +1,7 @@
 # Hệ thống quản lý Thực tập sinh
 
+Mã nguồn ứng dụng CareerPortal v4.1.0 được lưu tại [`CareerPortal_v4.1.0/`](./CareerPortal_v4.1.0/). Hãy xem [README chạy ứng dụng](./CareerPortal_v4.1.0/README.md) để cài đặt và khởi chạy.
+
 ## 1. Tổng quan dự án
 
 Hệ thống quản lý Thực tập sinh là một hệ thống thông tin hỗ trợ quá trình tổ chức và quản lý thực tập cho sinh viên, giảng viên, cơ sở thực tập và các đơn vị liên quan. Hệ thống được xây dựng nhằm tập trung hóa dữ liệu, kiểm soát quá trình thực tập và hỗ trợ công tác theo dõi, đánh giá và báo cáo kết quả thực tập trong một môi trường thống nhất.
@@ -115,4 +117,3 @@ Hệ thống quản lý Thực tập sinh có thể được nhóm thành các m
 Hệ thống quản lý Thực tập sinh là một hệ thống nghiệp vụ hỗ trợ quản lý toàn bộ quy trình thực tập của sinh viên từ khi đăng ký, theo dõi, đánh giá đến báo cáo kết quả. Hệ thống này tập trung vào việc giải quyết các vấn đề về quản lý thông tin, đồng bộ dữ liệu, kiểm soát tiến độ và nâng cao hiệu quả công tác giám sát thực tập.
 
 Với các actor chính là sinh viên, giảng viên, người hướng dẫn, đơn vị thực tập và quản trị viên, hệ thống đáp ứng nhu cầu quản lý thực tập trong môi trường giáo dục và doanh nghiệp, đồng thời tạo nền tảng cho việc ra quyết định và báo cáo quản lý một cách chính xác, kịp thời và minh bạch.
-
