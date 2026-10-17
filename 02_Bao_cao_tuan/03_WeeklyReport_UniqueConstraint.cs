@@ -1,0 +1,3 @@
+﻿// Source: backend/CareerPortal.Api/Sprint3Endpoints.cs | lines 168-168 | Excel row(s): 14
+        b.Entity<WeeklyReport>(e=>{e.ToTable("WEEKLY_REPORT",t=>t.HasCheckConstraint("CK_Report_Status","[Status] IN ('Submitted','Reviewed','ChangesRequested')"));e.Property(x=>x.Summary).HasMaxLength(6000);e.Property(x=>x.Blockers).HasMaxLength(2000);e.Property(x=>x.EvidenceUrl).HasMaxLength(500);e.Property(x=>x.Status).HasMaxLength(30);e.Property(x=>x.MentorFeedback).HasMaxLength(2000);e.HasIndex(x=>new{x.ProfileId,x.WeekStart}).IsUnique();e.HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);});
+

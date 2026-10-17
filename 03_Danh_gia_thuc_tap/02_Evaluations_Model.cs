@@ -1,0 +1,4 @@
+﻿// Source: backend/CareerPortal.Api/Sprint3Entities.cs | lines 10-11 | Excel row(s): 23, 28
+public sealed class InternshipEvaluation { public int Id { get; set; } public int MentorId { get; set; } public Mentor? Mentor { get; set; } public int ProfileId { get; set; } public InternProfile? Profile { get; set; } public int? ProgramId { get; set; } public InternshipProgram? Program { get; set; } public int Skills { get; set; } public int Attitude { get; set; } public int Communication { get; set; } public int? Teamwork { get; set; } public string Comment { get; set; } = ""; public bool IsLocked { get; set; } public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow; }
+public sealed record EvaluationInput(int ProfileId,int? ProgramId,[property:Range(1,5)] int Skills,[property:Range(1,5)] int Attitude,[property:Range(1,5)] int Communication,[property:Range(1,5)] int? Teamwork,[property:MaxLength(3000)] string Comment);
+

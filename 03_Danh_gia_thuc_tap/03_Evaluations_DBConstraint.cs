@@ -1,0 +1,3 @@
+﻿// Source: backend/CareerPortal.Api/Sprint3Endpoints.cs | lines 170-170 | Excel row(s): 23
+        b.Entity<InternshipEvaluation>(e=>{e.ToTable("INTERNSHIP_EVALUATION",t=>t.HasCheckConstraint("CK_Evaluation_Scores","[Skills] BETWEEN 1 AND 5 AND [Attitude] BETWEEN 1 AND 5 AND [Communication] BETWEEN 1 AND 5"));e.Property(x=>x.Comment).HasMaxLength(3000);e.HasIndex(x=>new{x.ProfileId,x.ProgramId}).IsUnique();e.HasOne(x=>x.Mentor).WithMany().HasForeignKey(x=>x.MentorId).OnDelete(DeleteBehavior.Restrict);e.HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);e.HasOne(x=>x.Program).WithMany().HasForeignKey(x=>x.ProgramId).OnDelete(DeleteBehavior.SetNull);});
+
