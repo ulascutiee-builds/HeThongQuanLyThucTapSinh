@@ -76,8 +76,6 @@ input[type=checkbox], input[type=radio] { accent-color: var(--forest); }
 .portal-topline-label strong { color: var(--ink); font-weight: 600; }
 .portal-page[data-s2-page="mentor"] .portal-topline-label { display: none; }
 .portal-page[data-s2-page="mentor"] .topbar-right .user { display: none; }
-.portal-page[data-s2-page="mentor"] .portal-guide-button { padding: 8px; font-size: 0; gap: 0; }
-.portal-page[data-s2-page="mentor"] .portal-guide-button .portal-icon { width: 19px; height: 19px; }
 .portal-tools { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .portal-date { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .portal-guide-button, .portal-menu { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 11px; border: 1px solid var(--line); background: white; color: #536682; border-radius: 8px; font-size: 12px; cursor: pointer; }
