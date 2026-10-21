@@ -82,7 +82,7 @@ public static class Documents
         if(count==0)return Results.Conflict(new{message="Hợp đồng đã xác nhận, hết hạn hoặc đã được thay bằng phiên bản mới."});
         var profile=await db.InternProfiles.FindAsync(row.ProfileId);
         if(profile is not null&&profile.Status is not ("Đã hoàn thành" or "Từ chối"))
-            profile.Status=row.StartsAt is DateTimeOffset start&&start>now?"Chờ bắt đầu":"Đang thực tập";
+            profile.Status="Đang thực tập";
         await db.SaveChangesAsync();
         var updated=await db.InternDocuments.AsNoTracking().SingleAsync(x=>x.Id==id);return Results.Ok(updated.ToResponse());
     }

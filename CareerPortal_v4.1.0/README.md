@@ -1,8 +1,17 @@
+# Bản bổ sung: DỮ LIỆU MẪU CHO TỪNG TRANG
+
+Đây là **bản source cập nhật** của CareerPortal v4.1.0, có thêm tài khoản/hồ sơ, lịch, chấm công, nhiệm vụ, báo cáo và PDF giả lập.
+
+- Xem **`DU-LIEU-MAU-TUNG-TRANG.md`** để biết dữ liệu sẽ xuất hiện trên từng trang và cách kiểm tra.
+- Mở PowerShell tại thư mục này và chạy **`powershell -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -SeedDemoData`** để nạp một lần rồi khởi động.
+- Yêu cầu **.NET SDK 10** và **SQL Server LocalDB**. ZIP source này không bao gồm thư mục build đã publish; `start.cmd` sẽ biên dịch source khi cần.
+- **Không sử dụng trên database sản xuất.** Dữ liệu giả lập nằm trong SQL Server của máy chạy, không nằm trong file ZIP dưới dạng database có sẵn.
+
+---
+
 # Hệ thống quản lý thực tập sinh v4.1.0 — Sprint 1, 2 và 3
 
 Dự án được cập nhật từ `HeThongQuanLyTSS_UI_v2.zip`, theo Excel `Hệ thống quản lý Thực tập sinh-TTCS_T926_K10S6 (2).xlsx`: **18 user story, 90 task** trong Sprint 1 và Sprint 2, cùng các luồng Sprint 3. Giao diện tiếng Việt theo phong cách sáng, xanh dương; thông báo thông thường dùng nền sáng và chữ tối dễ đọc. Logo ICTU × CODEGYM do người dùng cung cấp được sử dụng trên trang đăng nhập và các khu vực chức năng. Nội dung yêu cầu chi tiết cùng ô nguồn nằm trong `docs/YEU-CAU-SPRINT-1-2.md`.
-
-Trong repository này, mã nguồn được đặt trong thư mục `CareerPortal_v4.1.0/`; dữ liệu runtime `.local/` và bản build phát hành `build-v4.1/` không được đưa lên Git. Khi chạy từ repository, cần **.NET SDK 10** và **SQL Server LocalDB**; mở thư mục này trong terminal rồi chạy `.\start.ps1 -Source` hoặc `start.cmd`.
 
 ## Chạy bản build
 

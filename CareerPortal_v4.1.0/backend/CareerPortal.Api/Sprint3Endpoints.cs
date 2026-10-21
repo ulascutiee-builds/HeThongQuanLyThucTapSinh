@@ -156,7 +156,7 @@ public static class Sprint3Endpoints
         evaluation.Teamwork = input.Teamwork;
         evaluation.Comment = input.Comment?.Trim() ?? "";
         evaluation.UpdatedAt = DateTimeOffset.UtcNow;
-        db.PortalNotifications.Add(new() { ProfileId = profile.Id, Title = "Đã có đánh giá mới", Message = "Mentor đã cập nhật đánh giá thực tập của bạn.", Link = "attendance.html" });
+        db.PortalNotifications.Add(new() { ProfileId = profile.Id, Title = "Đã có đánh giá mới", Message = "Mentor đã cập nhật đánh giá thực tập của bạn.", Link = "thuc-tap-sinh.html?view=attendance&attendanceTab=program" });
         db.MailJobs.Add(new() { EventKey = $"evaluation:{profile.Id}:{programId}:{evaluation.UpdatedAt.Ticks}", Recipient = profile.Email, Subject = "Đánh giá thực tập đã được cập nhật", Body = $"Xin chào {profile.Name},\nMentor đã cập nhật đánh giá thực tập của bạn. Vui lòng đăng nhập Career Portal để xem chi tiết." });
         await db.SaveChangesAsync();
         return Results.Ok(evaluation.Id);

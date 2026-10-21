@@ -2,6 +2,7 @@
   "use strict";
   const app = document.getElementById("s2-app");
   const page = document.body.dataset.s2Page;
+  document.body.classList.toggle("s2-embedded", new URLSearchParams(location.search).has("embedded"));
   let me, data = {}, tab = "programs", refreshTimer, toastTimer;
   const $ = (selector, root = document) => root.querySelector(selector);
   const h = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -55,7 +56,9 @@
     const home = me.href || "dang-nhap.html";
     const links = [];
     if (can("accounts.manage")) links.push(["admin.html","Tài khoản và phân quyền"]);
-    if (can("profiles.read")) links.push(["hr.html","Quản lý hồ sơ"]);
+    if (can("profiles.read")) links.push(["hr.html?view=profiles","Hồ sơ thực tập"]);
+    if (can("applications.review")) links.push(["hr.html?view=applications","Đơn xin"]);
+    if (can("documents.read")) links.push(["hr.html?view=documents","Tài liệu & hợp đồng"]);
     if (role("Intern")) {
       links.push(["thuc-tap-sinh.html?view=overview","Tổng quan"]);
       links.push(["thuc-tap-sinh.html?view=documents","Hồ sơ và tài liệu"]);
@@ -65,7 +68,7 @@
     if (can("attendance.report")) links.push(["attendance.html","Báo cáo chuyên cần"]);
     if (role("Mentor")) links.push(["mentor.html","Nhóm thực tập"]);
     const currentPage = location.pathname.split("/").pop();
-    app.innerHTML = `<div class="s2-shell"><aside class="s2-sidebar"><a class="s2-brand" href="${home}"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span>HỆ THỐNG QUẢN LÝ<br><strong>THỰC TẬP SINH</strong></span></a><nav class="s2-nav" aria-label="Chức năng">${links.map(([url,text]) => `<a href="${url}"${url.split("?")[0] === currentPage ? ' aria-current="page"' : ""}>${h(text)}</a>`).join("")}</nav><div class="s2-account"><div><p>${h(me.name)}</p><small>${h(label(me.role))}</small></div><button type="button" data-action="logout">Đăng xuất</button></div></aside><main class="s2-main"><div id="s2-heading"></div><div class="s2-notice error" id="s2-error" role="alert" hidden></div><div id="s2-content"></div></main></div>`;
+    app.innerHTML = `<div class="s2-shell"><aside class="s2-sidebar"><a class="s2-brand" href="${home}"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span>HỆ THỐNG QUẢN LÝ<br><strong>THỰC TẬP SINH</strong></span></a><nav class="s2-nav" aria-label="Chức năng">${links.map(([url,text]) => `<a href="${url}"${url.split("?")[0] === currentPage && (currentPage !== "hr.html" || url.endsWith(`view=${new URLSearchParams(location.search).get("view") || "profiles"}`)) ? ' aria-current="page"' : ""}>${h(text)}</a>`).join("")}</nav><div class="s2-account"><div><p>${h(me.name)}</p><small>${h(label(me.role))}</small></div><button type="button" data-action="logout">Đăng xuất</button></div></aside><main class="s2-main"><div id="s2-heading"></div><div class="s2-notice error" id="s2-error" role="alert" hidden></div><div id="s2-content"></div></main></div>`;
     app.removeAttribute("aria-busy");
   }
   function dialog(title, content, onSubmit, submitText = "Lưu thay đổi") {

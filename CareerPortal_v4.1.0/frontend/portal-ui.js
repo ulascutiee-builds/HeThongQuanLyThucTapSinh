@@ -31,8 +31,10 @@
   // Public pages use an informational illustration, never invented dashboard figures.
   if (document.body.classList.contains("auth-page")) {
     const registration = page === "dang-ky.html";
-    const story = el("aside", null, "auth-story"); story.setAttribute("aria-label", "Giới thiệu Career Portal");
-    story.innerHTML = `<a class="auth-brand" href="dang-nhap.html"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span><strong>Career Portal</strong><small>QUẢN LÝ THỰC TẬP SINH</small></span></a>
+    const brand = `<a class="auth-brand" href="dang-nhap.html"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span><strong>Career Portal</strong><small>QUẢN LÝ THỰC TẬP SINH</small></span></a>`;
+    if (registration) {
+      const story = el("aside", null, "auth-story"); story.setAttribute("aria-label", "Giới thiệu Career Portal");
+      story.innerHTML = `${brand}
       <div class="auth-story-copy"><span class="auth-story-tag">KẾT NỐI · ĐỒNG HÀNH · PHÁT TRIỂN</span>
       <h1>${registration ? "Khởi đầu hành trình.<br>Mở lối tương lai." : "Một không gian.<br>Trọn hành trình<br>thực tập."}</h1>
       <p>${registration ? "Hoàn thiện thông tin để kết nối với chương trình thực tập và người hướng dẫn của bạn." : "Kết nối nhân sự, người hướng dẫn và thực tập sinh trong một hệ thống thống nhất."}</p>
@@ -40,7 +42,14 @@
       <div class="auth-journey-item"><span>02</span><div><strong>Chương trình & người hướng dẫn</strong><small>Kế hoạch rõ ràng, kết nối đúng mentor</small></div></div>
       <div class="auth-journey-item"><span>03</span><div><strong>Lịch thực tập & chuyên cần</strong><small>Theo dõi lịch làm việc và chấm công mỗi ngày</small></div></div></div></div>
       <div class="auth-story-footer">ICTU × CODEGYM &nbsp; / &nbsp; Hệ thống quản lý thực tập sinh</div>`;
-    document.querySelector(".login-layout").prepend(story);
+      document.querySelector(".login-layout").prepend(story);
+    } else {
+      const loginBrand = el("a", null, "auth-login-brand");
+      loginBrand.href = "dang-nhap.html";
+      loginBrand.setAttribute("aria-label", "Career Portal");
+      loginBrand.innerHTML = '<img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM">';
+      document.querySelector(".form-content").prepend(loginBrand);
+    }
     const security = el("p", "Thông tin của bạn được quản lý theo quyền truy cập.", "auth-security"); security.prepend(icon("shield"));
     document.querySelector(".form-content").append(security);
     return;

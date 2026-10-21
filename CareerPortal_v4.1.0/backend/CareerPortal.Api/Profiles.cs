@@ -77,6 +77,7 @@ public static class Profiles
     static async Task<IResult> Create(CreateHrProfileRequest input, HttpContext context, CareerDbContext db, IConfiguration config)
     {
         if (!SprintSecurity.HasPermission(context, "profiles.write")) return Results.Forbid();
+        if (input.Status == "Đang thực tập") return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         if (ValidateDates(input.Status, input.StartDate, input.EndDate, input.DateOfBirth) is string error) return Results.BadRequest(new { message = error });
         if (input.DateOfBirth is null) return Results.BadRequest(new { message = "Vui lòng nhập ngày tháng năm sinh." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
@@ -100,6 +101,9 @@ public static class Profiles
         if (input.Status is not null || input.StartDate is not null || input.EndDate is not null) return Results.Forbid();
         if (input.DateOfBirth is DateOnly dob && dob > InternshipStatusSync.Today) return Results.ValidationProblem(new Dictionary<string, string[]> { ["DateOfBirth"] = ["Ngày sinh không hợp lệ."] });
         var profile = await db.InternProfiles.FindAsync(id); if (profile is null) return Results.NotFound();
+        if (profile.Status != input.Status && input.Status == "Đang thực tập" &&
+            !await db.InternDocuments.AnyAsync(x => x.ProfileId == id && x.Type == "Hợp đồng thực tập" && x.IsCurrent && x.Status == "Đã xác nhận"))
+            return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
         if (await db.InternProfiles.AnyAsync(x => x.Id != id && x.Email == email) || await Accounts.EmailExists(db, email, profileId: id) || await PhoneExistsAsync(db, phone, id)) return Results.Conflict(new { message = "Email hoặc số điện thoại đã tồn tại." });
         await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
@@ -125,6 +129,10 @@ public static class Profiles
         if (!SprintSecurity.HasPermission(context, "profiles.write")) return Results.Forbid();
         if (ValidateDates(input.Status, input.StartDate, input.EndDate, input.DateOfBirth) is string error) return Results.BadRequest(new { message = error });
         var profile = await db.InternProfiles.FindAsync(id); if (profile is null) return Results.NotFound();
+        if (input.Status == "Đang thực tập" &&
+            !await db.InternDocuments.AnyAsync(x => x.ProfileId == id && x.Type == "Hợp đồng thực tập" && x.IsCurrent &&
+                x.Status == "Đã xác nhận"))
+            return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
         if (await db.InternProfiles.AnyAsync(x => x.Id != id && x.Email == email) || await Accounts.EmailExists(db, email, profileId: id) || await PhoneExistsAsync(db, phone, id)) return Results.Conflict(new { message = "Email hoặc số điện thoại đã tồn tại." });
         if (input.StudentId is not null && string.IsNullOrWhiteSpace(input.StudentId)) return Results.BadRequest(new { message = "Mã sinh viên không được để trống." });

@@ -21,7 +21,7 @@ public static class Applications
                     return Results.Json(new{message="Tài khoản cần quyền duyệt tài liệu để duyệt CV và đơn xin thực tập đang chờ."},statusCode:StatusCodes.Status403Forbidden);
             }
             a.Status=input.Status;a.Note=input.Note?.Trim();a.ReviewedAt=DateTimeOffset.UtcNow;a.ReviewedBy=c.User.Identity!.Name;
-            a.Profile!.Status=input.Status=="Đã duyệt"?"Đang thực tập":"Từ chối";
+            a.Profile!.Status=input.Status=="Đã duyệt"?"Chờ bắt đầu":"Từ chối";
             if(input.Status=="Đã duyệt")
             {
                 var applicationDocuments=await db.InternDocuments.Where(x=>x.ProfileId==a.ProfileId&&x.IsCurrent&&(x.Type=="CV"||x.Type=="Đơn xin thực tập")&&x.Status=="Chờ duyệt").ToListAsync();

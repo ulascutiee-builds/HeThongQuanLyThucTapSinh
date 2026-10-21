@@ -46,5 +46,6 @@ if(!app.Configuration.GetValue("Database:SkipInitialization",false))
     using var scope=app.Services.CreateScope();
     await scope.ServiceProvider.GetRequiredService<CareerDbContext>().Database.MigrateAsync();
     await app.InitializeAccountsAsync();
+    await app.SeedDemoAsync();
 }
 app.Run();

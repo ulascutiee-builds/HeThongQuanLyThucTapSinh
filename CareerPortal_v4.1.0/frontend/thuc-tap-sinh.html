@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2459d6" />
+    <meta name="theme-color" content="#173b78" />
     <title>Khu vực thực tập sinh | ICTU × CODEGYM</title>
     <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689" />
     <style>
@@ -472,6 +472,34 @@
       .attendance-actions .button {
         min-width: 120px;
       }
+      .attendance-subnav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .attendance-subnav-item {
+        min-height: 38px;
+        padding: 8px 14px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .attendance-subnav-item:hover {
+        background: #edf2fb;
+        color: #173b78;
+      }
+      .attendance-subnav-item[aria-current="page"] {
+        border-color: #d7e2f4;
+        background: #e9eff9;
+        color: #173b78;
+      }
       .attendance-form {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -479,6 +507,23 @@
       }
       .attendance-form .field-full {
         grid-column: 1 / -1;
+      }
+      .attendance-dialog-form {
+        display: grid;
+        gap: 16px;
+      }
+      .attendance-dialog-fields {
+        display: grid;
+        gap: 14px;
+      }
+      .attendance-dialog-fields .field {
+        display: grid;
+        gap: 7px;
+      }
+      .attendance-dialog-form footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
       }
       .attendance-form textarea {
         width: 100%;
@@ -1178,7 +1223,7 @@
       }
     </style>
     <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
-    <link rel="stylesheet" href="portal.css?v=20261012-brand-refresh" />
+    <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right" />
     <script src="portal-ui.js?v=20261012-brand-refresh" defer></script>
   </head>
   <body class="portal-page">
@@ -1841,9 +1886,14 @@
                   Theo dõi lịch làm việc, ghi nhận chấm công và gửi yêu cầu nghỉ phép ngay trong khu vực thực tập sinh.
                 </p>
               </div>
-              <button class="button button-secondary" type="button" id="attendance-refresh">Làm mới</button>
             </div>
             <p class="microcopy" id="attendance-error" role="alert" hidden></p>
+            <nav class="attendance-subnav" aria-label="Lịch và chấm công">
+              <button type="button" class="attendance-subnav-item" data-attendance-tab="schedule" aria-current="page">Lịch thực tập</button>
+              <button type="button" class="attendance-subnav-item" data-attendance-tab="program">Chương trình</button>
+              <button type="button" class="attendance-subnav-item" data-attendance-tab="leave">Đơn xin</button>
+            </nav>
+            <div data-attendance-panel="program" hidden>
             <section class="section-panel" aria-labelledby="attendance-program-title">
               <div class="panel-heading">
                 <div>
@@ -1853,6 +1903,36 @@
               </div>
               <div class="panel-content" id="attendance-program"></div>
             </section>
+            <section class="section-panel" aria-labelledby="intern-tasks-title">
+              <div class="panel-heading">
+                <div>
+                  <h2 class="panel-title" id="intern-tasks-title">Nhiệm vụ của tôi</h2>
+                  <p class="panel-description">Theo dõi và cập nhật tiến độ nhiệm vụ do mentor giao.</p>
+                </div>
+              </div>
+              <div class="panel-content" id="intern-tasks"></div>
+            </section>
+            <section class="section-panel" aria-labelledby="intern-reports-title">
+              <div class="panel-heading">
+                <div>
+                  <h2 class="panel-title" id="intern-reports-title">Báo cáo tuần</h2>
+                  <p class="panel-description">Nộp kết quả, ghi nhận vướng mắc và xem phản hồi của mentor.</p>
+                </div>
+                <button class="button button-primary" type="button" id="intern-report-new">Nộp báo cáo</button>
+              </div>
+              <div class="panel-content" id="intern-reports"></div>
+            </section>
+            <section class="section-panel" aria-labelledby="intern-evaluations-title">
+              <div class="panel-heading">
+                <div>
+                  <h2 class="panel-title" id="intern-evaluations-title">Đánh giá của mentor</h2>
+                  <p class="panel-description">Xem nhận xét và kết quả đánh giá trong kỳ thực tập.</p>
+                </div>
+              </div>
+              <div class="panel-content" id="intern-evaluations"></div>
+            </section>
+            </div>
+            <div data-attendance-panel="schedule">
             <section class="section-panel" aria-labelledby="attendance-schedule-title">
               <div class="panel-heading">
                 <div>
@@ -1884,8 +1964,10 @@
                   <p class="panel-description">Các mốc giờ được ghi nhận theo giờ hệ thống (UTC+7).</p>
                 </div>
               </div>
-              <div class="panel-content" id="attendance-history"></div>
+              <div class="panel-content" id="attendance-history">              </div>
             </section>
+            </div>
+            <div data-attendance-panel="leave" hidden>
             <section class="section-panel" id="leave-request-panel" aria-labelledby="leave-request-title">
               <div class="panel-heading">
                 <div>
@@ -1903,6 +1985,7 @@
                 <div id="leave-request-list" style="margin-top:18px"></div>
               </div>
             </section>
+            </div>
           </section>
         </main>
       </div>
@@ -2058,6 +2141,7 @@
       let state = { ...emptyState };
       let toastTimer;
       let attendanceTimer;
+      let attendanceTab = "schedule";
       let attendanceState = { schedule: null, attendance: null, leaves: [] };
       const navItems = [...document.querySelectorAll(".nav-item[data-view]")];
 
@@ -2173,6 +2257,12 @@
         }).format(new Date(value));
       }
 
+      function localDateValue() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 10);
+      }
+
       function formatClock(value) {
         if (!value) return "—";
         if (/^\d{2}:\d{2}/.test(value)) return value.slice(0, 5);
@@ -2212,6 +2302,111 @@
           attendanceState.leaves.length
             ? `<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>Thời gian nghỉ</th><th>Lý do</th><th>Trạng thái</th><th>Phản hồi</th></tr></thead><tbody>${attendanceState.leaves.map((item) => `<tr><td>${escapeHtml(formatDate(item.from))} – ${escapeHtml(formatDate(item.to))}</td><td>${escapeHtml(item.reason)}</td><td>${item.status === "Pending" ? "Chờ duyệt" : item.status === "Approved" ? "Đã duyệt" : "Từ chối"}</td><td>${escapeHtml(item.note || "—")}</td></tr>`).join("")}</tbody></table></div>`
             : '<p class="microcopy">Bạn chưa gửi yêu cầu nghỉ phép.</p>';
+        const tasks = attendanceState.tasks || [];
+        document.getElementById("intern-tasks").innerHTML = tasks.length
+          ? `<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>Nhiệm vụ</th><th>Deadline</th><th>Tiến độ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${tasks.map((task) => `<tr><td>${escapeHtml(task.title)}${task.description ? `<small>${escapeHtml(task.description)}</small>` : ""}</td><td>${escapeHtml(formatDate(task.dueDate))}</td><td>${Number(task.progress || 0)}%</td><td>${escapeHtml(task.status === "Done" ? "Hoàn thành" : task.status === "InProgress" ? "Đang thực hiện" : "Chưa bắt đầu")}</td><td><button class="button button-secondary" type="button" data-intern-action="task-progress" data-id="${task.id}">Cập nhật</button></td></tr>`).join("")}</tbody></table></div>`
+          : '<p class="microcopy">Bạn chưa được giao nhiệm vụ.</p>';
+        const reports = attendanceState.reports || [];
+        document.getElementById("intern-reports").innerHTML = reports.length
+          ? `<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>Tuần bắt đầu</th><th>Tóm tắt</th><th>Minh chứng</th><th>Trạng thái</th><th>Phản hồi mentor</th><th>Thao tác</th></tr></thead><tbody>${reports.map((report) => `<tr><td>${escapeHtml(formatDate(report.weekStart))}</td><td>${escapeHtml(report.summary)}</td><td>${/^https?:\/\//i.test(report.evidenceUrl || "") ? `<a href="${escapeHtml(report.evidenceUrl)}" target="_blank" rel="noopener">Mở link</a>` : "—"}</td><td>${escapeHtml(report.status === "Reviewed" ? "Đã phản hồi" : "Đã nộp")}</td><td>${escapeHtml(report.mentorFeedback || "Chưa phản hồi")}</td><td>${report.status === "Reviewed" ? "—" : `<button class="button button-secondary" type="button" data-intern-action="report-edit" data-id="${report.id}">Sửa</button>`}</td></tr>`).join("")}</tbody></table></div>`
+          : '<p class="microcopy">Bạn chưa nộp báo cáo tuần.</p>';
+        const evaluations = attendanceState.evaluations || [];
+        document.getElementById("intern-evaluations").innerHTML = evaluations.length
+          ? `<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>Chương trình</th><th>Kỹ năng</th><th>Thái độ</th><th>Giao tiếp</th><th>Làm việc nhóm</th><th>Điểm TB</th><th>Nhận xét</th></tr></thead><tbody>${evaluations.map((evaluation) => `<tr><td>${escapeHtml(evaluation.program || "—")}</td><td>${evaluation.skills}/5</td><td>${evaluation.attitude}/5</td><td>${evaluation.communication}/5</td><td>${evaluation.teamwork == null ? "—" : `${evaluation.teamwork}/5`}</td><td><strong>${Number(evaluation.average || 0).toLocaleString("vi-VN")}/5</strong></td><td>${escapeHtml(evaluation.comment || "—")}</td></tr>`).join("")}</tbody></table></div>`
+          : '<p class="microcopy">Mentor chưa gửi đánh giá.</p>';
+      }
+
+      function openInternDialog(title, fields, onSubmit, submitLabel) {
+        const dialog = document.createElement("dialog");
+        dialog.className = "portal-guide";
+        dialog.innerHTML = `<form class="attendance-dialog-form"><h2>${escapeHtml(title)}</h2><div class="attendance-dialog-fields">${fields}</div><footer><button type="button" class="button button-secondary" data-dialog-close>Hủy</button><button type="submit" class="button button-primary">${escapeHtml(submitLabel)}</button></footer></form>`;
+        document.body.append(dialog);
+        dialog.querySelector("[data-dialog-close]").addEventListener("click", () => dialog.close());
+        dialog.addEventListener("close", () => dialog.remove(), { once: true });
+        dialog.querySelector("form").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const submit = form.querySelector('[type="submit"]');
+          submit.disabled = true;
+          try {
+            await onSubmit(Object.fromEntries(new FormData(form)));
+            dialog.close();
+            const refreshed = await loadAttendanceWorkspace();
+            showToast(
+              refreshed
+                ? "Đã lưu thay đổi."
+                : "Đã lưu thay đổi nhưng chưa thể làm mới dữ liệu.",
+              refreshed ? "success" : "error",
+            );
+          } catch (error) {
+            showToast(error instanceof Error ? error.message : "Không thể lưu thay đổi.", "error");
+          } finally {
+            submit.disabled = false;
+          }
+        });
+        dialog.showModal();
+      }
+
+      function editInternTaskProgress(task) {
+        if (!task) return;
+        const statuses = [
+          ["Todo", "Chưa bắt đầu"],
+          ["InProgress", "Đang thực hiện"],
+          ["Done", "Hoàn thành"],
+        ];
+        openInternDialog(
+          "Cập nhật tiến độ",
+          `<label class="field">Tiến độ (%)<input name="progress" type="number" min="0" max="100" step="5" value="${Number(task.progress || 0)}" required></label><label class="field">Trạng thái<select name="status" required>${statuses.map(([value, label]) => `<option value="${value}"${task.status === value ? " selected" : ""}>${label}</option>`).join("")}</select></label>`,
+          async (values) => {
+            const progress = Number(values.progress);
+            const status = progress === 100 ? "Done" : progress > 0 ? "InProgress" : "Todo";
+            if (values.status !== status)
+              throw new Error("Trạng thái phải phù hợp với phần trăm tiến độ.");
+            await apiRequest(`/tasks/${task.id}/progress`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ progress, status, note: null }),
+            });
+          },
+          "Lưu tiến độ",
+        );
+      }
+
+      function editWeeklyReport(report = null) {
+        if (report?.status === "Reviewed") {
+          showToast("Báo cáo đã được mentor phản hồi, không thể sửa trực tiếp.", "error");
+          return;
+        }
+        openInternDialog(
+          report ? "Sửa báo cáo tuần" : "Nộp báo cáo tuần",
+          `<label class="field">Tuần bắt đầu<input name="weekStart" type="date" value="${escapeHtml(report?.weekStart || localDateValue())}" required></label><label class="field">Tóm tắt kết quả<textarea name="summary" rows="5" maxlength="6000" required>${escapeHtml(report?.summary || "")}</textarea></label><label class="field">Vướng mắc cần hỗ trợ<textarea name="blockers" rows="3" maxlength="2000">${escapeHtml(report?.blockers || "")}</textarea></label><label class="field">Minh chứng (đường dẫn)<input name="evidenceUrl" type="url" maxlength="500" placeholder="https://…" value="${escapeHtml(report?.evidenceUrl || "")}"></label>`,
+          async (values) => {
+            await apiRequest(`/reports/weekly${report ? `/${report.id}` : ""}`, {
+              method: report ? "PUT" : "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(values),
+            });
+          },
+          report ? "Lưu báo cáo" : "Nộp báo cáo",
+        );
+      }
+
+      function showAttendanceTab(tab) {
+        if (!["schedule", "program", "leave"].includes(tab)) return;
+        const button = document.querySelector(`[data-attendance-tab="${tab}"]`);
+        if (!button || button.hidden) return;
+        attendanceTab = tab;
+        document.querySelectorAll("[data-attendance-tab]").forEach((item) => {
+          if (item.dataset.attendanceTab === tab)
+            item.setAttribute("aria-current", "page");
+          else item.removeAttribute("aria-current");
+        });
+        document.querySelectorAll("[data-attendance-panel]").forEach((panel) => {
+          panel.hidden = panel.dataset.attendancePanel !== tab;
+        });
+        const url = new URL(window.location.href);
+        url.searchParams.set("attendanceTab", tab);
+        window.history.replaceState(null, "", url);
       }
 
       async function loadAttendanceWorkspace() {
@@ -2221,7 +2416,13 @@
           const identity = await window.sessionReady;
           const permissions = identity?.permissions || [];
           const attendanceEnabled = permissions.includes("attendance.write");
-          const [schedule, attendance, leaves] = await Promise.all([
+          document.querySelector('[data-attendance-tab="schedule"]').hidden =
+            !permissions.includes("schedule.read") && !attendanceEnabled;
+          document.querySelector('[data-attendance-tab="program"]').hidden =
+            !permissions.includes("schedule.read");
+          document.querySelector('[data-attendance-tab="leave"]').hidden =
+            !attendanceEnabled;
+          const [schedule, attendance, leaves, tasks, reports, evaluations] = await Promise.all([
             permissions.includes("schedule.read")
               ? apiRequest("/interns/me/schedule")
               : Promise.resolve(null),
@@ -2231,11 +2432,17 @@
             permissions.includes("attendance.write")
               ? apiRequest("/leave")
               : Promise.resolve([]),
+            apiRequest("/tasks"),
+            apiRequest("/reports/weekly"),
+            apiRequest("/evaluations"),
           ]);
           attendanceState = {
             schedule,
             attendance,
             leaves: Array.isArray(leaves) ? leaves : [],
+            tasks: Array.isArray(tasks) ? tasks : [],
+            reports: Array.isArray(reports) ? reports : [],
+            evaluations: Array.isArray(evaluations) ? evaluations : [],
           };
           const form = document.getElementById("leave-request-form");
           if (!form.elements.from.value) {
@@ -2246,12 +2453,21 @@
           document.getElementById("attendance-history-panel").hidden = !attendanceEnabled;
           document.getElementById("leave-request-panel").hidden = !attendanceEnabled;
           renderAttendance();
+          if (document.querySelector(`[data-attendance-tab="${attendanceTab}"]`)?.hidden) {
+            showAttendanceTab(
+              document.querySelector(".attendance-subnav-item:not([hidden])")?.dataset.attendanceTab || "schedule",
+            );
+          } else {
+            showAttendanceTab(attendanceTab);
+          }
+          return true;
         } catch (requestError) {
           error.textContent =
             requestError instanceof Error
               ? requestError.message
               : "Không thể tải lịch và chấm công.";
           error.hidden = false;
+          return false;
         }
       }
 
@@ -2863,9 +3079,29 @@
           if (event.target === event.currentTarget) event.currentTarget.close();
         });
 
-      document
-        .getElementById("attendance-refresh")
-        .addEventListener("click", () => void loadAttendanceWorkspace());
+      document.getElementById("intern-report-new").addEventListener("click", () =>
+        editWeeklyReport(),
+      );
+      document.getElementById("intern-tasks").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-intern-action]");
+        if (!button) return;
+        const id = Number(button.dataset.id);
+        if (button.dataset.internAction === "task-progress")
+          editInternTaskProgress(attendanceState.tasks.find((task) => task.id === id));
+      });
+      document.getElementById("intern-reports").addEventListener("click", (event) => {
+        const button = event.target.closest('[data-intern-action="report-edit"]');
+        if (!button) return;
+        const report = attendanceState.reports.find(
+          (item) => item.id === Number(button.dataset.id),
+        );
+        editWeeklyReport(report);
+      });
+      document.querySelectorAll("[data-attendance-tab]").forEach((button) => {
+        button.addEventListener("click", () =>
+          showAttendanceTab(button.dataset.attendanceTab),
+        );
+      });
       document
         .getElementById("attendance-check-in")
         .addEventListener("click", async (event) => {
@@ -2921,6 +3157,11 @@
         });
 
       const requestedView = new URLSearchParams(window.location.search).get("view");
+      const requestedAttendanceTab =
+        new URLSearchParams(window.location.search).get("attendanceTab");
+      attendanceTab = ["schedule", "program", "leave"].includes(requestedAttendanceTab)
+        ? requestedAttendanceTab
+        : "schedule";
       showView(["overview", "documents", "contract", "attendance"].includes(requestedView) ? requestedView : "overview");
       window.addEventListener("focus", () => void loadWorkspace());
       window.addEventListener("pagehide", () => clearInterval(attendanceTimer));

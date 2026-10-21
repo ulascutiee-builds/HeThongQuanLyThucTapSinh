@@ -19,11 +19,65 @@ public static class InternshipStatusSync
         var contracts = await db.InternDocuments
             .Where(x => x.Type == "Hợp đồng thực tập" && x.IsCurrent && x.StartsAt != null && x.ExpiresAt != null)
             .ToListAsync(cancellationToken);
+        var confirmedContractProfiles = contracts
+            .Where(x => x.Status == "Đã xác nhận")
+            .Select(x => x.ProfileId)
+            .ToHashSet();
+        var expiredConfirmedContractProfiles = contracts
+            .Where(x => x.Status == "Đã xác nhận" &&
+                DateOnly.FromDateTime(x.ExpiresAt!.Value.ToOffset(LocalOffset).Date) < today)
+            .Select(x => x.ProfileId)
+            .ToHashSet();
         var profiles = await db.InternProfiles
             .Where(x => x.Status != "Từ chối")
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var changed = false;
         var assignments = await db.InternAssignments.Include(x => x.Program).ToDictionaryAsync(x => x.ProfileId, cancellationToken);
+        var submittedProfiles = await db.InternApplications
+            .Where(x => x.Status == "Chờ duyệt" || x.Status == "Đã duyệt")
+            .Select(x => new { x.ProfileId, x.Status })
+            .ToListAsync(cancellationToken);
+        var pendingApplications = submittedProfiles
+            .Where(x => x.Status == "Chờ duyệt")
+            .Select(x => x.ProfileId)
+            .ToHashSet();
+        var submittedProfileIds = submittedProfiles
+            .Select(x => x.ProfileId)
+            .ToHashSet();
+        var submittedDocumentTypes = await db.InternDocuments
+            .Where(x => x.IsCurrent && (x.Type == "CV" || x.Type == "Đơn xin thực tập") &&
+                (x.Status == "Chờ duyệt" || x.Status == "Đã duyệt"))
+            .Select(x => new { x.ProfileId, x.Type })
+            .ToListAsync(cancellationToken);
+        var submittedDocuments = submittedDocumentTypes
+            .Select(x => (x.ProfileId, x.Type))
+            .ToHashSet();
+        var completeApplications = submittedProfileIds
+            .Where(profileId => submittedDocuments.Contains((profileId, "CV")) &&
+                submittedDocuments.Contains((profileId, "Đơn xin thực tập")))
+            .ToHashSet();
+        foreach (var profileId in pendingApplications)
+        {
+            if (completeApplications.Contains(profileId) && profiles.TryGetValue(profileId, out var profile) &&
+                profile.Status is not ("Chờ duyệt" or "Đã hoàn thành"))
+            {
+                profile.Status = "Chờ duyệt";
+                changed = true;
+            }
+        }
+
+        foreach (var profile in profiles.Values)
+        {
+            if (confirmedContractProfiles.Contains(profile.Id) || profile.Status == "Đã hoàn thành" ||
+                completeApplications.Contains(profile.Id))
+                continue;
+
+            if (profile.Status != "Chờ hồ sơ")
+            {
+                profile.Status = "Chờ hồ sơ";
+                changed = true;
+            }
+        }
 
         foreach (var contract in contracts)
         {
@@ -33,11 +87,7 @@ public static class InternshipStatusSync
             if (assignments.ContainsKey(contract.ProfileId)) continue;
             var start = DateOnly.FromDateTime(contract.StartsAt!.Value.ToOffset(LocalOffset).Date);
             var end = DateOnly.FromDateTime(contract.ExpiresAt!.Value.ToOffset(LocalOffset).Date);
-            var status = end < today
-                ? "Đã hoàn thành"
-                : start > today
-                    ? "Chờ bắt đầu"
-                    : "Đang thực tập";
+            var status = end < today ? "Đã hoàn thành" : "Đang thực tập";
 
             if (profile.StartDate != start)
             {
@@ -56,6 +106,16 @@ public static class InternshipStatusSync
                 profile.Status = status;
                 changed = true;
             }
+            else if (contract.Status != "Đã xác nhận" && completeApplications.Contains(profile.Id) &&
+                !pendingApplications.Contains(profile.Id) &&
+                profile.Status is not ("Đã hoàn thành" or "Từ chối"))
+            {
+                if (profile.Status != "Chờ bắt đầu")
+                {
+                    profile.Status = "Chờ bắt đầu";
+                    changed = true;
+                }
+            }
         }
 
         foreach (var assignment in assignments.Values)
@@ -65,8 +125,31 @@ public static class InternshipStatusSync
             var end = assignment.Program.EndDate;
             if (profile.StartDate != start || profile.EndDate != end) { profile.StartDate = start; profile.EndDate = end; changed = true; }
             if (profile.Status is "Chờ hồ sơ" or "Chờ duyệt") continue;
-            var status = end < today ? "Đã hoàn thành" : start > today ? "Chờ bắt đầu" : "Đang thực tập";
+            if (!confirmedContractProfiles.Contains(profile.Id))
+            {
+                if (profile.Status != "Chờ bắt đầu") { profile.Status = "Chờ bắt đầu"; changed = true; }
+                continue;
+            }
+            var status = end < today ? "Đã hoàn thành" : "Đang thực tập";
             if (profile.Status != status) { profile.Status = status; changed = true; }
+        }
+
+        foreach (var profileId in expiredConfirmedContractProfiles)
+        {
+            if (profiles.TryGetValue(profileId, out var profile) && profile.Status != "Đã hoàn thành")
+            {
+                profile.Status = "Đã hoàn thành";
+                changed = true;
+            }
+        }
+
+        foreach (var profile in profiles.Values)
+        {
+            if (profile.Status == "Đang thực tập" && !confirmedContractProfiles.Contains(profile.Id))
+            {
+                profile.Status = "Chờ bắt đầu";
+                changed = true;
+            }
         }
 
         if (changed)

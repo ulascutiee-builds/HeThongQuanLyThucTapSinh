@@ -174,6 +174,90 @@ try
     var assignmentId = Id(await Post(hr, "/api/assignments", new
         { profileId = internProfile.Id, programId, mentorId }, 201));
 
+    var statusProfile = await db.InternProfiles.SingleAsync(x => x.Id == internProfile.Id);
+    await Put(hr, $"/api/hr/profiles/{internProfile.Id}", new
+    {
+        name = statusProfile.Name,
+        studentId = statusProfile.StudentId,
+        email = statusProfile.Email,
+        phone = statusProfile.Phone,
+        school = statusProfile.School,
+        major = statusProfile.Major,
+        dateOfBirth = statusProfile.DateOfBirth,
+        startDate = today,
+        endDate = today.AddDays(30),
+        status = "Đang thực tập"
+    }, 400);
+    statusProfile.Status = "Đang thực tập";
+    await db.SaveChangesAsync();
+    await Get(intern, $"/api/interns/{internProfile.Id}/documents");
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Chờ hồ sơ", "Profile missing its CV and application did not move to document-pending status");
+
+    var statusApplication = await db.InternApplications.SingleOrDefaultAsync(x => x.ProfileId == internProfile.Id);
+    if (statusApplication is null)
+    {
+        statusApplication = new InternApplication { ProfileId = internProfile.Id, Status = "Chờ duyệt" };
+        db.InternApplications.Add(statusApplication);
+    }
+    else
+        statusApplication.Status = "Chờ duyệt";
+    var previousDocuments = await db.InternDocuments.Where(x => x.ProfileId == internProfile.Id).ToListAsync();
+    foreach (var previousDocument in previousDocuments.Where(x =>
+        x.Type is "CV" or "Đơn xin thực tập" or "Hợp đồng thực tập"))
+        previousDocument.IsCurrent = false;
+    int NextVersion(string type) => previousDocuments.Where(x => x.Type == type)
+        .Select(x => x.Version).DefaultIfEmpty(0).Max() + 1;
+    foreach (var type in new[] { "CV", "Đơn xin thực tập" })
+    {
+        db.InternDocuments.Add(new InternDocument
+        {
+            ProfileId = internProfile.Id,
+            Type = type,
+            FileName = type + ".pdf",
+            ContentType = "application/pdf",
+            Content = "%PDF-1.4\n%%EOF"u8.ToArray(),
+            Status = "Chờ duyệt",
+            Version = NextVersion(type),
+            UploadedBy = internEmail
+        });
+    }
+    var futureContract = new InternDocument
+    {
+        ProfileId = internProfile.Id,
+        Type = "Hợp đồng thực tập",
+        FileName = "status-check.pdf",
+        ContentType = "application/pdf",
+        Content = "%PDF-1.4\n%%EOF"u8.ToArray(),
+        Status = "Chờ xác nhận",
+        Version = NextVersion("Hợp đồng thực tập"),
+        StartsAt = InternshipStatusSync.StartOfDay(today.AddDays(1)),
+        ExpiresAt = InternshipStatusSync.EndOfDay(today.AddDays(30)),
+        UploadedBy = internEmail
+    };
+    statusProfile.Status = "Đang thực tập";
+    db.InternDocuments.Add(futureContract);
+    await db.SaveChangesAsync();
+    await Get(intern, $"/api/interns/{internProfile.Id}/documents");
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Chờ duyệt", "Submitted CV and application did not move the profile to approval-pending status");
+    statusApplication.Status = "Đã duyệt";
+    var submittedDocs = await db.InternDocuments.Where(x => x.ProfileId == internProfile.Id &&
+        (x.Type == "CV" || x.Type == "Đơn xin thực tập") && x.IsCurrent).ToListAsync();
+    foreach (var document in submittedDocs)
+        document.Status = "Đã duyệt";
+    statusProfile.Status = "Đang thực tập";
+    await db.SaveChangesAsync();
+    await Get(intern, $"/api/interns/{internProfile.Id}/documents");
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Chờ bắt đầu", "Unconfirmed contract did not keep the approved profile waiting to start");
+    await Post(intern, $"/api/interns/{internProfile.Id}/documents/{futureContract.Id}/confirm-contract", new { });
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Đang thực tập", "Confirming a future-start contract did not activate the internship");
+    await Get(intern, $"/api/interns/{internProfile.Id}/documents");
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Đang thực tập", "Status synchronization reverted a confirmed contract before its start date");
+
     var taskId = Id(await Post(mentor, "/api/tasks", taskInput, 201));
     Check(HasId(await Get(intern, "/api/tasks"), taskId), "Intern cannot see their task");
     Check(HasId(await Get(mentor, "/api/tasks"), taskId), "Mentor cannot see assigned task");
@@ -299,6 +383,12 @@ try
         Check(HasId((await Get(intern, "/api/notifications"))!["items"], profileNotification.Id),
             "Intern cannot read own profile notification");
 
+    futureContract.ExpiresAt = InternshipStatusSync.EndOfDay(today.AddDays(-1));
+    await db.SaveChangesAsync();
+    await Get(intern, $"/api/interns/{internProfile.Id}/documents");
+    await db.Entry(statusProfile).ReloadAsync();
+    Check(statusProfile.Status == "Đã hoàn thành", "Expired confirmed contract did not move the profile to completed");
+
     // Permanent account deletion must remove account-owned records while keeping
     // shared program data and all other users. These are disposable test identities.
     await Request(hr, HttpMethod.Delete, $"/api/accounts/{mentorUser.Id}", expected: 403);
@@ -321,7 +411,9 @@ try
     var internAccountId = await db.AppUsers.AsNoTracking().Where(x => x.ProfileId == internProfile.Id).Select(x => x.Id).SingleAsync();
     var schedule = new ProgramSchedule { ProgramId = programId, Date = today, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(17, 0), Title = "Deletion fixture" };
     db.ProgramSchedules.Add(schedule); await db.SaveChangesAsync();
-    db.InternDocuments.Add(new InternDocument { ProfileId = internProfile.Id, Type = "CV", FileName = "fixture.pdf", ContentType = "application/pdf", Content = [1, 2, 3] });
+    var nextCvVersion = (await db.InternDocuments.Where(x => x.ProfileId == internProfile.Id && x.Type == "CV")
+        .Select(x => (int?)x.Version).MaxAsync() ?? 0) + 1;
+    db.InternDocuments.Add(new InternDocument { ProfileId = internProfile.Id, Type = "CV", FileName = "fixture.pdf", ContentType = "application/pdf", Content = [1, 2, 3], Version = nextCvVersion });
     db.InternApplications.Add(new InternApplication { ProfileId = internProfile.Id });
     db.AttendanceRecords.Add(new AttendanceRecord { ProfileId = internProfile.Id, ScheduleId = schedule.Id, Date = today, CheckIn = DateTimeOffset.UtcNow, CheckOut = DateTimeOffset.UtcNow.AddHours(1) });
     db.LeaveRequests.Add(new LeaveRequest { ProfileId = internProfile.Id, From = today.AddDays(1), To = today.AddDays(1), Reason = "Fixture" });

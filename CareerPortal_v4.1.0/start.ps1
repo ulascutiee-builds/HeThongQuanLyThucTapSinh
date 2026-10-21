@@ -7,7 +7,8 @@ param(
     [string]$SmtpPassword,
     [string]$SmtpFrom,
     [switch]$SmtpNoSsl,
-    [switch]$RepairDemoAccounts
+    [switch]$RepairDemoAccounts,
+    [switch]$SeedDemoData
 )
 $ErrorActionPreference = 'Stop'
 $taskProject = Join-Path $PSScriptRoot 'backend\CareerPortal.Api\CareerPortal.Api.csproj'
@@ -23,6 +24,7 @@ $env:Accounts__MentorPassword = '0939232002'
 $env:Accounts__UserEmail = 'user@abcxyz.com'
 $env:Accounts__UserPassword = '0939232002'
 $env:Accounts__RepairDemoAccounts = [string]$RepairDemoAccounts
+$env:DemoData__Seed = [string]$SeedDemoData
 $env:ASPNETCORE_URLS = 'http://localhost:' + $Port
 $env:PublicUrl = 'http://localhost:' + $Port
 if (-not $env:ConnectionStrings__CareerPortal) {
@@ -49,6 +51,7 @@ Write-Host ('Mentor: ' + $env:Accounts__MentorEmail + ' / ' + $env:Accounts__Men
 Write-Host ('User: ' + $env:Accounts__UserEmail + ' / ' + $env:Accounts__UserPassword)
 Write-Host 'All four demo accounts use the same password. Keep this terminal private.'
 Write-Host 'The application applies migrations automatically without deleting existing data.'
+if ($SeedDemoData) { Write-Warning 'NAP DU LIEU GIA LAP: chỉ sử dụng trên cơ sở dữ liệu thử nghiệm, không dùng trên môi trường thật.' }
 if ($RepairDemoAccounts) {
     Write-Warning 'Repairing demo accounts: configured demo passwords will be reset and missing demo accounts created. Other accounts and database data are preserved.'
 }
@@ -60,7 +63,7 @@ if ($env:Email__Provider -eq 'Resend') { Write-Host 'Email provider: Resend (API
 elseif ($env:Email__Provider -eq 'Pickup') { Write-Host ('Email pickup folder: ' + (Join-Path $taskSecrets 'runtime\mail')) }
 elseif ($env:Email__SmtpHost) { Write-Host ('Email SMTP: ' + $env:Email__SmtpHost + ':' + $taskEmailPort) }
 else { Write-Host ('Email pickup folder (when a provider is not configured): ' + (Join-Path $taskSecrets 'runtime\mail')) }
-if ((Test-Path -LiteralPath $taskPublished) -and -not $Source -and -not $RepairDemoAccounts) {
+if ((Test-Path -LiteralPath $taskPublished) -and -not $Source -and -not $RepairDemoAccounts -and -not $SeedDemoData) {
     Push-Location $taskPublishedRoot
     try { & $taskPublished } finally { Pop-Location }
 } else {

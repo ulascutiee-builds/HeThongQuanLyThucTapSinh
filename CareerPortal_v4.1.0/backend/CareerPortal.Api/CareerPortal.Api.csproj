@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DemoFiles\*.pdf" />
     <Content Include="..\..\frontend\**\*" Link="frontend\%(RecursiveDir)%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
     <Content Remove="App_Data\**\*" />
     <None Remove="App_Data\**\*" />
