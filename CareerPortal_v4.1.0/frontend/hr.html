@@ -6,6 +6,9 @@
     <meta name="theme-color" content="#173b78" />
     <title>Quản lý nhân sự | Career Portal</title>
     <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689" />
+    <script>
+      if (new URLSearchParams(location.search).get("embedded") === "admin") document.documentElement.classList.add("embedded-admin");
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -1147,6 +1150,13 @@
         }
       }
     </style>
+    <style>
+      html.embedded-admin, html.embedded-admin body { min-height: 0; }
+      html.embedded-admin .app-shell { display: block !important; min-height: 0; }
+      html.embedded-admin .sidebar, html.embedded-admin .topbar { display: none !important; }
+      html.embedded-admin .main-area { width: 100%; min-width: 0; }
+      html.embedded-admin .content { width: 100%; max-width: none; padding: 0; }
+    </style>
     <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
     <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right" />
     <script src="portal-ui.js?v=20261012-brand-refresh" defer></script>
@@ -1915,6 +1925,12 @@
         }, 5000);
       }
 
+      function notifyAdminEmbedDialog(open) {
+        if (new URLSearchParams(location.search).get("embedded") === "admin") {
+          parent.postMessage({ type: "hr-embed-dialog", open }, location.origin);
+        }
+      }
+
       function fillFilterOptions(select, values, label) {
         const selected = select.value;
         const options = [...new Set(values.filter(Boolean))].sort((a, b) =>
@@ -2376,6 +2392,7 @@
         document.getElementById("profile-date-of-birth").value =
           profile?.dateOfBirth || "";
         document.getElementById("profile-dialog").showModal();
+        notifyAdminEmbedDialog(true);
       }
 
       function openDocumentDialog(documentId) {
@@ -2407,6 +2424,7 @@
         document.getElementById("document-download").download =
           documentItem.fileName;
         document.getElementById("document-dialog").showModal();
+        notifyAdminEmbedDialog(true);
       }
 
       navItems.forEach((item) =>
@@ -2796,6 +2814,9 @@
           ),
         );
       document.querySelectorAll("dialog").forEach((dialog) =>
+        dialog.addEventListener("close", () => notifyAdminEmbedDialog(false)),
+      );
+      document.querySelectorAll("dialog").forEach((dialog) =>
         dialog.addEventListener("click", (event) => {
           if (event.target === dialog) dialog.close();
         }),
@@ -2806,5 +2827,18 @@
       loadState();
     </script>
     <script src="sprint1-ui.js?v=20261003-3"></script>
+    <script>
+      if (new URLSearchParams(location.search).get("embedded") === "admin") {
+        const reportEmbeddedHeight = () => {
+          const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+          parent.postMessage({ type: "hr-embed-height", height }, location.origin);
+        };
+        new ResizeObserver(reportEmbeddedHeight).observe(document.documentElement);
+        new ResizeObserver(reportEmbeddedHeight).observe(document.body);
+        new MutationObserver(reportEmbeddedHeight).observe(document.body, { childList: true, subtree: true });
+        window.addEventListener("load", reportEmbeddedHeight);
+        reportEmbeddedHeight();
+      }
+    </script>
   </body>
 </html>

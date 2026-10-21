@@ -180,7 +180,11 @@
     });
     document.querySelectorAll(".sidebar nav a[href], .s2-nav a[href]").forEach(link => {
       let active = false;
-      try { active = new URL(link.href, location.href).pathname === location.pathname; } catch { /* Keep malformed external links unchanged. */ }
+      try {
+        const target = new URL(link.href, location.href);
+        const current = new URL(location.href);
+        active = target.pathname === current.pathname && target.searchParams.get("section") === current.searchParams.get("section");
+      } catch { /* Keep malformed external links unchanged. */ }
       if (active) { link.setAttribute("aria-current", "page"); link.classList.add("current"); }
       else if (link.hasAttribute("aria-current")) { link.removeAttribute("aria-current"); link.classList.remove("current"); }
     });

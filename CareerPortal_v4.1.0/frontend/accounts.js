@@ -121,6 +121,81 @@
     byId("nav-attendance").hidden = !can("attendance.report");
     byId("permissions-tab").disabled = !can("roles.manage");
   }
+  function setAdminSection(section, updateHistory = false) {
+    const showInterns = section === "interns";
+    const showPrograms = section === "programs";
+    const showAttendance = section === "attendance";
+    const permissions = state.me?.permissions || [];
+    if (showInterns && !permissions.includes("profiles.read")) {
+      notice("Bạn không có quyền quản lý hồ sơ thực tập sinh.", true);
+      return;
+    }
+    if (showPrograms && !permissions.some(permission => ["programs.manage", "assignments.manage"].includes(permission))) {
+      notice("Bạn không có quyền quản lý chương trình và phân công.", true);
+      return;
+    }
+    if (showAttendance && !permissions.includes("attendance.report")) {
+      notice("Bạn không có quyền xem báo cáo chuyên cần.", true);
+      return;
+    }
+    byId("admin-home").hidden = showInterns || showPrograms || showAttendance;
+    byId("interns-module").hidden = !showInterns;
+    byId("programs-module").hidden = !showPrograms;
+    byId("attendance-module").hidden = !showAttendance;
+    byId("admin-section-title").textContent = showInterns ? "Quản lý thực tập sinh" : showPrograms ? "Chương trình và phân công" : showAttendance ? "Báo cáo chuyên cần" : "Quản trị tài khoản";
+    byId("nav-accounts").classList.toggle("current", !showInterns && !showPrograms && !showAttendance);
+    if (!showInterns && !showPrograms && !showAttendance) byId("nav-accounts").setAttribute("aria-current", "page");
+    else byId("nav-accounts").removeAttribute("aria-current");
+    for (const [id, active] of [["nav-hr", showInterns], ["nav-programs", showPrograms], ["nav-attendance", showAttendance]]) {
+      byId(id).classList.toggle("current", active);
+      if (active) byId(id).setAttribute("aria-current", "page");
+      else byId(id).removeAttribute("aria-current");
+    }
+    if (showInterns && !byId("interns-frame").dataset.loaded) {
+      byId("interns-frame").src = "hr.html?embedded=admin";
+      byId("interns-frame").dataset.loaded = "true";
+    }
+    if (showPrograms && !byId("programs-frame").dataset.loaded) {
+      byId("programs-frame").src = "programs.html?embedded=admin";
+      byId("programs-frame").dataset.loaded = "true";
+    }
+    if (showAttendance && !byId("attendance-frame").dataset.loaded) {
+      byId("attendance-frame").src = "attendance.html?embedded=admin";
+      byId("attendance-frame").dataset.loaded = "true";
+    }
+    if (updateHistory) {
+      const url = new URL(location.href);
+      if (showInterns || showPrograms || showAttendance) url.searchParams.set("section", showInterns ? "interns" : showPrograms ? "programs" : "attendance");
+      else url.searchParams.delete("section");
+      history.pushState({}, "", url);
+    }
+  }
+  byId("nav-accounts").addEventListener("click", event => { event.preventDefault(); setAdminSection("accounts", true); });
+  byId("nav-hr").addEventListener("click", event => { event.preventDefault(); setAdminSection("interns", true); });
+  byId("nav-programs").addEventListener("click", event => { event.preventDefault(); setAdminSection("programs", true); });
+  byId("nav-attendance").addEventListener("click", event => { event.preventDefault(); setAdminSection("attendance", true); });
+  window.addEventListener("popstate", () => setAdminSection(new URLSearchParams(location.search).get("section")));
+  let internsDialogOpen = false;
+  window.addEventListener("message", event => {
+    if (event.origin !== location.origin) return;
+    const isInternsFrame = event.source === byId("interns-frame").contentWindow;
+    const isProgramsFrame = event.source === byId("programs-frame").contentWindow;
+    const isAttendanceFrame = event.source === byId("attendance-frame").contentWindow;
+    if (!isInternsFrame && !isProgramsFrame && !isAttendanceFrame) return;
+    if (event.data?.type === "hr-embed-dialog" && isInternsFrame && typeof event.data.open === "boolean") {
+      internsDialogOpen = event.data.open;
+      if (internsDialogOpen) {
+        const frame = byId("interns-frame");
+        frame.style.height = `${Math.max(600, Math.floor(window.innerHeight * 0.9))}px`;
+        frame.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+      return;
+    }
+    const heights = { "hr-embed-height": [isInternsFrame, "interns-frame"], "programs-embed-height": [isProgramsFrame, "programs-frame"], "attendance-embed-height": [isAttendanceFrame, "attendance-frame"] };
+    const height = heights[event.data?.type];
+    if (!height || !height[0] || !Number.isFinite(event.data.height) || (event.data.type === "hr-embed-height" && internsDialogOpen)) return;
+    byId(height[1]).style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
+  });
   async function activateTab(name) {
     if (name !== "account-permissions" && state.activeTab === "account-permissions" && permissionDirty()) {
       if (state.permissionSaving || !(await (window.portalConfirm ? window.portalConfirm("Bỏ thay đổi phân quyền chưa lưu để chuyển mục?") : true))) return;
@@ -230,7 +305,15 @@
   byId("save-permissions").addEventListener("click", () => perform(byId("save-permissions"), async () => { const role = byId("permission-role").value; const permissions = [...byId("permission-list").querySelectorAll("input:checked")].map((input) => input.value); await api(`/api/roles/${encodeURIComponent(role)}/permissions`, { method: "PUT", body: JSON.stringify({ permissions }) }); await refresh(); notice(`Đã cập nhật quyền cho vai trò ${labelForRole(role)}.`); }));
   byId("logout").addEventListener("click", () => perform(byId("logout"), async () => { await api("/api/auth/logout", { method: "POST" }); sessionStorage.clear(); location.assign("dang-nhap.html"); }));
   (async () => {
-    try { state.me = await api("/api/auth/me"); renderNavigation(); await refresh(); }
+    try {
+      state.me = await api("/api/auth/me");
+      renderNavigation();
+      const url = new URL(location.href);
+      url.searchParams.delete("section");
+      if (url.href !== location.href) history.replaceState(history.state, "", url);
+      setAdminSection("accounts");
+      await refresh();
+    }
     catch (error) { byId("account-rows").replaceChildren(); const row = node("tr"); const cell = node("td", error.message, "empty"); cell.colSpan = 5; row.append(cell); byId("account-rows").append(row); byId("new-account").disabled = true; notice(error.message, true); }
   })();
 })();
