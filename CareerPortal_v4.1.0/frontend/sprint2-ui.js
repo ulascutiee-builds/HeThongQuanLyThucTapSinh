@@ -4,6 +4,8 @@
   const page = document.body.dataset.s2Page;
   document.body.classList.toggle("s2-embedded", new URLSearchParams(location.search).has("embedded"));
   let me, data = {}, tab = "programs", refreshTimer, toastTimer;
+  const listPageSize = 5;
+  const listPages = { programs: 1, assignments: 1, mentors: 1 };
   const $ = (selector, root = document) => root.querySelector(selector);
   const h = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rows = value => Array.isArray(value) ? value : value?.items || [];
@@ -28,6 +30,16 @@
   const options = (items, selected, text = item => item.name, key = "id") => items.map(item => `<option value="${h(item[key])}"${String(item[key]) === String(selected) ? " selected" : ""}>${h(text(item))}</option>`).join("");
   const select = (name, items, selected = "", text, key = "id", required = true) => `<select name="${name}" ${required ? "required" : ""}><option value="">${required ? "Chọn…" : "Tất cả"}</option>${options(items,selected,text,key)}</select>`;
   const table = (headers, body) => `<div class="s2-table-scroll"><table class="s2-table"><thead><tr>${headers.map(x => `<th scope="col">${h(x)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>`;
+  function paginated(items, key) {
+    const pageCount = Math.max(1, Math.ceil(items.length / listPageSize));
+    listPages[key] = Math.min(listPages[key], pageCount);
+    const start = (listPages[key] - 1) * listPageSize;
+    const visible = items.slice(start, start + listPageSize);
+    const first = items.length ? start + 1 : 0;
+    const last = start + visible.length;
+    const controls = `<nav class="s2-pagination" aria-label="Phân trang ${key}"><span>Hiển thị ${first}–${last} / ${items.length} · Trang ${listPages[key]} / ${pageCount}</span><div><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:prev"${listPages[key] === 1 ? " disabled" : ""}>Trước</button><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:next"${listPages[key] === pageCount ? " disabled" : ""}>Sau</button></div></nav>`;
+    return { visible, controls };
+  }
 
   async function api(path, init = {}) {
     let response;
@@ -125,13 +137,16 @@
   function renderProgramTab() {
     const panel = $("#s2-panel");
     if (tab === "programs") {
-      panel.innerHTML = `<div class="s2-toolbar"><h2>Chương trình thực tập (${data.programs.length})</h2>${button("Thêm chương trình","program-new","","")}</div>${data.programs.length ? table(["Chương trình","Phòng ban","Thời gian","Chỉ tiêu","Trạng thái","Thao tác"],data.programs.map(p => `<tr><td>${h(p.name)}<small>${h(p.description)}</small></td><td>${h(p.departmentName)}</td><td>${date(p.startDate)} – ${date(p.endDate)}</td><td>${number(p.assignedCount)} / ${number(p.capacity)}</td><td>${badge(p.status)}</td><td><div class="s2-actions">${button("Sửa","program-edit",p.id)}${button("Xóa","program-delete",p.id,"danger")}</div></td></tr>`).join("")) : empty("Chưa có chương trình. Tạo chương trình để bắt đầu tổ chức thực tập.")}`;
+      const page = paginated(data.programs, "programs");
+      panel.innerHTML = `<div class="s2-toolbar"><h2>Chương trình thực tập (${data.programs.length})</h2>${button("Thêm chương trình","program-new","","")}</div>${data.programs.length ? `${table(["Chương trình","Phòng ban","Thời gian","Chỉ tiêu","Trạng thái","Thao tác"],page.visible.map(p => `<tr><td>${h(p.name)}<small>${h(p.description)}</small></td><td>${h(p.departmentName)}</td><td>${date(p.startDate)} – ${date(p.endDate)}</td><td>${number(p.assignedCount)} / ${number(p.capacity)}</td><td>${badge(p.status)}</td><td><div class="s2-actions">${button("Sửa","program-edit",p.id)}${button("Xóa","program-delete",p.id,"danger")}</div></td></tr>`).join(""))}${page.controls}` : empty("Chưa có chương trình. Tạo chương trình để bắt đầu tổ chức thực tập.")}`;
     } else if (tab === "departments") {
       panel.innerHTML = `<div class="s2-toolbar"><h2>Phòng ban</h2>${button("Thêm phòng ban","department-new","","")}</div>${data.departments.length ? table(["Phòng ban","Mã"],data.departments.map(d => `<tr><td>${h(d.name)}</td><td>${h(d.id)}</td></tr>`).join("")) : empty("Chưa có phòng ban. Thêm phòng ban trước khi tạo chương trình.")}`;
     } else if (tab === "assignments") {
-      panel.innerHTML = `<div class="s2-toolbar"><h2>Phân công (${data.assignments.length})</h2>${button("Phân công thực tập sinh","assignment-new","","")}</div><p class="s2-help">Mỗi thực tập sinh được phân công một mentor. Chỉ chọn chương trình mở tuyển hoặc đang diễn ra và mentor còn chỉ tiêu.</p>${data.assignments.length ? table(["Thực tập sinh","Chương trình","Mentor","Thời gian","Thao tác"],data.assignments.map(a => `<tr><td>${h(a.profile?.name || a.name)}<small>${h(a.profile?.email)}</small></td><td>${h(a.program?.name || find("programs",a.programId)?.name)}</td><td>${h(a.mentor?.name || find("mentors",a.mentorId)?.name)}</td><td>${date(a.program?.startDate)} – ${date(a.program?.endDate)}</td><td><div class="s2-actions">${button("Đổi mentor","assignment-edit",a.id)}${button("Hủy phân công","assignment-delete",a.id,"danger")}</div></td></tr>`).join("")) : empty("Chưa có phân công. Chọn thực tập sinh, chương trình và mentor để tạo phân công.")}`;
+      const page = paginated(data.assignments, "assignments");
+      panel.innerHTML = `<div class="s2-toolbar"><h2>Phân công (${data.assignments.length})</h2>${button("Phân công thực tập sinh","assignment-new","","")}</div><p class="s2-help">Mỗi thực tập sinh được phân công một mentor. Chỉ chọn chương trình mở tuyển hoặc đang diễn ra và mentor còn chỉ tiêu.</p>${data.assignments.length ? `${table(["Thực tập sinh","Chương trình","Mentor","Thời gian","Thao tác"],page.visible.map(a => `<tr><td>${h(a.profile?.name || a.name)}<small>${h(a.profile?.email)}</small></td><td>${h(a.program?.name || find("programs",a.programId)?.name)}</td><td>${h(a.mentor?.name || find("mentors",a.mentorId)?.name)}</td><td>${date(a.program?.startDate)} – ${date(a.program?.endDate)}</td><td><div class="s2-actions">${button("Đổi mentor","assignment-edit",a.id)}${button("Hủy phân công","assignment-delete",a.id,"danger")}</div></td></tr>`).join(""))}${page.controls}` : empty("Chưa có phân công. Chọn thực tập sinh, chương trình và mentor để tạo phân công.")}`;
     } else if (tab === "mentors") {
-      panel.innerHTML = `<div class="s2-toolbar"><h2>Mentor và khả năng tiếp nhận</h2>${button("Thêm mentor","mentor-new","","")}</div>${data.mentors.length ? table(["Mentor","Phòng ban","Đang hướng dẫn","Chỉ tiêu","Thao tác"],data.mentors.map(m => `<tr><td>${h(m.name)}<small>${h(m.email)}</small></td><td>${h(m.departmentName)}</td><td>${number(m.assignedCount)}</td><td>${number(m.capacity)}</td><td>${button("Sửa","mentor-edit",m.id)}</td></tr>`).join("")) : empty("Chưa có mentor. Tạo tài khoản vai trò Mentor trong mục Tài khoản, rồi bổ sung phòng ban và chỉ tiêu tại đây.")}`;
+      const page = paginated(data.mentors, "mentors");
+      panel.innerHTML = `<div class="s2-toolbar"><h2>Mentor và khả năng tiếp nhận (${data.mentors.length})</h2>${button("Thêm mentor","mentor-new","","")}</div>${data.mentors.length ? `${table(["Mentor","Phòng ban","Đang hướng dẫn","Chỉ tiêu","Thao tác"],page.visible.map(m => `<tr><td>${h(m.name)}<small>${h(m.email)}</small></td><td>${h(m.departmentName)}</td><td>${number(m.assignedCount)}</td><td>${number(m.capacity)}</td><td>${button("Sửa","mentor-edit",m.id)}</td></tr>`).join(""))}${page.controls}` : empty("Chưa có mentor. Tạo tài khoản vai trò Mentor trong mục Tài khoản, rồi bổ sung phòng ban và chỉ tiêu tại đây.")}`;
     } else if (tab === "schedule") {
       panel.innerHTML = `<div class="s2-toolbar">${field("Chương trình","programId",select("programId",data.programs,data.scheduleProgram))}${button("Thêm ca / mốc","schedule-new","","")}</div><div id="s2-schedules">${empty("Chọn chương trình để xem ca làm và các mốc quan trọng.")}</div>`;
       const programSelect = $("select[name=programId]",panel);
@@ -395,6 +410,14 @@
       if (key === "logout") { await api("/auth/logout",{method:"POST"}); sessionStorage.removeItem("sprint1-intern-profile-id"); location.assign("dang-nhap.html"); }
       else if (key === "refresh") { target.disabled=true; await refresh(); }
       else if (key === "tab") { tab=id; renderPrograms(); }
+      else if (key === "list-page" && page === "programs") {
+        const [list, direction] = id.split(":");
+        if (Object.hasOwn(listPages, list) && (direction === "prev" || direction === "next")) {
+          const pageCount = Math.max(1, Math.ceil((data[list] || []).length / listPageSize));
+          listPages[list] = Math.max(1, Math.min(pageCount, listPages[list] + (direction === "next" ? 1 : -1)));
+          renderProgramTab();
+        }
+      }
       else if (key === "program-new" && can("programs.manage")) programForm();
       else if (key === "program-edit" && can("programs.manage")) programForm(find("programs",id));
       else if (key === "program-delete" && can("programs.manage")) confirmAction("Xóa chương trình",`Xóa ${find("programs",id)?.name}? Chương trình đang có phân công hoặc lịch sẽ không thể xóa.`,async ()=>{await api("/programs/"+id,{method:"DELETE"}); await loadPrograms();},"Xóa chương trình");
