@@ -175,7 +175,8 @@
     document.querySelectorAll(".sidebar nav a, .sidebar nav button, .s2-nav a").forEach(link => {
       if (link.dataset.portalIcon) return; link.dataset.portalIcon = "true";
       const key = link.dataset.view || link.getAttribute("href") || "";
-      const name = /admin/.test(key) ? "shield" : /attendance/.test(key) ? "clock" : /programs/.test(key) ? "calendar" : /mentor|profiles|hr/.test(key) ? "users" : /documents|contract|applications/.test(key) ? "file" : "grid";
+      const adminIcons = { "nav-accounts": "shield", "nav-hr": "users", "nav-programs": "calendar", "nav-attendance": "clock" };
+      const name = adminIcons[link.id] || (/attendance/.test(key) ? "clock" : /programs/.test(key) ? "calendar" : /mentor|profiles|hr/.test(key) ? "users" : /documents|contract|applications/.test(key) ? "file" : /admin/.test(key) ? "shield" : "grid");
       const glyph = link.querySelector(".nav-glyph"); if (glyph) glyph.replaceChildren(icon(name)); else link.prepend(icon(name));
     });
     document.querySelectorAll(".sidebar nav a[href], .s2-nav a[href]").forEach(link => {
