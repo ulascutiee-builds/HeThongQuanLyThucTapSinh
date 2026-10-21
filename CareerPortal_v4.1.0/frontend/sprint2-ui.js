@@ -76,16 +76,29 @@
     }
     if (can("programs.manage") || can("assignments.manage")) links.push(["programs.html","Chương trình và phân công"]);
     if (can("attendance.report")) links.push(["attendance.html","Báo cáo chuyên cần"]);
-    if (role("Mentor")) links.push(["mentor.html","Nhóm thực tập"]);
+    if (role("Mentor")) {
+      links.push(["mentor.html?view=group","Nhóm thực tập"]);
+      links.push(["mentor.html?view=tasks","Nhiệm vụ"]);
+      links.push(["mentor.html?view=evaluations","Đánh giá"]);
+    }
     const currentPage = location.pathname.split("/").pop();
     const mentorPage = page === "mentor";
+    const mentorView = new URLSearchParams(location.search).get("view") || "group";
     const account = `<div class="s2-account"><div><p>${h(me.name)}</p><small>${h(label(me.role))}</small></div><button type="button" data-action="logout">Đăng xuất</button></div>`;
     const displayName = me.name || me.email || label(me.role);
     const initials = displayName.trim().split(/\s+/).map(part => Array.from(part)[0]).slice(-2).join("").toLocaleUpperCase("vi-VN");
     const mentorProfile = `<div class="s2-profile-card"><span class="s2-profile-avatar" aria-hidden="true">${h(initials)}</span><div><p>${h(displayName)}</p><small>${h(label(me.role))}</small></div></div>`;
     const mentorNavLabel = mentorPage ? `<p class="s2-nav-label">Khu vực mentor</p>` : "";
+    const navLinks = links.map(([url,text]) => {
+      const target = new URL(url, location.href);
+      const isCurrent = target.pathname.split("/").pop() === currentPage
+        && (mentorPage
+          ? (target.searchParams.get("view") || "group") === mentorView
+          : currentPage !== "hr.html" || (target.searchParams.get("view") || "profiles") === (new URLSearchParams(location.search).get("view") || "profiles"));
+      return `<a href="${url}"${isCurrent ? ' aria-current="page"' : ""}>${h(text)}</a>`;
+    }).join("");
     const mentorTopbar = `<header class="portal-topline"><div class="portal-topline-label">Career Portal / <strong>Khu vực mentor</strong></div><div class="topbar-right"><span class="user">${h(me.name)}</span><button class="logout-link" type="button" data-action="logout">Đăng xuất</button></div></header>`;
-    app.innerHTML = `<div class="s2-shell"><aside class="s2-sidebar"><a class="s2-brand" href="${home}"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span>HỆ THỐNG QUẢN LÝ<br><strong>THỰC TẬP SINH</strong></span></a>${mentorNavLabel}<nav class="s2-nav" aria-label="Chức năng">${links.map(([url,text]) => `<a href="${url}"${url.split("?")[0] === currentPage && (currentPage !== "hr.html" || url.endsWith(`view=${new URLSearchParams(location.search).get("view") || "profiles"}`)) ? ' aria-current="page"' : ""}>${h(text)}</a>`).join("")}</nav>${mentorPage ? mentorProfile : account}</aside><main class="s2-main">${mentorPage ? mentorTopbar : ""}<div id="s2-heading"></div><div class="s2-notice error" id="s2-error" role="alert" hidden></div><div id="s2-content"></div></main></div>`;
+    app.innerHTML = `<div class="s2-shell"><aside class="s2-sidebar"><a class="s2-brand" href="${home}"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span>HỆ THỐNG QUẢN LÝ<br><strong>THỰC TẬP SINH</strong></span></a>${mentorNavLabel}<nav class="s2-nav" aria-label="Chức năng">${navLinks}</nav>${mentorPage ? mentorProfile : account}</aside><main class="s2-main">${mentorPage ? mentorTopbar : ""}<div id="s2-heading"></div><div class="s2-notice error" id="s2-error" role="alert" hidden></div><div id="s2-content"></div></main></div>`;
     app.removeAttribute("aria-busy");
   }
   function dialog(title, content, onSubmit, submitText = "Lưu thay đổi") {
@@ -349,7 +362,14 @@
 
   async function loadMentor() {
     clearError();
-    $("#s2-heading").innerHTML = heading("Nhóm thực tập của tôi","Theo dõi các thực tập sinh được phân công và lịch của chương trình bạn đang hướng dẫn.",button("Làm mới","refresh"));
+    const mentorView = new URLSearchParams(location.search).get("view") || "group";
+    const headings = {
+      group: ["Nhóm thực tập của tôi","Theo dõi các thực tập sinh được phân công và lịch của chương trình bạn đang hướng dẫn."],
+      tasks: ["Nhiệm vụ","Giao và theo dõi tiến độ nhiệm vụ của các thực tập sinh trong nhóm."],
+      evaluations: ["Đánh giá","Đánh giá kỹ năng, thái độ và kết quả thực tập của từng thực tập sinh."]
+    };
+    const [title, subtitle] = headings[mentorView] || headings.group;
+    $("#s2-heading").innerHTML = heading(title,subtitle,button("Làm mới","refresh"));
     const assignments = rows(await api("/assignments"));
     data.mentorAssignments = assignments;
     const [taskResult, reportResult, evaluationResult] = await Promise.allSettled([api("/tasks"), api("/reports/weekly"), api("/evaluations")]);
@@ -359,11 +379,14 @@
     const failedLoad = [taskResult, reportResult, evaluationResult].find(x => x.status === "rejected");
     if (failedLoad) errorBox(failedLoad.reason);
     const programs = [...new Map(assignments.filter(a=>a.program).map(a=>[a.programId,a.program])).values()];
-    const schedules = await Promise.allSettled(programs.map(p=>api("/schedules?programId="+p.id)));
+    const schedules = mentorView === "group" ? await Promise.allSettled(programs.map(p=>api("/schedules?programId="+p.id))) : [];
     const taskRows = data.mentorTasks.map(t=>`<tr><td>${h(t.title)}<small>${h(t.profile?.name)}</small></td><td>${date(t.dueDate)}</td><td>${badge(t.priority)}</td><td>${badge(t.status)}<small>${t.progress}%</small>${role("Mentor") && can("tasks.manage") ? button("Sửa","task-edit",t.id) : ""}</td></tr>`).join("");
     const reportRows = data.mentorReports.map(r=>`<tr><td>${h(r.name)}</td><td>${date(r.weekStart)}</td><td>${h(r.summary)}</td><td>${badge(r.status)} ${role("Mentor") && can("reports.review") ? `<button class="s2-button secondary" data-action="report-feedback" data-id="${r.id}">${r.status === "Reviewed" ? "Sửa phản hồi" : "Phản hồi"}</button>` : ""}</td></tr>`).join("");
     const evaluationRows = assignments.map(a => { const e = data.mentorEvaluations.find(x => x.profileId === a.profileId && (!a.programId || x.programId === a.programId)); const locked = Boolean(e?.isLocked || (a.program?.endDate && a.program.endDate < today())); return `<tr><td>${h(a.profile?.name)}</td><td>${h(a.program?.name || "—")}</td><td>${e ? `${number(e.average)}/5` : "Chưa đánh giá"}</td><td>${role("Mentor") && can("evaluations.manage") && !locked ? `<button class="s2-button secondary" data-action="evaluation-new" data-id="${a.profileId}" data-program="${a.programId || ""}">${e ? "Cập nhật" : "Đánh giá"}</button>` : locked ? "Đã khóa" : "—"}</td></tr>`; }).join("");
-    $("#s2-content").innerHTML = `<section class="s2-card"><h2>Thực tập sinh (${assignments.length})</h2>${assignments.length ? table(["Họ tên","Email","Trường / ngành","Chương trình","Thời gian"],assignments.map(a=>`<tr><td>${h(a.profile?.name)}</td><td>${h(a.profile?.email)}</td><td>${h(a.profile?.school)}<small>${h(a.profile?.major)}</small></td><td>${h(a.program?.name)}</td><td>${date(a.program?.startDate)} – ${date(a.program?.endDate)}</td></tr>`).join("")) : empty("Bạn chưa được phân công hướng dẫn thực tập sinh. HR sẽ cập nhật nhóm tại đây.")}</section><section class="s2-card"><div class="s2-toolbar"><h2>Nhiệm vụ được giao (${data.mentorTasks.length})</h2>${role("Mentor") && can("tasks.manage") ? '<button type="button" class="s2-button" data-action="task-new">Giao nhiệm vụ</button>' : ""}</div>${data.mentorTasks.length ? table(["Nhiệm vụ / thực tập sinh","Deadline","Ưu tiên","Tiến độ / thao tác"],taskRows) : empty("Chưa có nhiệm vụ.")}</section><section class="s2-card"><h2>Báo cáo tuần (${data.mentorReports.length})</h2>${data.mentorReports.length ? table(["Thực tập sinh","Tuần","Nội dung","Trạng thái"],reportRows) : empty("Chưa có báo cáo tuần nào.")}</section><section class="s2-card"><h2>Đánh giá kỹ năng và thái độ</h2>${assignments.length ? table(["Thực tập sinh","Chương trình","Điểm trung bình","Thao tác"],evaluationRows) : empty("Chưa có thực tập sinh để đánh giá.")}</section>${programs.map((p,i)=>`<section class="s2-card"><h2>${h(p.name)}</h2><p class="s2-help">${date(p.startDate)} – ${date(p.endDate)} · ${h(p.departmentName || "")}</p>${schedules[i].status === "fulfilled" ? scheduleTable(rows(schedules[i].value)) : '<div class="s2-notice error">Không tải được lịch chương trình. Hãy làm mới để thử lại.</div>'}</section>`).join("")}`;
+    const groupContent = `<section class="s2-card"><h2>Thực tập sinh (${assignments.length})</h2>${assignments.length ? table(["Họ tên","Email","Trường / ngành","Chương trình","Thời gian"],assignments.map(a=>`<tr><td>${h(a.profile?.name)}</td><td>${h(a.profile?.email)}</td><td>${h(a.profile?.school)}<small>${h(a.profile?.major)}</small></td><td>${h(a.program?.name)}</td><td>${date(a.program?.startDate)} – ${date(a.program?.endDate)}</td></tr>`).join("")) : empty("Bạn chưa được phân công hướng dẫn thực tập sinh. HR sẽ cập nhật nhóm tại đây.")}</section><section class="s2-card"><h2>Báo cáo tuần (${data.mentorReports.length})</h2>${data.mentorReports.length ? table(["Thực tập sinh","Tuần","Nội dung","Trạng thái"],reportRows) : empty("Chưa có báo cáo tuần nào.")}</section>${programs.map((p,i)=>`<section class="s2-card"><h2>${h(p.name)}</h2><p class="s2-help">${date(p.startDate)} – ${date(p.endDate)} · ${h(p.departmentName || "")}</p>${schedules[i].status === "fulfilled" ? scheduleTable(rows(schedules[i].value)) : '<div class="s2-notice error">Không tải được lịch chương trình. Hãy làm mới để thử lại.</div>'}</section>`).join("")}`;
+    const tasksContent = `<section class="s2-card"><div class="s2-toolbar"><h2>Nhiệm vụ được giao (${data.mentorTasks.length})</h2>${role("Mentor") && can("tasks.manage") ? '<button type="button" class="s2-button" data-action="task-new">Giao nhiệm vụ</button>' : ""}</div>${data.mentorTasks.length ? table(["Nhiệm vụ / thực tập sinh","Deadline","Ưu tiên","Tiến độ / thao tác"],taskRows) : empty("Chưa có nhiệm vụ.")}</section>`;
+    const evaluationsContent = `<section class="s2-card"><h2>Đánh giá kỹ năng và thái độ</h2>${assignments.length ? table(["Thực tập sinh","Chương trình","Điểm trung bình","Thao tác"],evaluationRows) : empty("Chưa có thực tập sinh để đánh giá.")}</section>`;
+    $("#s2-content").innerHTML = mentorView === "tasks" ? tasksContent : mentorView === "evaluations" ? evaluationsContent : groupContent;
   }
   function reportFeedbackForm(id) { const report = data.mentorReports?.find(x => String(x.id) === String(id)); if (!report) return; dialog("Phản hồi báo cáo tuần",`<p class="s2-wide s2-help">${h(report.name)} · Tuần bắt đầu ${date(report.weekStart)}<br>${h(report.summary)}</p>`+field("Phản hồi của mentor","feedback",`<textarea name="feedback" rows="6" maxlength="2000" required>${h(report.mentorFeedback || "")}</textarea>`,true),async values=>{await write("/reports/weekly/"+id+"/feedback","PATCH",{feedback:values.feedback});await loadMentor();toast("Đã gửi phản hồi và email thông báo cho thực tập sinh.");},"Gửi phản hồi"); }
   function evaluationForm(profileId, programId) { const existing = data.mentorEvaluations?.find(x => String(x.profileId) === String(profileId) && String(x.programId || "") === String(programId || "")); const scores = [1,2,3,4,5].map(x => ({id:x,name:x+" / 5"})); const profile = data.mentorAssignments?.find(x => String(x.profileId) === String(profileId)); if (existing?.isLocked || (profile?.program?.endDate && profile.program.endDate < today())) { toast("Đánh giá đã khóa vì kỳ thực tập đã kết thúc.",true); return; } dialog(existing ? "Cập nhật đánh giá" : "Đánh giá cuối kỳ",`<p class="s2-wide s2-help">${h(profile?.profile?.name || existing?.name || "Thực tập sinh")} · ${h(profile?.program?.name || existing?.program || "")}</p>`+field("Kỹ năng chuyên môn","skills",select("skills",scores,existing?.skills || 3,undefined,"id"))+field("Thái độ và trách nhiệm","attitude",select("attitude",scores,existing?.attitude || 3,undefined,"id"))+field("Giao tiếp","communication",select("communication",scores,existing?.communication || 3,undefined,"id"))+field("Làm việc nhóm","teamwork",select("teamwork",scores,existing?.teamwork || 3,undefined,"id"))+field("Nhận xét","comment",`<textarea name="comment" rows="5" maxlength="3000">${h(existing?.comment || "")}</textarea>`,true),async values=>{await write("/evaluations","POST",{profileId:Number(profileId),programId:programId ? Number(programId) : null,skills:Number(values.skills),attitude:Number(values.attitude),communication:Number(values.communication),teamwork:Number(values.teamwork),comment:values.comment || ""});await loadMentor();toast("Đã lưu đánh giá.");},"Lưu đánh giá"); }
