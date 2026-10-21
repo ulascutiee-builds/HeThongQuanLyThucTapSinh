@@ -220,14 +220,13 @@
       const wrap = table.closest(".s2-table-scroll"); if (!wrap) return;
       wrap.tabIndex = 0; wrap.setAttribute("role", "region"); wrap.setAttribute("aria-label", "Bảng dữ liệu, cuộn ngang để xem thêm cột");
       const tools = el("div", null, "portal-table-tools"); const label = el("label"); const input = el("input"); input.type = "search"; input.placeholder = "Tìm trong bảng…"; input.setAttribute("aria-label", "Tìm trong " + (table.closest("section")?.querySelector("h2")?.textContent || "bảng dữ liệu")); label.append(input);
-      const count = el("span", `${rows.length} dòng`, "portal-table-count"); count.setAttribute("aria-live", "polite");
       const empty = el("p", "Không tìm thấy dữ liệu phù hợp. Hãy thử từ khóa khác.", "portal-table-empty"); empty.hidden = true;
       input.addEventListener("input", () => {
         const query = normalize(input.value.trim()); let visible = 0;
         rows.forEach(row => { row.hidden = !normalize(row.textContent).includes(query); if (!row.hidden) visible++; });
-        count.textContent = `${visible} / ${rows.length} dòng`; empty.hidden = visible > 0;
+        empty.hidden = visible > 0;
       });
-      tools.append(label, count);
+      tools.append(label);
       if (page === "attendance.html") {
         const download = button("Xuất CSV", "btn small", "download"); download.title = "Xuất các dòng đang hiển thị trong bảng này";
         download.onclick = () => {
