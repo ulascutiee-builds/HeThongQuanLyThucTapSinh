@@ -67,6 +67,10 @@ input[type=checkbox], input[type=radio] { accent-color: var(--forest); }
 .account-role, .account-detail, .s2-account small { color: #c7d8ff; font-size: 11px; }
 .avatar, .profile-avatar { background: #e9f0ff; color: var(--forest); border-radius: 12px; }
 .s2-account button { border: 1px solid #ffffff70; color: #fff; background: transparent; border-radius: 8px; font-size: 12px; padding: 9px 14px; }
+.s2-profile-card { display: flex; align-items: center; gap: 11px; margin-top: auto; padding: 18px 8px 4px; border-top: 1px solid #ffffff40; color: #fff; }
+.s2-profile-avatar { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #e9f0ff; color: var(--forest); font-size: 12px; font-weight: 700; }
+.s2-profile-card p { margin: 0 0 3px; color: #fff; font-size: 12px; font-weight: 650; overflow-wrap: anywhere; }
+.s2-profile-card small { color: #c7d8ff; font-size: 10px; }
 .workspace, .s2-main { padding: 30px 36px 52px; margin: 0 auto; width: 100%; max-width: 1580px; min-width: 0; }
 .content { padding: 30px 36px 52px; max-width: 1520px; }
 .app-shell .topbar { height: 72px; padding: 0 36px; background: white; gap: 16px; }
