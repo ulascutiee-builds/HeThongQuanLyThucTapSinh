@@ -107,7 +107,14 @@
   }
   function renderNavigation() {
     const roles = state.me.roles || [state.me.role]; const can = key => state.me.permissions?.includes(key);
-    byId("current-user").textContent = state.me.name || state.me.email || "Quản trị viên";
+    const displayName = state.me.name || state.me.email || "Quản trị viên";
+    byId("current-user").textContent = displayName;
+    const sidebarName = byId("admin-account-name");
+    const sidebarAvatar = byId("admin-avatar");
+    if (sidebarName && sidebarAvatar) {
+      sidebarName.textContent = displayName;
+      sidebarAvatar.textContent = displayName.trim().split(/\s+/).map(part => Array.from(part)[0]).slice(-2).join("").toLocaleUpperCase("vi-VN");
+    }
     ["Mentor", "Intern"].forEach(role => { byId(`nav-${role.toLowerCase()}`).hidden = !roles.includes(role); });
     byId("nav-hr").hidden = !can("profiles.read");
     byId("nav-programs").hidden = !can("programs.manage") && !can("assignments.manage");
