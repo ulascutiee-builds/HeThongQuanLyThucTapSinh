@@ -15,6 +15,10 @@
   <style>
     .app-shell { display: grid; min-height: 100vh; }
     .main-area { min-width: 0; }
+    .sidebar .account-card { display: flex; align-items: center; gap: 10px; }
+    .sidebar .account-name { margin: 0; color: #fff; font-size: 11px; font-weight: 700; overflow-wrap: anywhere; }
+    .sidebar .account-role { margin: 3px 0 0; color: rgba(245, 244, 237, 0.59); font-size: 10px; }
+    .sidebar .admin-avatar { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border-radius: 50%; background: #d1a15b; color: #24352e; font-size: 11px; font-weight: 700; }
   </style>
   <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
   <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right" />
@@ -29,7 +33,7 @@
       <div class="sidebar-spacer"></div>
       <p class="sidebar-footnote">Quản lý tài khoản tập trung và phân quyền theo vai trò.</p>
       <div class="account-card">
-        <span class="avatar" id="admin-avatar" aria-hidden="true">AD</span>
+        <span class="avatar admin-avatar" id="admin-avatar" aria-hidden="true">AD</span>
         <div>
           <p class="account-name" id="admin-account-name">Quản trị viên</p>
           <p class="account-role">Tài khoản Admin</p>
