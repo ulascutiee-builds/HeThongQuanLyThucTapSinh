@@ -184,7 +184,9 @@
       try {
         const target = new URL(link.href, location.href);
         const current = new URL(location.href);
-        active = target.pathname === current.pathname && target.searchParams.get("section") === current.searchParams.get("section");
+        active = target.pathname === current.pathname
+          && target.searchParams.get("section") === current.searchParams.get("section")
+          && target.searchParams.get("view") === current.searchParams.get("view");
       } catch { /* Keep malformed external links unchanged. */ }
       if (active) { link.setAttribute("aria-current", "page"); link.classList.add("current"); }
       else if (link.hasAttribute("aria-current")) { link.removeAttribute("aria-current"); link.classList.remove("current"); }
