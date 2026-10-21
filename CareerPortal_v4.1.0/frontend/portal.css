@@ -397,6 +397,8 @@ body.auth-page:not(.register-page) .form-content {
   .portal-page[data-s2-page="mentor"] .topbar-right { flex: 0 0 auto; }
   .portal-page[data-s2-page="mentor"] .topbar-right .user,
   .portal-page[data-s2-page="mentor"] .portal-notification-button { display: none; }
+  .portal-page[data-s2-page="mentor"] .portal-guide-button { padding: 7px 10px; font-size: 11px; gap: 6px; white-space: nowrap; }
+  .portal-page[data-s2-page="mentor"] .portal-guide-button .portal-icon { width: 16px; height: 16px; }
   .portal-page .sidebar, .portal-page .s2-sidebar { padding: 10px 12px 9px; }
   .portal-page .sidebar .brand, .portal-page .s2-brand { padding-bottom: 8px; }
   .portal-page .sidebar nav, .portal-page .s2-nav { gap: 3px; }
