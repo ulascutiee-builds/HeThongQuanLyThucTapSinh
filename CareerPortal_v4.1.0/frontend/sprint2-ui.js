@@ -35,7 +35,7 @@
     listPages[key] = Math.min(listPages[key], pageCount);
     const start = (listPages[key] - 1) * listPageSize;
     const visible = items.slice(start, start + listPageSize);
-    const controls = `<nav class="s2-pagination" aria-label="Phân trang ${key}"><span>Trang ${listPages[key]} / ${pageCount}</span><div><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:prev"${listPages[key] === 1 ? " disabled" : ""}>Trước</button><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:next"${listPages[key] === pageCount ? " disabled" : ""}>Sau</button></div></nav>`;
+    const controls = `<nav class="s2-pagination" aria-label="Phân trang ${key}"><span>Trang ${listPages[key]} / ${pageCount}</span><div><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:prev" aria-label="Trang trước"${listPages[key] === 1 ? " disabled" : ""}>←</button><button type="button" class="s2-button secondary" data-action="list-page" data-id="${key}:next" aria-label="Trang sau"${listPages[key] === pageCount ? " disabled" : ""}>→</button></div></nav>`;
     return { visible, controls };
   }
 
