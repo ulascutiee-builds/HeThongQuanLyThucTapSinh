@@ -1288,15 +1288,6 @@
               <div>
                 <h2 class="section-title">Danh sách thực tập sinh</h2>
               </div>
-              <div class="toolbar-actions">
-                <button
-                  class="secondary-button"
-                  type="button"
-                  data-open-view="documents"
-                >
-                  Xem tài liệu chờ duyệt
-                </button>
-              </div>
             </div>
             <div class="filter-bar" role="search">
               <label class="filter-search"
@@ -2430,13 +2421,6 @@
       navItems.forEach((item) =>
         item.addEventListener("click", () => showView(item.dataset.view)),
       );
-      document
-        .querySelectorAll("[data-open-view]")
-        .forEach((button) =>
-          button.addEventListener("click", () =>
-            showView(button.dataset.openView),
-          ),
-        );
       document
         .getElementById("add-profile")
         .addEventListener("click", () => openProfileDialog());
