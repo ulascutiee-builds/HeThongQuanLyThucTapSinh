@@ -46,6 +46,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--forest); }
 .sidebar .portal-brand-copy strong, .s2-brand .portal-brand-copy strong { display: block; color: #fff; font-size: 18px; font-weight: 750; letter-spacing: -.5px; text-transform: none; }
 .sidebar .portal-brand-copy span, .s2-brand .portal-brand-copy span { display: block; color: #c7d8ff; font-size: 9px; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
 .sidebar .nav-label { font-size: 10px; letter-spacing: .09em; margin: 2px 12px 12px; color: #c7d8ff; }
+.s2-nav-label { margin: 2px 12px 12px; color: #c7d8ff; font-size: 10px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
 .sidebar nav, .s2-nav { display: grid; gap: 5px; }
 .sidebar nav a, .sidebar .nav-item, .s2-nav a {
   display: flex; align-items: center; justify-content: flex-start; gap: 11px;
