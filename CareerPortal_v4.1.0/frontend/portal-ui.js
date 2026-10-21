@@ -162,7 +162,7 @@
     if (brand) { const logo = brand.querySelector("img"); const copy = el("span", null, "portal-brand-copy"); copy.append(el("strong", "Career Portal"), el("span", "QUẢN LÝ THỰC TẬP SINH")); brand.replaceChildren(...(logo ? [logo] : []), copy); }
     const main = document.querySelector("main");
     if (main) { main.id ||= "portal-content"; main.tabIndex = -1; const skip = el("a", "Chuyển đến nội dung", "portal-skip"); skip.href = "#" + main.id; document.body.prepend(skip); }
-    let topline = document.querySelector(".app-shell .topbar, .shell .topbar, .topbar");
+    let topline = document.querySelector(".app-shell .topbar, .shell .topbar, .topbar, .portal-topline");
     if (!topline && main) { topline = el("div", null, "portal-topline"); const label = el("div", null, "portal-topline-label"); label.append(el("span", "Career Portal / "), el("strong", guides[page]?.[0] || "Không gian làm việc")); topline.append(label); main.prepend(topline); }
     if (!topline) return;
     const tools = el("div", null, "portal-tools");
