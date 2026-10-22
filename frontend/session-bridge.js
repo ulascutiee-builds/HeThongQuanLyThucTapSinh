@@ -17,7 +17,8 @@
     const controls = {
       '#add-profile':'profiles.write', '[data-edit-profile]':'profiles.write',
       '[data-view="applications"]':'applications.review', '[data-view="documents"]':'documents.read',
-      '#contract-form':'contracts.write',
+      '#contract-form':'contracts.write', '[data-document-decision]':'documents.review',
+      '#document-approve':'documents.review', '#document-reject':'documents.review',
       '[data-application-decision]':'applications.review'
     };
     for (const [selector,key] of Object.entries(controls)) document.querySelectorAll(selector).forEach(el => setPermission(el,key));
