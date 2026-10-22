@@ -16,3 +16,10 @@ uploads/
 .idea/
 .DS_Store
 Thumbs.db
+
+# ASP.NET Core build/runtime state and local configuration
+**/bin/
+**/obj/
+**/App_Data/
+**/appsettings.Development.json
+**/.local/

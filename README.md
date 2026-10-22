@@ -129,3 +129,8 @@ Backend Node.js, TypeScript, Express và PostgreSQL cùng hướng dẫn cài đ
 - `POST /api/mentors/assignments` và `PUT /api/mentors/assignments/{id}` tạo/cập nhật phân công, kiểm tra hồ sơ, mentor hoạt động, trùng thời gian và chỉ tiêu. `GET /api/mentors/statistics/mentees` tổng hợp mentee/sức chứa; `GET /api/statistics/schools-majors` tổng hợp thực tập sinh theo trường/ngành.
 - Cấu trúc database và hướng dẫn nâng cấp nằm trong `backend/database/schema.sql` và `backend/database/migrations/003_sprint3.sql`.
 
+
+
+## Nguyễn Văn Khánh — Sprint 1–3
+
+Phạm vi nhiệm vụ theo workbook và ánh xạ file/API trong [docs/NGUYEN_VAN_KHANH_SPRINT1-3.md](docs/NGUYEN_VAN_KHANH_SPRINT1-3.md). Backend ASP.NET Core được đặt tại `HeThongThucTapSinh/backend/Mã nguồn/CareerPortal.Api`; Node backend hiện có tiếp tục là thành phần tích hợp riêng.

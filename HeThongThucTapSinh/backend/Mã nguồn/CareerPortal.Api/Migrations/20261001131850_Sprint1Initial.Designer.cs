@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CareerPortal.Api.Migrations
 {
     [DbContext(typeof(CareerDbContext))]
-    [Migration("20260930172042_AddPortalWorkflows")]
-    partial class AddPortalWorkflows
+    [Migration("20261001131850_Sprint1Initial")]
+    partial class Sprint1Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,13 +35,24 @@ namespace CareerPortal.Api.Migrations
                     b.Property<DateTimeOffset>("AppliedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SubmissionVersion")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -71,22 +82,32 @@ namespace CareerPortal.Api.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -96,9 +117,17 @@ namespace CareerPortal.Api.Migrations
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex("ProfileId", "Type", "Version")
+                        .IsUnique();
 
                     b.ToTable("InternDocuments");
                 });
@@ -119,6 +148,9 @@ namespace CareerPortal.Api.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("nvarchar(160)");
 
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("bit");
+
                     b.Property<DateOnly?>("EndDate")
                         .HasColumnType("date");
 
@@ -136,6 +168,10 @@ namespace CareerPortal.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("School")
                         .IsRequired()
@@ -155,15 +191,34 @@ namespace CareerPortal.Api.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
 
+                    b.Property<DateTimeOffset?>("VerificationExpires")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("VerificationHash")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("Major");
+
+                    b.HasIndex("Phone")
+                        .IsUnique()
+                        .HasFilter("[Phone] IS NOT NULL");
+
+                    b.HasIndex("School");
+
+                    b.HasIndex("Status");
+
                     b.HasIndex("StudentId")
                         .IsUnique();
 
-                    b.ToTable("InternProfiles");
+                    b.ToTable("IN_TERN", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Intern_Dates", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]");
+                        });
                 });
 
             modelBuilder.Entity("InternReviewHistory", b =>
@@ -175,8 +230,7 @@ namespace CareerPortal.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
@@ -184,23 +238,24 @@ namespace CareerPortal.Api.Migrations
                     b.Property<DateTimeOffset>("ReviewedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("ReviewedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TargetId")
                         .HasColumnType("int");
 
                     b.Property<string>("TargetLabel")
                         .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TargetType")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -227,13 +282,20 @@ namespace CareerPortal.Api.Migrations
                     b.Property<DateTimeOffset>("DueAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Error")
+                    b.Property<string>("EventKey")
                         .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("LastError")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Recipient")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -245,173 +307,10 @@ namespace CareerPortal.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MailJobs");
-                });
-
-            modelBuilder.Entity("PortalAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("nvarchar(160)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Permissions")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
+                    b.HasIndex("EventKey")
                         .IsUnique();
 
-                    b.ToTable("PortalAccounts");
-                });
-
-            modelBuilder.Entity("PortalAudit", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Actor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("At")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Resource")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PortalAudits");
-                });
-
-            modelBuilder.Entity("WorkItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<byte[]>("Attachment")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Detail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("End")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("History")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Kind")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<int?>("MentorId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProfileId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProgramId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Progress")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("Start")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(240)
-                        .HasColumnType("nvarchar(240)");
-
-                    b.Property<string>("UniqueKey")
-                        .HasMaxLength(240)
-                        .HasColumnType("nvarchar(240)");
-
-                    b.Property<byte[]>("Version")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UniqueKey")
-                        .IsUnique()
-                        .HasFilter("[UniqueKey] IS NOT NULL");
-
-                    b.HasIndex("Kind", "ProfileId");
-
-                    b.ToTable("WorkItems");
+                    b.ToTable("MailJobs");
                 });
 
             modelBuilder.Entity("InternApplication", b =>
