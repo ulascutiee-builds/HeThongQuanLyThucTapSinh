@@ -1,18 +1,37 @@
-# Node.js / TypeScript
+# Frontend tools
 node_modules/
 dist/
 coverage/
 *.tsbuildinfo
 npm-debug.log*
 
-# Local configuration and uploaded files
+# .NET / Visual Studio / Rider
+**/bin/
+**/obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Local runtime, secret and generated data
+.local/
+**/App_Data/
+**/__pycache__/
 .env
 .env.*
 !.env.example
 uploads/
+build-v4.1/
+publish/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+**/secrets.json
+appsettings.*.local.json
+appsettings.Production.json
 
-# IDE / OS
-.vscode/
-.idea/
+# Operating systems
 .DS_Store
 Thumbs.db

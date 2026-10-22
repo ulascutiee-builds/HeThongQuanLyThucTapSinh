@@ -1,0 +1,35 @@
+name: Build CareerPortal
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'sprint-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore API
+        run: dotnet restore backend/CareerPortal.Api/CareerPortal.Api.csproj --configfile NuGet.Config
+      - name: Build API
+        run: dotnet build backend/CareerPortal.Api/CareerPortal.Api.csproj --configuration Release --no-restore
+      - name: Compile standalone test projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in tests/*/*.csproj; do
+            echo "Building $project"
+            dotnet build "$project" --configuration Release
+          done
+      # SQL Server LocalDB integration tests require a prepared Windows host/database;
+      # do not execute destructive demo-data test programs on the public CI runner.
