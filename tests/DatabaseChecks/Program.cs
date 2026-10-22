@@ -37,9 +37,16 @@ Check(futureBirth.StatusCode == HttpStatusCode.BadRequest, "Future birth date wa
 Check(!await db.InternProfiles.AnyAsync(x => x.Email == tag + "-future@example.test"), "Invalid registration persisted");
 
 response = await http.PostAsJsonAsync("/api/interns/login", new { identity = profile.Email, password }); response.EnsureSuccessStatusCode();
+var updatedBirthDate = dateOfBirth.AddYears(-1);
+var updatedName = profile.Name + " edited";
+var updatedSchool = "DB Test updated";
+var savedUpdate = await http.PutAsJsonAsync($"/api/interns/{profile.Id}", new { name = updatedName, studentId = profile.StudentId, email = profile.Email, phone = profile.Phone, dateOfBirth = updatedBirthDate, school = updatedSchool, major = profile.Major });
+savedUpdate.EnsureSuccessStatusCode();
+await db.Entry(profile).ReloadAsync();
+Check(profile.Name == updatedName && profile.DateOfBirth == updatedBirthDate && profile.School == updatedSchool, "Valid profile changes were not persisted");
 var futureUpdate = await http.PutAsJsonAsync($"/api/interns/{profile.Id}", new { name = profile.Name, studentId = profile.StudentId, email = profile.Email, phone = profile.Phone, dateOfBirth = futureDate, school = profile.School, major = profile.Major });
 Check(futureUpdate.StatusCode == HttpStatusCode.BadRequest, "Future birth update was accepted");
-await db.Entry(profile).ReloadAsync(); Check(profile.DateOfBirth == dateOfBirth, "Rejected birth date changed the profile");
+await db.Entry(profile).ReloadAsync(); Check(profile.DateOfBirth == updatedBirthDate, "Rejected birth date changed the profile");
 
 var contract = new InternDocument { ProfileId = profile.Id, Type = "Hợp đồng thực tập", FileName = "expired.pdf", ContentType = "application/pdf", Content = "%PDF-1.4\n%%EOF"u8.ToArray(), Status = "Chờ xác nhận", ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1), UploadedBy = "TEST ONLY" };
 db.InternDocuments.Add(contract); await db.SaveChangesAsync();

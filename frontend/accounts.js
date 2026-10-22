@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const byId = (id) => document.getElementById(id);
-  const state = { items: [], roles: [], permissions: [], profiles: [], editing: null, me: null, permissionAccountId: "", permissionDraft: null, permissionSaving: false };
+  const state = { items: [], roles: [], permissions: [], profiles: [], editing: null, me: null, activeTab: "accounts", permissionAccountId: "", permissionDraft: null, permissionSaving: false };
   const tabs = ["accounts", "account-permissions", "permissions"];
   const canManagePermissions = () => !!state.me?.permissions?.includes("roles.manage");
   const roleLabels = { Admin: "Quản trị viên", HR: "Nhân sự", Mentor: "Mentor", Intern: "Thực tập sinh" };
@@ -29,6 +29,27 @@
   function bodyFor(item, isActive = item.isActive) { return { name: item.name, email: item.email, roles: item.roles.map(roleName), profileId: item.profileId ?? null, isActive }; }
   async function perform(button, action) { button.disabled = true; try { await action(); } catch (error) { notice(error.message, true); } finally { button.disabled = false; } }
   function makeButton(text, handler, danger = false) { const button = node("button", text, "btn small" + (danger ? " danger" : "")); button.type = "button"; button.addEventListener("click", () => perform(button, () => handler(button))); return button; }
+  function confirmPermanentDelete(account) {
+    const dialog = byId("delete-account-dialog"); const form = byId("delete-account-form"); const input = byId("delete-account-email"); const submit = byId("confirm-delete-account");
+    const impact = ["tài khoản, quyền truy cập và thông báo gắn trực tiếp"];
+    if (account.profileId) impact.push("hồ sơ thực tập sinh cùng tài liệu, đơn, chấm công, báo cáo và đánh giá");
+    if (account.roles.map(roleName).includes("Mentor")) impact.push("phân công, nhiệm vụ và đánh giá do Mentor phụ trách");
+    byId("delete-account-target").textContent = `${account.name} · ${account.email}`;
+    byId("delete-account-impact").textContent = `Sẽ xóa: ${impact.join("; ")}. Chương trình, phòng ban và tài khoản khác được giữ lại.`;
+    form.reset(); submit.disabled = true;
+    return new Promise((resolve) => {
+      let settled = false;
+      const matches = () => input.value.trim().toLowerCase() === account.email.toLowerCase();
+      const onInput = () => { submit.disabled = !matches(); };
+      const finish = (value) => { if (settled) return; settled = true; dialog.close(); resolve(value); };
+      const onSubmit = (event) => { event.preventDefault(); if (matches()) finish(true); };
+      const onCancel = () => finish(false);
+      const onClose = () => { input.removeEventListener("input", onInput); form.removeEventListener("submit", onSubmit); byId("cancel-delete-account").removeEventListener("click", onCancel); byId("close-delete-dialog").removeEventListener("click", onCancel); if (!settled) { settled = true; resolve(false); } };
+      input.addEventListener("input", onInput); form.addEventListener("submit", onSubmit);
+      byId("cancel-delete-account").addEventListener("click", onCancel); byId("close-delete-dialog").addEventListener("click", onCancel);
+      dialog.addEventListener("close", onClose, { once: true }); dialog.showModal(); input.focus();
+    });
+  }
   function populateFilters() {
     const filter = byId("role-filter"); const value = filter.value; filter.replaceChildren(new Option("Tất cả vai trò", "")); state.roles.forEach((role) => filter.add(new Option(labelForRole(role), roleName(role)))); filter.value = value;
     const roles = byId("permission-role"); const selected = roles.value; roles.replaceChildren(); state.roles.forEach((role) => roles.add(new Option(labelForRole(role), roleName(role)))); roles.value = state.roles.some((r) => roleName(r) === selected) ? selected : roleName(state.roles[0] || "");
@@ -53,7 +74,13 @@
       permissionButton.disabled = !canManagePermissions(); actionGroup.append(permissionButton);
       if (account.isActive) actionGroup.append(makeButton(account.requiresActivation ? "Gửi lại lời mời" : "Đặt lại mật khẩu", async () => { if (!account.requiresActivation && !(await (window.portalConfirm ? portalConfirm(`Gửi liên kết đặt lại mật khẩu tới ${account.email}? Tài khoản cần hoàn tất đặt mật khẩu trước khi đăng nhập lại.`) : true))) return; const result = await api(`/api/accounts/${encodeURIComponent(account.id)}/activation`, { method: "POST" }); await refresh(); notice(`Đã gửi liên kết đặt mật khẩu tới ${account.email}, có hiệu lực 24 giờ.`, false, result); }));
       actionGroup.append(makeButton(account.isActive ? "Vô hiệu hóa" : "Kích hoạt", async () => { if (account.isActive && !(await (window.portalConfirm ? portalConfirm(`Vô hiệu hóa tài khoản ${account.email}?`) : true))) return; await api(`/api/accounts/${encodeURIComponent(account.id)}`, { method: "PUT", body: JSON.stringify(bodyFor(account, !account.isActive)) }); await refresh(); notice(account.isActive ? "Đã vô hiệu hóa tài khoản." : "Đã cho phép tài khoản hoạt động."); }));
-      actionGroup.append(makeButton("Xóa", async () => { if (!(await (window.portalConfirm ? portalConfirm(`Xóa tài khoản ${account.email}? Tài khoản sẽ bị vô hiệu hóa; lịch sử nghiệp vụ được giữ lại.`) : true))) return; await api(`/api/accounts/${encodeURIComponent(account.id)}`, { method: "DELETE" }); await refresh(); notice("Đã xóa tài khoản khỏi quyền truy cập hệ thống."); }, true)); actions.append(actionGroup);
+      const deleteButton = makeButton("Xóa vĩnh viễn", async () => {
+        if (!(await confirmPermanentDelete(account))) return;
+        await api(`/api/accounts/${encodeURIComponent(account.id)}`, { method: "DELETE" });
+        if (account.id === state.me.accountId) { sessionStorage.clear(); location.replace("dang-nhap.html"); return; }
+        await refresh(); notice(`Đã xóa vĩnh viễn ${account.email} và dữ liệu thuộc tài khoản.`);
+      }, true);
+      deleteButton.disabled = !state.me?.roles?.includes("Admin") || !state.me?.permissions?.includes("accounts.manage"); actionGroup.append(deleteButton); actions.append(actionGroup);
       row.append(person, roles, statusCell, profileCell, actions); rows.append(row);
     });
     if (!items.length) { const row = node("tr"); const cell = node("td", "Không có tài khoản phù hợp.", "empty"); cell.colSpan = 5; row.append(cell); rows.append(row); }
@@ -80,19 +107,125 @@
   }
   function renderNavigation() {
     const roles = state.me.roles || [state.me.role]; const can = key => state.me.permissions?.includes(key);
-    byId("current-user").textContent = state.me.name || state.me.email || "Quản trị viên";
+    const displayName = state.me.name || state.me.email || "Quản trị viên";
+    byId("current-user").textContent = displayName;
+    const sidebarName = byId("admin-account-name");
+    const sidebarAvatar = byId("admin-avatar");
+    if (sidebarName && sidebarAvatar) {
+      sidebarName.textContent = displayName;
+      sidebarAvatar.textContent = displayName.trim().split(/\s+/).map(part => Array.from(part)[0]).slice(-2).join("").toLocaleUpperCase("vi-VN");
+    }
     ["Mentor", "Intern"].forEach(role => { byId(`nav-${role.toLowerCase()}`).hidden = !roles.includes(role); });
     byId("nav-hr").hidden = !can("profiles.read");
     byId("nav-programs").hidden = !can("programs.manage") && !can("assignments.manage");
     byId("nav-attendance").hidden = !can("attendance.report");
-    byId("permissions-tab").disabled = !can("roles.manage"); byId("account-permissions-tab").disabled = !can("roles.manage");
+    byId("permissions-tab").disabled = !can("roles.manage");
   }
+  function setAdminSection(section, updateHistory = false) {
+    const showInterns = section === "interns";
+    const showPrograms = section === "programs";
+    const showAttendance = section === "attendance";
+    if (showInterns && !state.me?.permissions?.includes("profiles.read")) {
+      notice("Bạn không có quyền quản lý hồ sơ thực tập sinh.", true);
+      return;
+    }
+    if (showPrograms && !state.me?.permissions?.some(permission => ["programs.manage", "assignments.manage"].includes(permission))) {
+      notice("Bạn không có quyền quản lý chương trình và phân công.", true);
+      return;
+    }
+    if (showAttendance && !state.me?.permissions?.includes("attendance.report")) {
+      notice("Bạn không có quyền xem báo cáo chuyên cần.", true);
+      return;
+    }
+    byId("admin-home").hidden = showInterns || showPrograms || showAttendance;
+    byId("interns-module").hidden = !showInterns;
+    byId("programs-module").hidden = !showPrograms;
+    byId("attendance-module").hidden = !showAttendance;
+    byId("admin-section-title").textContent = showInterns ? "Quản lý thực tập sinh" : showPrograms ? "Chương trình và phân công" : showAttendance ? "Báo cáo chuyên cần" : "Quản trị tài khoản";
+    byId("portal-content").setAttribute("aria-labelledby", showInterns ? "interns-module" : showPrograms ? "programs-module" : showAttendance ? "attendance-module" : "page-title");
+    byId("nav-accounts").classList.toggle("current", !showInterns && !showPrograms && !showAttendance);
+    byId("nav-accounts").toggleAttribute("aria-current", !showInterns && !showPrograms && !showAttendance);
+    byId("nav-hr").classList.toggle("current", showInterns);
+    if (showInterns) byId("nav-hr").setAttribute("aria-current", "page");
+    else byId("nav-hr").removeAttribute("aria-current");
+    byId("nav-programs").classList.toggle("current", showPrograms);
+    if (showPrograms) byId("nav-programs").setAttribute("aria-current", "page");
+    else byId("nav-programs").removeAttribute("aria-current");
+    byId("nav-attendance").classList.toggle("current", showAttendance);
+    if (showAttendance) byId("nav-attendance").setAttribute("aria-current", "page");
+    else byId("nav-attendance").removeAttribute("aria-current");
+    if (showInterns && !byId("interns-frame").dataset.loaded) {
+      byId("interns-frame").src = "hr.html?embedded=admin";
+      byId("interns-frame").dataset.loaded = "true";
+    }
+    if (showPrograms && !byId("programs-frame").dataset.loaded) {
+      byId("programs-frame").src = "programs.html?embedded=admin";
+      byId("programs-frame").dataset.loaded = "true";
+    }
+    if (showAttendance && !byId("attendance-frame").dataset.loaded) {
+      byId("attendance-frame").src = "attendance.html?embedded=admin";
+      byId("attendance-frame").dataset.loaded = "true";
+    }
+    if (updateHistory) {
+      const url = new URL(location.href);
+      if (showInterns || showPrograms || showAttendance) url.searchParams.set("section", showInterns ? "interns" : showPrograms ? "programs" : "attendance");
+      else url.searchParams.delete("section");
+      history.pushState({}, "", url);
+    }
+  }
+  byId("nav-accounts").addEventListener("click", event => {
+    event.preventDefault();
+    setAdminSection("accounts", true);
+  });
+  byId("nav-hr").addEventListener("click", event => {
+    event.preventDefault();
+    setAdminSection("interns", true);
+  });
+  byId("nav-programs").addEventListener("click", event => {
+    event.preventDefault();
+    setAdminSection("programs", true);
+  });
+  byId("nav-attendance").addEventListener("click", event => {
+    event.preventDefault();
+    setAdminSection("attendance", true);
+  });
+  window.addEventListener("popstate", () => {
+    setAdminSection(new URLSearchParams(location.search).get("section"));
+  });
+  let internsDialogOpen = false;
+  window.addEventListener("message", event => {
+    if (event.origin !== location.origin) return;
+    const isInternsFrame = event.source === byId("interns-frame").contentWindow;
+    const isProgramsFrame = event.source === byId("programs-frame").contentWindow;
+    const isAttendanceFrame = event.source === byId("attendance-frame").contentWindow;
+    if (!isInternsFrame && !isProgramsFrame && !isAttendanceFrame) return;
+    if (event.data?.type === "hr-embed-dialog" && isInternsFrame && typeof event.data.open === "boolean") {
+      internsDialogOpen = event.data.open;
+      if (internsDialogOpen) {
+        const frame = byId("interns-frame");
+        frame.style.height = `${Math.max(600, Math.floor(window.innerHeight * 0.9))}px`;
+        frame.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
+      return;
+    }
+    if (event.data?.type === "programs-embed-height" && isProgramsFrame && Number.isFinite(event.data.height)) {
+      byId("programs-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
+      return;
+    }
+    if (event.data?.type === "attendance-embed-height" && isAttendanceFrame && Number.isFinite(event.data.height)) {
+      byId("attendance-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
+      return;
+    }
+    if (event.data?.type !== "hr-embed-height" || !isInternsFrame || !Number.isFinite(event.data.height) || internsDialogOpen) return;
+    byId("interns-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
+  });
   async function activateTab(name) {
-    if (name !== "account-permissions" && byId("account-permissions-tab").getAttribute("aria-selected") === "true" && permissionDirty()) {
+    if (name !== "account-permissions" && state.activeTab === "account-permissions" && permissionDirty()) {
       if (state.permissionSaving || !(await (window.portalConfirm ? window.portalConfirm("Bỏ thay đổi phân quyền chưa lưu để chuyển mục?") : true))) return;
       renderAccountPermissions();
     }
-    tabs.forEach((other) => { byId(`${other}-tab`).setAttribute("aria-selected", String(other === name)); byId(`${other}-panel`).hidden = other !== name; });
+    state.activeTab = name;
+    tabs.forEach((other) => { const tab = byId(`${other}-tab`); if (tab) tab.setAttribute("aria-selected", String(other === name)); byId(`${other}-panel`).hidden = other !== name; });
   }
   function permissionAccount() { return state.items.find((account) => String(account.id) === state.permissionAccountId); }
   function permissionDirty() {
@@ -156,7 +289,9 @@
     try {
       const profileValue = byId("account-profile").value; const profile = state.profiles.find((p) => String(p.id) === profileValue);
       const body = { name: byId("account-name").value.trim(), email: byId("account-email").value.trim(), roles, profileId: roles.includes("Intern") ? profile?.id ?? profileValue : null, isActive: byId("account-active").checked };
-      const editing = state.editing; const result = await api(editing ? `/api/accounts/${encodeURIComponent(editing.id)}` : "/api/accounts", { method: editing ? "PUT" : "POST", body: JSON.stringify(body) }); byId("account-dialog").close(); await refresh(); notice(editing ? "Đã cập nhật tài khoản." : `Đã tạo tài khoản và gửi lời mời kích hoạt tới ${body.email}. Kiểm tra hộp thư đến hoặc thư mục email của hệ thống khi chạy cục bộ.`, false, result);
+      const editing = state.editing; const result = await api(editing ? `/api/accounts/${encodeURIComponent(editing.id)}` : "/api/accounts", { method: editing ? "PUT" : "POST", body: JSON.stringify(body) }); byId("account-dialog").close(); await refresh();
+      const emailChanged = editing && body.email.toLowerCase() !== editing.email.toLowerCase();
+      notice(emailChanged ? `Đã lưu thông tin khác. Email cũ vẫn dùng để đăng nhập cho đến khi bạn mở thư gửi tới ${body.email} và bấm Xác nhận đổi email.` : editing ? "Đã cập nhật tài khoản." : `Đã tạo tài khoản và gửi lời mời kích hoạt tới ${body.email}. Kiểm tra hộp thư đến hoặc thư mục email của hệ thống khi chạy cục bộ.`, false, result);
     } catch (err) { error.textContent = err.message; error.hidden = false; } finally { button.disabled = false; }
   });
   ["close-dialog", "cancel-dialog"].forEach((id) => byId(id).addEventListener("click", () => byId("account-dialog").close()));
@@ -164,7 +299,7 @@
   byId("account-profile").addEventListener("change", () => { const profile = state.profiles.find((p) => String(p.id) === byId("account-profile").value); if (profile) { byId("account-email").value = profile.email || ""; if (!byId("account-name").value.trim()) byId("account-name").value = profile.name || ""; } });
   byId("search").addEventListener("input", renderAccounts); ["role-filter", "status-filter"].forEach((id) => byId(id).addEventListener("change", renderAccounts));
   byId("refresh").addEventListener("click", () => perform(byId("refresh"), refresh)); byId("permission-role").addEventListener("change", renderPermissions);
-  tabs.forEach((name) => byId(`${name}-tab`).addEventListener("click", () => activateTab(name)));
+  tabs.forEach((name) => { const tab = byId(`${name}-tab`); if (tab) tab.addEventListener("click", () => activateTab(name)); });
   byId("permission-account").addEventListener("change", (event) => selectPermissionAccount(event.target.value));
   byId("cancel-user-permissions").addEventListener("click", renderAccountPermissions);
   byId("reset-user-permissions").addEventListener("click", () => {
@@ -193,7 +328,15 @@
   byId("save-permissions").addEventListener("click", () => perform(byId("save-permissions"), async () => { const role = byId("permission-role").value; const permissions = [...byId("permission-list").querySelectorAll("input:checked")].map((input) => input.value); await api(`/api/roles/${encodeURIComponent(role)}/permissions`, { method: "PUT", body: JSON.stringify({ permissions }) }); await refresh(); notice(`Đã cập nhật quyền cho vai trò ${labelForRole(role)}.`); }));
   byId("logout").addEventListener("click", () => perform(byId("logout"), async () => { await api("/api/auth/logout", { method: "POST" }); sessionStorage.clear(); location.assign("dang-nhap.html"); }));
   (async () => {
-    try { state.me = await api("/api/auth/me"); renderNavigation(); await refresh(); }
+    try {
+      state.me = await api("/api/auth/me");
+      renderNavigation();
+      const url = new URL(location.href);
+      url.searchParams.delete("section");
+      if (url.href !== location.href) history.replaceState(history.state, "", url);
+      setAdminSection("accounts");
+      await refresh();
+    }
     catch (error) { byId("account-rows").replaceChildren(); const row = node("tr"); const cell = node("td", error.message, "empty"); cell.colSpan = 5; row.append(cell); byId("account-rows").append(row); byId("new-account").disabled = true; notice(error.message, true); }
   })();
 })();

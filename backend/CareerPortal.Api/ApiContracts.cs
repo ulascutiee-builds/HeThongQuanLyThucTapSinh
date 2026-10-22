@@ -43,7 +43,7 @@ public sealed record CreateHrProfileRequest
     [Required] public DateOnly? DateOfBirth { get; init; }
     public DateOnly? StartDate { get; init; }
     public DateOnly? EndDate { get; init; }
-    public string Status { get; init; } = "Đang thực tập";
+    public string Status { get; init; } = "Chờ hồ sơ";
 }
 
 public sealed record UpdateHrProfileRequest

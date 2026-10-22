@@ -750,6 +750,35 @@ namespace CareerPortal.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PendingEmailChange", b =>
+                {
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NewEmail")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<DateTimeOffset>("RequestedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("AccountId");
+
+                    b.HasIndex("NewEmail")
+                        .IsUnique();
+
+                    b.ToTable("PENDING_EMAIL_CHANGE", (string)null);
+                });
+
             modelBuilder.Entity("PortalNotification", b =>
                 {
                     b.Property<int>("Id")
@@ -1148,6 +1177,17 @@ namespace CareerPortal.Api.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PendingEmailChange", b =>
+                {
+                    b.HasOne("AppUser", "Account")
+                        .WithOne()
+                        .HasForeignKey("PendingEmailChange", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("ProgramSchedule", b =>

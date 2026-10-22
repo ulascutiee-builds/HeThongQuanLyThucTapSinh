@@ -3,15 +3,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#2459d6">
+  <meta name="theme-color" content="#173b78">
   <title>Chương trình và phân công | Career Portal</title>
-  <link rel="stylesheet" href="sprint2.css?v=20261006">
+  <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689">
+  <link rel="stylesheet" href="sprint2.css?v=20261022-program-pagination">
   <link rel="stylesheet" href="system-font.css?v=20261009-blue">
-  <link rel="stylesheet" href="portal.css?v=20261009-blue">
-  <script src="portal-ui.js?v=20261009-blue" defer></script>
+  <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right">
+  <script src="portal-ui.js?v=20261022-hide-table-count" defer></script>
+  <style>
+    body.s2-embedded {
+      min-width: 0;
+      background: transparent;
+    }
+    body.s2-embedded .s2-shell {
+      display: block;
+      min-height: 0;
+    }
+    body.s2-embedded .s2-sidebar {
+      display: none;
+    }
+    body.s2-embedded .s2-main {
+      max-width: none;
+      padding: 8px 0 24px;
+    }
+    body.s2-embedded .s2-heading {
+      display: none;
+    }
+    body.s2-embedded .portal-topline {
+      display: none;
+    }
+  </style>
 </head>
 <body class="portal-page" data-s2-page="programs">
   <div id="s2-app" aria-busy="true"><p class="s2-notice" role="status">Đang tải chương trình…</p></div>
-  <script src="sprint2-ui.js?v=20261009-blue"></script>
+  <script src="sprint2-ui.js?v=20261022-pagination-arrows"></script>
+<script>
+  if (new URLSearchParams(location.search).get("embedded") === "admin") {
+    const reportEmbeddedHeight = () => {
+      const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      parent.postMessage({ type: "programs-embed-height", height }, location.origin);
+    };
+    new ResizeObserver(reportEmbeddedHeight).observe(document.documentElement);
+    new MutationObserver(reportEmbeddedHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
+    window.addEventListener("load", reportEmbeddedHeight);
+    reportEmbeddedHeight();
+  }
+</script>
 </body>
 </html>

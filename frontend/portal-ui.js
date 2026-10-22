@@ -31,16 +31,25 @@
   // Public pages use an informational illustration, never invented dashboard figures.
   if (document.body.classList.contains("auth-page")) {
     const registration = page === "dang-ky.html";
-    const story = el("aside", null, "auth-story"); story.setAttribute("aria-label", "Giới thiệu Career Portal");
-    story.innerHTML = `<a class="auth-brand" href="dang-nhap.html"><img src="codegym-logo.svg" alt="CodeGym"><span><strong>Career Portal</strong><small>QUẢN LÝ THỰC TẬP SINH</small></span></a>
+    const brand = `<a class="auth-brand" href="dang-nhap.html"><img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM"><span><strong>Career Portal</strong><small>QUẢN LÝ THỰC TẬP SINH</small></span></a>`;
+    if (registration) {
+      const story = el("aside", null, "auth-story"); story.setAttribute("aria-label", "Giới thiệu Career Portal");
+      story.innerHTML = `${brand}
       <div class="auth-story-copy"><span class="auth-story-tag">KẾT NỐI · ĐỒNG HÀNH · PHÁT TRIỂN</span>
       <h1>${registration ? "Khởi đầu hành trình.<br>Mở lối tương lai." : "Một không gian.<br>Trọn hành trình<br>thực tập."}</h1>
       <p>${registration ? "Hoàn thiện thông tin để kết nối với chương trình thực tập và người hướng dẫn của bạn." : "Kết nối nhân sự, người hướng dẫn và thực tập sinh trong một hệ thống thống nhất."}</p>
       <div class="auth-journey"><div class="auth-journey-item"><span>01</span><div><strong>Hồ sơ & ứng tuyển</strong><small>Chuẩn bị, gửi và theo dõi hồ sơ trực tuyến</small></div></div>
       <div class="auth-journey-item"><span>02</span><div><strong>Chương trình & người hướng dẫn</strong><small>Kế hoạch rõ ràng, kết nối đúng mentor</small></div></div>
       <div class="auth-journey-item"><span>03</span><div><strong>Lịch thực tập & chuyên cần</strong><small>Theo dõi lịch làm việc và chấm công mỗi ngày</small></div></div></div></div>
-      <div class="auth-story-footer">CODEGYM &nbsp; / &nbsp; Hệ thống quản lý thực tập sinh</div>`;
-    document.querySelector(".login-layout").prepend(story);
+      <div class="auth-story-footer">ICTU × CODEGYM &nbsp; / &nbsp; Hệ thống quản lý thực tập sinh</div>`;
+      document.querySelector(".login-layout").prepend(story);
+    } else {
+      const loginBrand = el("a", null, "auth-login-brand");
+      loginBrand.href = "dang-nhap.html";
+      loginBrand.setAttribute("aria-label", "Career Portal");
+      loginBrand.innerHTML = '<img src="ictu-codegym-logo.png?v=c8d8f689" alt="Logo ICTU × CODEGYM">';
+      document.querySelector(".form-content").prepend(loginBrand);
+    }
     const security = el("p", "Thông tin của bạn được quản lý theo quyền truy cập.", "auth-security"); security.prepend(icon("shield"));
     document.querySelector(".form-content").append(security);
     return;
@@ -117,22 +126,7 @@
     notificationBadge.hidden = !unread;
     notificationButton?.setAttribute("aria-label", unread ? `Thông báo, ${unread} chưa đọc` : "Thông báo");
   }
-  async function markNotificationRead(item, row) {
-    if (item.isRead) return true;
-    try {
-      const response = await fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"});
-      if (!response.ok) throw new Error("Không thể cập nhật trạng thái thông báo.");
-      item.isRead = true;
-      renderNotificationBadge(notificationItems.filter(notification => !notification.isRead).length);
-      row.classList.remove("unread"); row.classList.add("read");
-      return true;
-    } catch {
-      await window.portalAlert?.("Chưa thể đánh dấu thông báo đã đọc. Vui lòng thử lại.");
-      return false;
-    }
-  }
-  async function openNotifications() {
-    await loadNotifications();
+  function openNotifications() {
     const dialog = el("dialog", null, "portal-guide portal-notifications");
     const heading = el("h2", "Thông báo");
     const intro = el("p", notificationItems.length ? "Cập nhật mới nhất từ hệ thống." : "Bạn chưa có thông báo mới.");
@@ -141,12 +135,12 @@
       const row = el("article", null, "portal-notification-item" + (item.isRead ? " read" : " unread"));
       const copy = el("div"); copy.append(el("strong", item.title || "Thông báo"), el("p", item.message || ""), el("time", notificationDate(item.createdAt)));
       row.append(copy);
-      if (item.link) { const link = el("a", "Mở", "portal-notification-link"); link.href = item.link; link.onclick = async event => { event.preventDefault(); if (await markNotificationRead(item,row)) location.assign(link.href); }; row.append(link); }
-      row.onclick = async event => { if (event.target.closest("a")) return; await markNotificationRead(item,row); };
+      if (item.link) { const link = el("a", "Mở", "portal-notification-link"); link.href = item.link; link.onclick = () => { if (!item.isRead) fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"}).catch(()=>{}); }; row.append(link); }
+      row.onclick = async event => { if (event.target.closest("a")) return; if (!item.isRead) { item.isRead = true; await fetch(`/api/notifications/${item.id}/read`, {method:"PATCH", credentials:"same-origin"}).catch(()=>{}); renderNotificationBadge(notificationItems.filter(x => !x.isRead).length); row.classList.remove("unread"); row.classList.add("read"); } };
       list.append(row);
     });
     const footer = el("footer"); const all = button("Đánh dấu tất cả đã đọc", "btn", "file"); const close = button("Đóng", "btn primary");
-    all.disabled = !notificationItems.some(x => !x.isRead); all.onclick = async () => { try { const response = await fetch("/api/notifications/read-all", {method:"POST", credentials:"same-origin"}); if (!response.ok) throw new Error(); notificationItems.forEach(x => x.isRead = true); renderNotificationBadge(0); dialog.close(); } catch { await window.portalAlert?.("Chưa thể đánh dấu tất cả thông báo đã đọc. Vui lòng thử lại."); } };
+    all.disabled = !notificationItems.some(x => !x.isRead); all.onclick = async () => { await fetch("/api/notifications/read-all", {method:"POST", credentials:"same-origin"}).catch(()=>{}); notificationItems.forEach(x => x.isRead = true); renderNotificationBadge(0); dialog.close(); };
     close.onclick = () => dialog.close(); footer.append(all, close); dialog.append(heading, intro, list, footer); dialog.addEventListener("close", () => dialog.remove()); document.body.append(dialog); dialog.showModal(); close.focus();
   }
   async function loadNotifications() {
@@ -160,56 +154,45 @@
     tools.prepend(notificationButton); loadNotifications(); notificationTimer = setInterval(loadNotifications, 60000);
   }
 
-  const mobile = matchMedia("(max-width: 900px)");
-  let sidebar, menuButton, previousFocus;
-  function setNav(open) {
-    if (!sidebar) return;
-    document.body.classList.toggle("portal-nav-open", open);
-    sidebar.inert = mobile.matches && !open;
-    const background = document.querySelector(".main-area") || document.querySelector("main");
-    if (background) background.inert = mobile.matches && open;
-    const skip = document.querySelector(".portal-skip"); if (skip) skip.inert = mobile.matches && open;
-    menuButton?.setAttribute("aria-expanded", String(open));
-    if (open) { previousFocus = document.activeElement; sidebar.querySelector(".portal-nav-close").focus(); }
-    else if (previousFocus) { if (mobile.matches) previousFocus.focus(); previousFocus = null; }
-  }
   function enhanceShell() {
-    sidebar = document.querySelector(".sidebar, .s2-sidebar");
+    const sidebar = document.querySelector(".sidebar, .s2-sidebar");
     if (!sidebar || sidebar.dataset.portalReady) return;
     sidebar.dataset.portalReady = "true"; sidebar.id ||= "portal-navigation";
     const brand = sidebar.querySelector(".brand, .s2-brand");
     if (brand) { const logo = brand.querySelector("img"); const copy = el("span", null, "portal-brand-copy"); copy.append(el("strong", "Career Portal"), el("span", "QUẢN LÝ THỰC TẬP SINH")); brand.replaceChildren(...(logo ? [logo] : []), copy); }
     const main = document.querySelector("main");
     if (main) { main.id ||= "portal-content"; main.tabIndex = -1; const skip = el("a", "Chuyển đến nội dung", "portal-skip"); skip.href = "#" + main.id; document.body.prepend(skip); }
-    let topline = document.querySelector(".app-shell .topbar, .shell .topbar, .topbar");
+    let topline = document.querySelector(".app-shell .topbar, .shell .topbar, .topbar, .portal-topline");
     if (!topline && main) { topline = el("div", null, "portal-topline"); const label = el("div", null, "portal-topline-label"); label.append(el("span", "Career Portal / "), el("strong", guides[page]?.[0] || "Không gian làm việc")); topline.append(label); main.prepend(topline); }
     if (!topline) return;
-    menuButton = button("", "portal-menu", "menu"); menuButton.setAttribute("aria-label", "Mở menu điều hướng"); menuButton.setAttribute("aria-controls", sidebar.id); menuButton.setAttribute("aria-expanded", "false"); menuButton.onclick = () => setNav(true); topline.prepend(menuButton);
     const tools = el("div", null, "portal-tools");
     tools.append(el("time", new Intl.DateTimeFormat("vi-VN", {day: "2-digit", month: "long", year: "numeric"}).format(new Date()), "portal-date"));
     const guide = button("Hướng dẫn", "portal-guide-button", "help"); guide.setAttribute("aria-label", "Hướng dẫn sử dụng"); guide.onclick = openGuide; tools.append(guide); installNotifications(tools);
     const logout = topline.querySelector(".topbar-actions, .topbar-right"); if (logout) topline.insertBefore(tools, logout); else topline.append(tools);
-    const close = button("", "portal-nav-close", "close"); close.setAttribute("aria-label", "Đóng menu điều hướng"); close.onclick = () => setNav(false); sidebar.prepend(close);
-    const scrim = button("", "portal-scrim"); scrim.setAttribute("aria-hidden", "true"); scrim.tabIndex = -1; scrim.onclick = () => setNav(false); document.body.append(scrim);
-    sidebar.addEventListener("click", event => { if (event.target.closest("nav button, nav a")) setNav(false); });
-    mobile.addEventListener("change", () => setNav(false)); setNav(false);
   }
-  document.addEventListener("keydown", event => {
-    if (!document.body.classList.contains("portal-nav-open")) return;
-    if (event.key === "Escape") { setNav(false); return; }
-    if (event.key !== "Tab") return;
-    const focusable = [...sidebar.querySelectorAll("a[href], button:not(:disabled)")].filter(node => node.getClientRects().length);
-    const first = focusable[0], last = focusable.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-    if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-  });
 
   function decorateNavigation() {
     document.querySelectorAll(".sidebar nav a, .sidebar nav button, .s2-nav a").forEach(link => {
       if (link.dataset.portalIcon) return; link.dataset.portalIcon = "true";
       const key = link.dataset.view || link.getAttribute("href") || "";
-      const name = /admin/.test(key) ? "shield" : /attendance/.test(key) ? "clock" : /programs/.test(key) ? "calendar" : /mentor|profiles|hr/.test(key) ? "users" : /documents|contract|applications/.test(key) ? "file" : "grid";
+      const adminIcons = { "nav-accounts": "shield", "nav-hr": "users", "nav-programs": "calendar", "nav-attendance": "clock" };
+      const name = adminIcons[link.id] || (/attendance/.test(key) ? "clock" : /programs/.test(key) ? "calendar" : /mentor|profiles|hr/.test(key) ? "users" : /documents|contract|applications/.test(key) ? "file" : /admin/.test(key) ? "shield" : "grid");
       const glyph = link.querySelector(".nav-glyph"); if (glyph) glyph.replaceChildren(icon(name)); else link.prepend(icon(name));
+    });
+    document.querySelectorAll(".sidebar nav a[href], .s2-nav a[href]").forEach(link => {
+      let active = false;
+      try {
+        const target = new URL(link.href, location.href);
+        const current = new URL(location.href);
+        const sameView = target.pathname.endsWith("/mentor.html")
+          ? (target.searchParams.get("view") || "group") === (current.searchParams.get("view") || "group")
+          : target.searchParams.get("view") === current.searchParams.get("view");
+        active = target.pathname === current.pathname
+          && target.searchParams.get("section") === current.searchParams.get("section")
+          && sameView;
+      } catch { /* Keep malformed external links unchanged. */ }
+      if (active) { link.setAttribute("aria-current", "page"); link.classList.add("current"); }
+      else if (link.hasAttribute("aria-current")) { link.removeAttribute("aria-current"); link.classList.remove("current"); }
     });
     document.querySelectorAll(".metric, .stat, .s2-stat").forEach((card, index) => {
       if (card.querySelector(".portal-stat-icon")) return;
@@ -243,14 +226,13 @@
       const wrap = table.closest(".s2-table-scroll"); if (!wrap) return;
       wrap.tabIndex = 0; wrap.setAttribute("role", "region"); wrap.setAttribute("aria-label", "Bảng dữ liệu, cuộn ngang để xem thêm cột");
       const tools = el("div", null, "portal-table-tools"); const label = el("label"); const input = el("input"); input.type = "search"; input.placeholder = "Tìm trong bảng…"; input.setAttribute("aria-label", "Tìm trong " + (table.closest("section")?.querySelector("h2")?.textContent || "bảng dữ liệu")); label.append(input);
-      const count = el("span", `${rows.length} dòng`, "portal-table-count"); count.setAttribute("aria-live", "polite");
       const empty = el("p", "Không tìm thấy dữ liệu phù hợp. Hãy thử từ khóa khác.", "portal-table-empty"); empty.hidden = true;
       input.addEventListener("input", () => {
         const query = normalize(input.value.trim()); let visible = 0;
         rows.forEach(row => { row.hidden = !normalize(row.textContent).includes(query); if (!row.hidden) visible++; });
-        count.textContent = `${visible} / ${rows.length} dòng`; empty.hidden = visible > 0;
+        empty.hidden = visible > 0;
       });
-      tools.append(label, count);
+      tools.append(label);
       if (page === "attendance.html") {
         const download = button("Xuất CSV", "btn small", "download"); download.title = "Xuất các dòng đang hiển thị trong bảng này";
         download.onclick = () => {

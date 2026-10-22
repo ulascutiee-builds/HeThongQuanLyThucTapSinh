@@ -149,6 +149,7 @@ public static class Accounts
         await using var scope = app.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CareerDbContext>();
         var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
+        var profileHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<InternProfile>>();
         var knownPermissions = await db.AppPermissions.Select(x => x.Key).ToListAsync();
         var addedPermissions = Permissions.Keys.Except(knownPermissions).ToArray();
         foreach (var key in addedPermissions) db.AppPermissions.Add(new() { Key = key, Label = Permissions[key] });
@@ -165,6 +166,9 @@ public static class Accounts
                 foreach (var permission in DefaultPermissions(role).Intersect(addedPermissions)) entity.RolePermissions.Add(new() { RoleName = role, PermissionKey = permission });
         }
         await db.SaveChangesAsync();
+        // Demo credentials are bootstrap data by default; repair is an explicit opt-in.
+        var repairDemoAccounts = app.Configuration.GetValue("Accounts:RepairDemoAccounts", false);
+        var bootstrapDemoAccounts = !await db.AppUsers.AnyAsync();
         foreach (var profile in await db.InternProfiles.Where(x => !db.AppUsers.Any(u => u.ProfileId == x.Id || u.Email == x.Email)).ToListAsync())
         {
             // Preserve legacy logins while moving authentication to persistent accounts.
@@ -173,18 +177,145 @@ public static class Accounts
             db.AppUsers.Add(account);
         }
         await db.SaveChangesAsync();
-        foreach (var (role, emailKey, passwordKey) in new[] { ("HR", "Sprint1:HrEmail", "Sprint1:HrPassword"), ("Admin", "Accounts:AdminEmail", "Accounts:AdminPassword") })
+        var mentorEmail = app.Configuration["Accounts:MentorEmail"]?.Trim().ToLowerInvariant();
+        var mentorPassword = app.Configuration["Accounts:MentorPassword"];
+        if (bootstrapDemoAccounts || repairDemoAccounts)
+        {
+        foreach (var (role, emailKey, passwordKey, name, legacyEmail) in new[]
+        {
+            ("HR", "Sprint1:HrEmail", "Sprint1:HrPassword", "Nhân sự", "hr@sprint1.local"),
+            ("Admin", "Accounts:AdminEmail", "Accounts:AdminPassword", "Quản trị hệ thống", "admin@sprint12.local")
+        })
         {
             var email = app.Configuration[emailKey]?.Trim().ToLowerInvariant();
             var password = app.Configuration[passwordKey];
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrEmpty(password) || await db.AppUsers.AnyAsync(x => x.Email == email)) continue;
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrEmpty(password)) continue;
             if (password.Length < 8) throw new InvalidOperationException($"{passwordKey} phải có ít nhất 8 ký tự.");
-            var account = new AppUser { Name = role == "Admin" ? "Quản trị hệ thống" : "Nhân sự", Email = email, PasswordHash = "" };
+            var target = await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.Email == email);
+            if (target is not null && !target.UserRoles.Any(x => x.RoleName == role))
+                throw new InvalidOperationException($"Email khởi tạo {email} đã được gán cho tài khoản không thuộc vai trò {role}.");
+            var account = target ?? (bootstrapDemoAccounts
+                ? await db.AppUsers.Include(x => x.UserRoles)
+                    .Where(x => x.UserRoles.Any(r => r.RoleName == role))
+                    .OrderBy(x => x.Email == legacyEmail ? 0 : 1)
+                    .ThenBy(x => x.CreatedAt)
+                    .FirstOrDefaultAsync()
+                : null);
+            if (account is null)
+            {
+                account = new AppUser { Name = name, Email = email, PasswordHash = "" };
+                db.AppUsers.Add(account);
+            }
+            account.Name = name;
+            account.Email = email;
             account.PasswordHash = hasher.HashPassword(account, password);
-            account.UserRoles.Add(new() { RoleName = role });
-            db.AppUsers.Add(account);
+            account.IsActive = true;
+            account.RequiresActivation = false;
+            account.ActivationHash = null;
+            account.ActivationExpiresAt = null;
+            if (!account.UserRoles.Any(x => x.RoleName == role)) account.UserRoles.Add(new() { RoleName = role });
+            if (role == "Admin" && account.HasCustomPermissions)
+                foreach (var key in new[] { "accounts.manage", "roles.manage" }.Except(account.UserPermissions.Select(x => x.PermissionKey)).ToArray())
+                    account.UserPermissions.Add(new() { PermissionKey = key });
         }
         await db.SaveChangesAsync();
+
+        // Create the configured demo mentor only when missing. Existing mentor credentials and
+        // account-level permissions belong to the user and must not be reset on every startup.
+        if (!string.IsNullOrWhiteSpace(mentorEmail) && !string.IsNullOrEmpty(mentorPassword))
+        {
+            if (mentorPassword.Length < 8) throw new InvalidOperationException("Accounts:MentorPassword phải có ít nhất 8 ký tự.");
+            var mentor = await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.Email == mentorEmail);
+            if (mentor is not null && !mentor.UserRoles.Any(x => x.RoleName == "Mentor"))
+                throw new InvalidOperationException($"Email khởi tạo {mentorEmail} đang được dùng bởi tài khoản không thuộc vai trò Mentor.");
+            if (mentor is null)
+            {
+                mentor = new AppUser { Name = "Mentor hướng dẫn", Email = mentorEmail, PasswordHash = "" };
+                mentor.PasswordHash = hasher.HashPassword(mentor, mentorPassword);
+                mentor.UserRoles.Add(new() { RoleName = "Mentor" });
+                db.AppUsers.Add(mentor);
+                await db.SaveChangesAsync();
+            }
+            else if (repairDemoAccounts)
+            {
+                mentor.PasswordHash = hasher.HashPassword(mentor, mentorPassword);
+                mentor.IsActive = true;
+                mentor.RequiresActivation = false;
+                mentor.ActivationHash = null;
+                mentor.ActivationExpiresAt = null;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        var internEmail = app.Configuration["Accounts:UserEmail"]?.Trim().ToLowerInvariant();
+        var internPassword = app.Configuration["Accounts:UserPassword"];
+        if ((bootstrapDemoAccounts || repairDemoAccounts) && !string.IsNullOrWhiteSpace(internEmail) && !string.IsNullOrEmpty(internPassword))
+        {
+            if (internPassword.Length < 8) throw new InvalidOperationException("Accounts:UserPassword phải có ít nhất 8 ký tự.");
+            var account = await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.Email == internEmail);
+            if (account is not null && account.UserRoles.Any(x => x.RoleName != "Intern"))
+                throw new InvalidOperationException($"Email khởi tạo {internEmail} đang được dùng bởi vai trò khác.");
+            var profile = account?.ProfileId is int profileId
+                ? await db.InternProfiles.SingleOrDefaultAsync(x => x.Id == profileId)
+                : await db.InternProfiles.SingleOrDefaultAsync(x => x.Email == internEmail);
+            if (profile is null)
+            {
+                profile = new InternProfile
+                {
+                    Name = "Thực tập sinh",
+                    StudentId = "DEMO-USER",
+                    Email = internEmail,
+                    School = "Chưa cập nhật",
+                    Major = "Chưa cập nhật",
+                    PasswordHash = "",
+                    EmailVerified = true,
+                    Status = "Chờ hồ sơ"
+                };
+                profile.PasswordHash = profileHasher.HashPassword(profile, internPassword);
+                db.InternProfiles.Add(profile);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                profile.Email = internEmail;
+                profile.EmailVerified = true;
+                profile.PasswordHash = profileHasher.HashPassword(profile, internPassword);
+            }
+
+            account ??= await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.ProfileId == profile.Id);
+            if (account is null)
+            {
+                account = CreateInternAccount(db, profile, "");
+            }
+            account.Name = profile.Name;
+            account.Email = internEmail;
+            account.ProfileId = profile.Id;
+            account.PasswordHash = hasher.HashPassword(account, internPassword);
+            account.IsActive = true;
+            account.RequiresActivation = false;
+            account.ActivationHash = null;
+            account.ActivationExpiresAt = null;
+            if (!account.UserRoles.Any(x => x.RoleName == "Intern")) account.UserRoles.Add(new() { RoleName = "Intern" });
+            await db.SaveChangesAsync();
+        }
+        }
+
+        // The demo Mentor account also needs a Mentor row for Sprint 2/3 endpoints.
+        // The neutral department is only a placeholder; HR chooses the actual department
+        // and assigns interns through the normal workflow.
+        if (!string.IsNullOrWhiteSpace(mentorEmail) && !string.IsNullOrEmpty(mentorPassword))
+        {
+            var mentorAccount = await db.AppUsers.SingleOrDefaultAsync(x => x.Email == mentorEmail);
+            if (mentorAccount is not null && !await db.Mentors.AnyAsync(x => x.UserId == mentorAccount.Id))
+            {
+                await using var transaction = await db.Database.BeginTransactionAsync();
+                var department = await db.Departments.SingleOrDefaultAsync(x => x.Name == "Chưa phân loại");
+                department ??= new Department { Name = "Chưa phân loại" };
+                db.Mentors.Add(new Mentor { UserId = mentorAccount.Id, Department = department, Capacity = 5 });
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+        }
     }
 
     public static AppUser CreateInternAccount(CareerDbContext db, InternProfile profile, string passwordHash)
@@ -287,14 +418,21 @@ public static class Accounts
             var created = await WithPermissions(db).AsNoTracking().SingleAsync(x => x.Id == user.Id);
             return Results.Created($"/api/accounts/{user.Id}", new { account = ToResponse(created), message = "Tài khoản đã tạo. Liên kết đặt mật khẩu được gửi qua email (hiệu lực 24 giờ)." });
         });
-        app.MapPut("/api/accounts/{id:int}", async (int id, AccountRequest input, HttpContext context, CareerDbContext db) =>
+        app.MapPut("/api/accounts/{id:int}", async (int id, AccountRequest input, HttpContext context, CareerDbContext db, IConfiguration config) =>
         {
             await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var user = await WithPermissions(db).SingleOrDefaultAsync(x => x.Id == id); if (user is null) return Results.NotFound();
             if (!SprintSecurity.HasPermission(context, "roles.manage") && !input.Roles.ToHashSet().SetEquals(user.UserRoles.Select(x => x.RoleName))) return Results.Forbid();
-            if (await ValidateAccount(db, input, id) is string error) return Results.BadRequest(new { message = error });
+            var requestedEmail = input.Email.Trim().ToLowerInvariant();
+            var changingEmail = requestedEmail != user.Email;
+            if (changingEmail && input.ProfileId != user.ProfileId) return Results.BadRequest(new { message = "Hãy đổi liên kết hồ sơ và email trong hai lần lưu riêng." });
+            // Validate the current linked profile while the new email is pending confirmation.
+            var validationInput = changingEmail ? input with { Email = user.Email } : input;
+            if (await ValidateAccount(db, validationInput, id) is string error) return Results.BadRequest(new { message = error });
             if (await IsLastAdmin(db, user, input.IsActive, input.Roles)) return Results.Conflict(new { message = "Phải giữ ít nhất một tài khoản Admin đang hoạt động." });
-            user.Name = input.Name.Trim(); user.Email = input.Email.Trim().ToLowerInvariant(); user.ProfileId = input.ProfileId; user.IsActive = input.IsActive;
+            if (changingEmail && await EmailChange.QueueAsync(db, user, requestedEmail, config) is string emailError)
+                return Results.Conflict(new { message = emailError });
+            user.Name = input.Name.Trim(); user.ProfileId = input.ProfileId; user.IsActive = input.IsActive;
             db.UserRoles.RemoveRange(user.UserRoles.Where(x => !input.Roles.Contains(x.RoleName)));
             foreach (var role in input.Roles.Except(user.UserRoles.Select(x => x.RoleName)).ToArray()) user.UserRoles.Add(new() { RoleName = role });
             if (user.HasCustomPermissions && input.Roles.Contains("Admin"))
@@ -324,13 +462,56 @@ public static class Accounts
             var updated = await WithPermissions(db).AsNoTracking().SingleAsync(x => x.Id == id);
             return Results.Ok(ToResponse(updated));
         });
-        app.MapDelete("/api/accounts/{id:int}", async (int id, CareerDbContext db) =>
+        app.MapDelete("/api/accounts/{id:int}", async (int id, HttpContext context, CareerDbContext db) =>
         {
+            if (!context.User.IsInRole("Admin") || !SprintSecurity.HasPermission(context, "accounts.manage")) return Results.Forbid();
             await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-            var user = await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.Id == id); if (user is null) return Results.NotFound();
-            if (await IsLastAdmin(db, user, false, [])) return Results.Conflict(new { message = "Không thể vô hiệu hóa Admin hoạt động cuối cùng." });
-            user.IsActive = false; user.ActivationHash = null; user.ActivationExpiresAt = null;
-            await db.SaveChangesAsync(); await tx.CommitAsync(); return Results.NoContent();
+            var user = await db.AppUsers.Include(x => x.UserRoles).SingleOrDefaultAsync(x => x.Id == id);
+            if (user is null) return Results.NotFound();
+            if (await IsLastAdmin(db, user, false, []))
+                return Results.Conflict(new { message = "Không thể xóa Admin đang hoạt động cuối cùng." });
+
+            var mentorIds = await db.Mentors.Where(x => x.UserId == id).Select(x => x.Id).ToArrayAsync();
+            var profileId = user.ProfileId;
+            var profileEmail = profileId is int pid
+                ? await db.InternProfiles.Where(x => x.Id == pid).Select(x => x.Email).SingleOrDefaultAsync()
+                : null;
+            var recipientEmails = new[] { user.Email, profileEmail }.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToArray();
+
+            // Notification and mail records are not FK-linked to a user. Remove direct
+            // account/profile messages and queued or sent mail metadata for this identity.
+            await db.PortalNotifications.Where(x => x.AccountId == id || (profileId != null && x.ProfileId == profileId)).ExecuteDeleteAsync();
+            await db.MailJobs.Where(x => recipientEmails.Contains(x.Recipient)
+                || x.EventKey.StartsWith("activation:" + id + ":")
+                || x.EventKey.StartsWith("email-change:" + id + ":")
+                || (profileId != null && (x.EventKey.StartsWith("report-submitted:" + profileId + ":")
+                    || x.EventKey.StartsWith("evaluation:" + profileId + ":")))).ExecuteDeleteAsync();
+            await db.TaskProgressHistories.Where(x => x.ChangedByUserId == id).ExecuteDeleteAsync();
+
+            if (mentorIds.Length > 0)
+            {
+                await db.InternshipTasks.Where(x => mentorIds.Contains(x.MentorId)).ExecuteDeleteAsync();
+                await db.InternshipEvaluations.Where(x => mentorIds.Contains(x.MentorId)).ExecuteDeleteAsync();
+                await db.InternAssignments.Where(x => mentorIds.Contains(x.MentorId)).ExecuteDeleteAsync();
+                await db.Mentors.Where(x => x.UserId == id).ExecuteDeleteAsync();
+            }
+
+            if (profileId is int linkedProfileId)
+            {
+                await db.InternshipTasks.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+                await db.InternshipEvaluations.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+                await db.WeeklyReports.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+                await db.AttendanceRecords.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+                await db.LeaveRequests.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+                await db.InternAssignments.Where(x => x.ProfileId == linkedProfileId).ExecuteDeleteAsync();
+            }
+
+            db.AppUsers.Remove(user);
+            await db.SaveChangesAsync();
+            if (profileId is int ownedProfileId)
+                await db.InternProfiles.Where(x => x.Id == ownedProfileId).ExecuteDeleteAsync();
+            await tx.CommitAsync();
+            return Results.NoContent();
         });
         app.MapPost("/api/accounts/{id:int}/activation", async (int id, CareerDbContext db, IConfiguration config) =>
         {
