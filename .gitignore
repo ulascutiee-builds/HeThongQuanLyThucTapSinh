@@ -1,10 +1,18 @@
-**/bin/
-**/obj/
-**/App_Data/
-**/__pycache__/
-.vs/
+# Node.js / TypeScript
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local configuration and uploaded files
+.env
+.env.*
+!.env.example
+uploads/
+
+# IDE / OS
 .vscode/
-*.user
-.local/
-/build*/
-/publish/
+.idea/
+.DS_Store
+Thumbs.db

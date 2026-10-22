@@ -3,47 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#173b78">
+  <meta name="theme-color" content="#2459d6">
   <title>Lịch và chấm công | Career Portal</title>
-  <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689">
-  <link rel="stylesheet" href="sprint2.css?v=20261016-toast-top-right">
+  <link rel="stylesheet" href="sprint2.css?v=20261006">
   <link rel="stylesheet" href="system-font.css?v=20261009-blue">
-  <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right">
-  <script src="portal-ui.js?v=20261022-nav-section-state" defer></script>
-  <style>
-    body.s2-embedded {
-      min-width: 0;
-      background: transparent;
-    }
-    body.s2-embedded .s2-shell {
-      display: block;
-      min-height: 0;
-    }
-    body.s2-embedded .s2-sidebar,
-    body.s2-embedded .s2-heading,
-    body.s2-embedded .portal-topline {
-      display: none;
-    }
-    body.s2-embedded .s2-main {
-      max-width: none;
-      padding: 8px 0 24px;
-    }
-  </style>
+  <link rel="stylesheet" href="portal.css?v=20261009-blue">
+  <script src="portal-ui.js?v=20261009-blue" defer></script>
 </head>
 <body class="portal-page" data-s2-page="attendance">
   <div id="s2-app" aria-busy="true"><p class="s2-notice" role="status">Đang tải lịch và chấm công…</p></div>
-  <script src="sprint2-ui.js?v=20261016-hr-embedded-nav"></script>
-<script>
-  if (new URLSearchParams(location.search).get("embedded") === "admin") {
-    const reportEmbeddedHeight = () => {
-      const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-      parent.postMessage({ type: "attendance-embed-height", height }, location.origin);
-    };
-    new ResizeObserver(reportEmbeddedHeight).observe(document.documentElement);
-    new MutationObserver(reportEmbeddedHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
-    window.addEventListener("load", reportEmbeddedHeight);
-    reportEmbeddedHeight();
-  }
-</script>
+  <script src="sprint2-ui.js?v=20261009-blue"></script>
 </body>
 </html>
