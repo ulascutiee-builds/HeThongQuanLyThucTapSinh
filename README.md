@@ -1,5 +1,7 @@
 # Hệ thống quản lý Thực tập sinh
 
+Mã nguồn ứng dụng CareerPortal v4.1.0 được lưu tại [`CareerPortal_v4.1.0/`](./CareerPortal_v4.1.0/). Hãy xem [README chạy ứng dụng](./CareerPortal_v4.1.0/README.md) để cài đặt và khởi chạy.
+
 ## 1. Tổng quan dự án
 
 Hệ thống quản lý Thực tập sinh là một hệ thống thông tin hỗ trợ quá trình tổ chức và quản lý thực tập cho sinh viên, giảng viên, cơ sở thực tập và các đơn vị liên quan. Hệ thống được xây dựng nhằm tập trung hóa dữ liệu, kiểm soát quá trình thực tập và hỗ trợ công tác theo dõi, đánh giá và báo cáo kết quả thực tập trong một môi trường thống nhất.
@@ -115,22 +117,3 @@ Hệ thống quản lý Thực tập sinh có thể được nhóm thành các m
 Hệ thống quản lý Thực tập sinh là một hệ thống nghiệp vụ hỗ trợ quản lý toàn bộ quy trình thực tập của sinh viên từ khi đăng ký, theo dõi, đánh giá đến báo cáo kết quả. Hệ thống này tập trung vào việc giải quyết các vấn đề về quản lý thông tin, đồng bộ dữ liệu, kiểm soát tiến độ và nâng cao hiệu quả công tác giám sát thực tập.
 
 Với các actor chính là sinh viên, giảng viên, người hướng dẫn, đơn vị thực tập và quản trị viên, hệ thống đáp ứng nhu cầu quản lý thực tập trong môi trường giáo dục và doanh nghiệp, đồng thời tạo nền tảng cho việc ra quyết định và báo cáo quản lý một cách chính xác, kịp thời và minh bạch.
-
-## Backend API
-
-Backend Node.js, TypeScript, Express và PostgreSQL cùng hướng dẫn cài đặt/API nằm trong [`backend/README.md`](backend/README.md).
-
-## Công việc Sprint 3 của Nguyễn Văn Khánh
-
-- `GET /api/attendance/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tính ngày công, ngày đi muộn, ngày về sớm và ngày nghỉ phép đã duyệt theo từng hồ sơ. `POST /api/attendance/records` ghi bản chấm công nguồn cùng giờ ca để tổng hợp.
-- `POST /api/leave-requests` tạo yêu cầu nghỉ; `GET /api/leave-requests` liệt kê và lọc yêu cầu. `PUT /api/leave-requests/{id}/status` nhận trạng thái `APPROVED` hoặc `REJECTED`, phản hồi và `processedBy`; hệ thống lưu người xử lý, thời điểm cùng lịch sử thay đổi.
-- Bảng `allowances` có khóa ngoại tới `interns`. `GET/POST /api/allowances` và `PUT /api/allowances/{id}` quản lý phụ cấp, mã tiền tệ ISO 4217 và kỳ áp dụng; lịch sử được lưu ở `allowance_histories`.
-- `PUT /api/allowances/{id}/payment-status` cập nhật `UNPAID` hoặc `PAID`; `GET /api/allowances/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` tổng hợp theo kỳ, trạng thái và tiền tệ, không cộng chéo các tiền tệ. `GET /api/allowances/{id}/history` trả lịch sử thay đổi.
-- `POST /api/mentors/assignments` và `PUT /api/mentors/assignments/{id}` tạo/cập nhật phân công, kiểm tra hồ sơ, mentor hoạt động, trùng thời gian và chỉ tiêu. `GET /api/mentors/statistics/mentees` tổng hợp mentee/sức chứa; `GET /api/statistics/schools-majors` tổng hợp thực tập sinh theo trường/ngành.
-- Cấu trúc database và hướng dẫn nâng cấp nằm trong `backend/database/schema.sql` và `backend/database/migrations/003_sprint3.sql`.
-
-
-
-## Nguyễn Văn Khánh — Sprint 1–3
-
-Phạm vi nhiệm vụ theo workbook và ánh xạ file/API trong [docs/NGUYEN_VAN_KHANH_SPRINT1-3.md](docs/NGUYEN_VAN_KHANH_SPRINT1-3.md). Backend ASP.NET Core được đặt tại `HeThongThucTapSinh/backend/Mã nguồn/CareerPortal.Api`; Node backend hiện có tiếp tục là thành phần tích hợp riêng.
