@@ -3,18 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#173b78" />
+    <meta name="theme-color" content="#173e34" />
     <title>Quản lý nhân sự | Career Portal</title>
-    <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689" />
-    <script>
-      if (new URLSearchParams(location.search).get("embedded") === "admin") {
-        document.documentElement.classList.add("embedded-admin");
-      }
-    </script>
     <style>
       :root {
         color-scheme: light;
-        --forest: #2459d6;
+        --forest: #173e34;
         --forest-light: #245748;
         --paper: #f3f4ef;
         --surface: #fff;
@@ -147,14 +141,6 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-      }
-      .programs-frame {
-        display: block;
-        width: 100%;
-        height: min(1500px, calc(100vh - 190px));
-        min-height: 720px;
-        border: 0;
-        background: var(--paper);
       }
       .nav-glyph {
         width: 18px;
@@ -398,15 +384,6 @@
         justify-content: space-between;
         gap: 16px;
         margin: 0 0 14px;
-        min-width: 0;
-      }
-      .section-toolbar > div:first-child {
-        min-width: 0;
-      }
-      .section-toolbar .toolbar-actions {
-        min-width: 0;
-        max-width: 100%;
-        flex-wrap: wrap;
       }
       .section-title {
         margin: 0;
@@ -425,18 +402,12 @@
         gap: 8px;
       }
       #application-profile-filter {
-        width: 0;
-        min-width: 0;
-        flex: 1 1 0;
+        width: auto;
+        min-width: 180px;
       }
       #application-status-filter {
-        width: 0;
-        min-width: 0;
-        flex: 1 1 0;
-      }
-      #view-applications .toolbar-actions {
-        width: min(100%, 460px);
-        flex-wrap: nowrap;
+        width: auto;
+        min-width: 140px;
       }
       .filter-bar {
         display: grid;
@@ -694,11 +665,6 @@
         color: #68736c;
         font-size: 10px;
         font-weight: 700;
-      }
-      .application-documents-hint {
-        margin: 0 0 8px;
-        color: #78847d;
-        font-size: 10px;
       }
       .application-document {
         display: flex;
@@ -1002,11 +968,6 @@
           justify-self: start;
         }
       }
-      @media (max-width: 1450px) {
-        .metrics {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
       @media (max-width: 720px) {
         .app-shell {
           display: block;
@@ -1092,21 +1053,17 @@
         }
         .toolbar-actions {
           align-self: stretch;
-          width: 100%;
         }
         .toolbar-actions > button {
           flex: 1;
         }
         #document-profile-filter,
-        #document-filter {
-          width: 100%;
+        #document-filter,
+        #application-profile-filter,
+        #application-status-filter {
+          width: 0;
           min-width: 0;
-          flex: 0 0 auto;
-        }
-        #view-applications .toolbar-actions {
-          flex-direction: row;
-          flex-wrap: nowrap;
-          width: 100%;
+          flex: 1 1 0;
         }
         .work-panel-head {
           align-items: flex-start;
@@ -1151,31 +1108,10 @@
           transition-duration: 0.01ms !important;
         }
       }
-      html.embedded-admin,
-      html.embedded-admin body {
-        min-height: 0;
-      }
-      html.embedded-admin .app-shell {
-        display: block !important;
-        min-height: 0;
-      }
-      html.embedded-admin .sidebar,
-      html.embedded-admin .topbar {
-        display: none !important;
-      }
-      html.embedded-admin .main-area {
-        width: 100%;
-        min-width: 0;
-      }
-      html.embedded-admin .content {
-        width: 100%;
-        max-width: none;
-        padding: 0;
-      }
     </style>
     <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
-    <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right" />
-    <script src="portal-ui.js?v=20261022-nav-section-state" defer></script>
+    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
+    <script src="portal-ui.js?v=20261009-blue" defer></script>
   </head>
   <body class="portal-page">
     <div class="app-shell">
@@ -1183,10 +1119,10 @@
         <a class="brand" href="dang-nhap.html">
           <img
             class="brand-logo"
-            src="ictu-codegym-logo.png?v=c8d8f689"
-            alt="ICTU × CODEGYM"
+            src="codegym-logo.svg"
+            alt="CODEGYM - Hệ thống đào tạo lập trình hiện đại"
           />
-          <span class="brand-text">ICTU × CODEGYM</span>
+          <span class="brand-text">CODEGYM</span>
         </a>
         <p class="nav-label">Không gian nhân sự</p>
         <nav class="nav-list" aria-label="Chức năng quản lý">
@@ -1211,13 +1147,14 @@
             <span class="nav-item-text"
               ><span class="nav-glyph" aria-hidden="true">▣</span>Hợp đồng</span
             >
+            <span class="nav-count" id="document-count">0</span>
           </button>
-          <button class="nav-item permission-denied" type="button" data-view="programs" data-permission="programs.manage,assignments.manage">
+          <a class="nav-item permission-denied" href="programs.html" data-permission="programs.manage,assignments.manage" style="text-decoration:none">
             <span class="nav-item-text"><span class="nav-glyph" aria-hidden="true">▦</span>Chương trình &amp; phân công</span>
-          </button>
-          <button class="nav-item permission-denied" type="button" data-view="attendance" data-permission="attendance.report">
+          </a>
+          <a class="nav-item permission-denied" href="attendance.html" data-permission="attendance.report" style="text-decoration:none">
             <span class="nav-item-text"><span class="nav-glyph" aria-hidden="true">◷</span>Báo cáo chuyên cần</span>
-          </button>
+          </a>
         </nav>
         <div class="sidebar-spacer"></div>
         <p class="sidebar-footnote">
@@ -1303,6 +1240,18 @@
             <div class="section-toolbar">
               <div>
                 <h2 class="section-title">Danh sách thực tập sinh</h2>
+                <p class="section-subtitle">
+                  Tìm theo tên, mã sinh viên, trường hoặc ngành.
+                </p>
+              </div>
+              <div class="toolbar-actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  data-open-view="documents"
+                >
+                  Xem tài liệu chờ duyệt
+                </button>
               </div>
             </div>
             <div class="filter-bar" role="search">
@@ -1422,6 +1371,10 @@
             <div class="section-toolbar">
               <div>
                 <h2 class="section-title">Hộp thư ứng tuyển</h2>
+                <p class="section-subtitle">
+                  Quyết định được lưu trên SQL Server và cập nhật ngay sau khi
+                  xử lý.
+                </p>
               </div>
               <div class="toolbar-actions">
                 <input
@@ -1499,6 +1452,10 @@
                   Xem trạng thái giấy tờ và thêm hợp đồng thực tập vào hồ sơ.
                 </p>
               </div>
+            </div>
+            <div class="info-banner">
+              Tệp hợp đồng được tải lên và lưu trong SQL Server. Tệp mới sẽ thay
+              thế hợp đồng hiện tại của hồ sơ.
             </div>
             <div class="work-panel" style="margin-bottom: 15px">
               <div class="work-panel-head">
@@ -1593,50 +1550,6 @@
                 </div>
               </div>
             </div>
-          </section>
-          <section
-            class="view-section"
-            id="view-programs"
-            aria-labelledby="programs-title"
-            hidden
-          >
-            <div class="page-heading">
-              <div>
-                <p class="heading-kicker">Quản lý vận hành</p>
-                <h1 id="programs-title">Chương trình &amp; phân công</h1>
-                <p class="heading-description">
-                  Quản lý chương trình, lịch, phòng ban, mentor và phân công thực tập sinh.
-                </p>
-              </div>
-            </div>
-            <iframe
-              class="programs-frame"
-              src="programs.html?embedded=1&v=20261022-pagination-arrows"
-              title="Quản lý chương trình và phân công"
-              loading="lazy"
-            ></iframe>
-          </section>
-          <section
-            class="view-section"
-            id="view-attendance"
-            aria-labelledby="attendance-title"
-            hidden
-          >
-            <div class="page-heading">
-              <div>
-                <p class="heading-kicker">Theo dõi thực tập</p>
-                <h1 id="attendance-title">Báo cáo chuyên cần</h1>
-                <p class="heading-description">
-                  Xem báo cáo ngày công, chấm công và xử lý đơn nghỉ phép.
-                </p>
-              </div>
-            </div>
-            <iframe
-              class="programs-frame"
-              src="attendance.html?embedded=1"
-              title="Báo cáo chuyên cần"
-              loading="lazy"
-            ></iframe>
           </section>
         </main>
       </div>
@@ -1735,7 +1648,37 @@
                 required
               />
             </div>
+            <div class="form-field">
+              <label for="profile-start-date">Ngày bắt đầu</label
+              ><input
+                class="form-control"
+                id="profile-start-date"
+                name="startDate"
+                type="date"
+              />
+            </div>
+            <div class="form-field">
+              <label for="profile-end-date">Ngày kết thúc</label
+              ><input
+                class="form-control"
+                id="profile-end-date"
+                name="endDate"
+                type="date"
+              />
+            </div>
+            <div class="form-field full">
+              <label for="profile-status">Trạng thái</label
+              ><select class="form-control" id="profile-status" name="status">
+                <option>Đang thực tập</option>
+                <option>Chờ bắt đầu</option>
+                <option>Đã hoàn thành</option>
+              </select>
+            </div>
           </div>
+          <p class="dialog-note">
+            Hồ sơ mới được lưu cùng tài khoản thực tập sinh. Email kích hoạt sẽ
+            hướng dẫn người dùng tự đặt mật khẩu trước khi đăng nhập.
+          </p>
           <div class="dialog-actions">
             <button
               class="secondary-button"
@@ -1795,6 +1738,19 @@
           >Mở / tải tệp</a
         >
         <p class="dialog-note" id="document-dialog-note"></p>
+        <div class="dialog-actions">
+          <button
+            class="secondary-button"
+            type="button"
+            data-close-dialog="document-dialog"
+          >
+            Đóng</button
+          ><button class="danger-button" id="document-reject" type="button">
+            Từ chối</button
+          ><button class="primary-button" id="document-approve" type="button">
+            Duyệt tài liệu
+          </button>
+        </div>
       </div>
     </dialog>
 
@@ -1808,6 +1764,7 @@
           : `${location.origin}/api`;
       let state = { profiles: [], applications: [], documents: [] };
       let toastTimer;
+      let activeDocumentId = null;
       let profilePage = 1;
       let applicationPage = 1;
       let contractPage = 1;
@@ -1932,12 +1889,6 @@
         }, 5000);
       }
 
-      function notifyAdminEmbedDialog(open) {
-        if (new URLSearchParams(location.search).get("embedded") === "admin") {
-          parent.postMessage({ type: "hr-embed-dialog", open }, location.origin);
-        }
-      }
-
       function fillFilterOptions(select, values, label) {
         const selected = select.value;
         const options = [...new Set(values.filter(Boolean))].sort((a, b) =>
@@ -1954,22 +1905,17 @@
         const pendingApplications = state.applications.filter(
           (application) => application.status === "Chờ duyệt",
         ).length;
-        const pendingDocuments = new Set(
-          state.documents
-            .filter(
-              (documentItem) =>
-                documentItem.isCurrent &&
-                documentItem.status === "Chờ duyệt" &&
-                ["CV", "Đơn xin thực tập"].includes(documentItem.type) &&
-                Number(documentItem.size) > 0 &&
-                state.applications.some(
-                  (application) =>
-                    Number(application.profileId) === Number(documentItem.profileId) &&
-                    application.status === "Chờ duyệt",
-                ),
-            )
-            .map((documentItem) => documentItem.profileId),
-        ).size;
+        const pendingDocuments = state.documents.filter(
+          (documentItem) =>
+            documentItem.isCurrent && documentItem.status === "Chờ duyệt",
+        ).length;
+        const activeContracts = state.documents.filter(
+          (documentItem) =>
+            documentItem.type === "Hợp đồng thực tập" &&
+            documentItem.isCurrent &&
+            documentItem.expiresAt &&
+            new Date(documentItem.expiresAt).getTime() >= Date.now(),
+        ).length;
         document.getElementById("metric-total").textContent =
           state.profiles.length;
         document.getElementById("metric-active").textContent =
@@ -1982,6 +1928,8 @@
           pendingDocuments;
         document.getElementById("application-count").textContent =
           pendingApplications;
+        document.getElementById("document-count").textContent =
+          activeContracts;
         document.getElementById("app-total").textContent =
           state.applications.length;
         document.getElementById("app-pending").textContent =
@@ -2161,27 +2109,13 @@
         list.innerHTML = pageApplications
           .map(
             (application) => {
-              const requiredDocuments = ["CV", "Đơn xin thực tập"].map((type) =>
-                state.documents.find(
-                  (item) => item.profileId === application.profileId && item.type === type && item.isCurrent,
-                ),
-              );
-              const attachments = requiredDocuments
-                .map((documentItem, index) => {
-                  const type = ["CV", "Đơn xin thực tập"][index];
-                  if (!documentItem) {
-                    return `<div class="application-document"><div><span class="document-type">${escapeHtml(type)}</span><p class="application-document-empty">Tệp chưa có hoặc tài khoản chưa được cấp quyền xem.</p></div></div>`;
-                  }
-                  return `<div class="application-document"><div><span class="document-type">${escapeHtml(type)}</span><p class="document-file">${escapeHtml(documentItem.fileName)} · v${escapeHtml(documentItem.version)}</p></div><div class="document-actions"><span class="status-pill ${statusClass(documentItem.status)}">${escapeHtml(documentItem.status)}</span><button class="secondary-button" type="button" data-permission="documents.read" data-view-document="${escapeHtml(documentItem.id)}">Xem</button></div></div>`;
-                })
-                .join("");
               return `
         <article class="work-panel" data-sprint-profile="${application.profileId}">
           <div class="work-panel-head">
             <div><span class="status-pill ${statusClass(application.status)}">${escapeHtml(application.status)}</span><h2 style="margin-top:9px">${escapeHtml(application.name)}</h2><p>${escapeHtml(application.studentId)} · ${escapeHtml(application.email)}</p></div>
-            <div class="application-actions">${application.status === "Chờ duyệt" ? `<button class="primary-button" type="button" data-application-decision="approve" data-application-id="${escapeHtml(application.id)}">Duyệt đơn</button><button class="danger-button" type="button" data-application-decision="reject" data-application-id="${escapeHtml(application.id)}">Từ chối</button>` : ""}</div>
+            <div class="application-actions">${application.status === "Chờ duyệt" ? `<button class="primary-button" type="button" data-application-decision="approve" data-application-id="${escapeHtml(application.id)}">Duyệt đơn</button><button class="danger-button" type="button" data-application-decision="reject" data-application-id="${escapeHtml(application.id)}">Từ chối</button>` : `<span class="person-meta">Đã xử lý · ${formatDateTime(application.reviewedAt)}${application.reviewedBy ? ` · ${escapeHtml(application.reviewedBy)}` : ""}</span>`}</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:13px 16px;color:#68736c;font-size:10px"><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">TRƯỜNG</strong>${escapeHtml(application.school)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀNH</strong>${escapeHtml(application.major)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY NỘP HỒ SƠ</strong>${formatDateTime(application.appliedAt)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY XỬ LÝ</strong>${formatDateTime(application.reviewedAt)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">TRẠNG THÁI</strong>${escapeHtml(application.status)}</div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:13px 16px;color:#68736c;font-size:10px"><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">TRƯỜNG</strong>${escapeHtml(application.school)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀNH</strong>${escapeHtml(application.major)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY NỘP HỒ SƠ</strong>${formatDateTime(application.appliedAt)}</div><div><strong style="display:block;margin-bottom:4px;color:#8a948d;font-size:9px">NGÀY XỬ LÝ</strong>${formatDateTime(application.reviewedAt)}</div></div>
         </article>`;
             },
           )
@@ -2225,7 +2159,7 @@
             const owner = profile
               ? `${profile.name} · ${profile.studentId}`
               : "Chưa gắn hồ sơ";
-            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(documentItem.type)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(documentItem.fileName)} · v${documentItem.version}${documentItem.isCurrent ? " · Hiện hành" : " · Phiên bản cũ"}</p></div><div class="document-actions"><span class="status-pill ${statusClass(documentItem.status)}">${escapeHtml(documentItem.status)}</span><button class="secondary-button" type="button" data-view-document="${escapeHtml(documentItem.id)}">Xem</button></div></div></article>`;
+            return `<article class="work-panel"><div class="work-panel-head"><div><span class="document-type">${escapeHtml(documentItem.type)}</span><p class="document-title">${escapeHtml(owner)}</p><p class="document-file">${escapeHtml(documentItem.fileName)} · v${documentItem.version}${documentItem.isCurrent ? " · Hiện hành" : " · Phiên bản cũ"}</p></div><div class="document-actions"><span class="status-pill ${statusClass(documentItem.status)}">${escapeHtml(documentItem.status)}</span><button class="secondary-button" type="button" data-view-document="${escapeHtml(documentItem.id)}">Xem</button>${documentItem.isCurrent && documentItem.status === "Chờ duyệt" ? `<button class="primary-button" type="button" data-document-decision="approve" data-document-id="${escapeHtml(documentItem.id)}">Duyệt</button><button class="danger-button" type="button" data-document-decision="reject" data-document-id="${escapeHtml(documentItem.id)}">Từ chối</button>` : ""}</div></div></article>`;
           })
           .join("");
       }
@@ -2319,7 +2253,7 @@
                 <td>${formatDate(item.startsAt)}</td>
                 <td>${formatDate(item.expiresAt)}</td>
                 <td><span class="status-pill ${statusClass(item.status)}">${escapeHtml(item.status)}</span></td>
-                <td><div class="row-actions"><a class="quiet-button" href="${API_BASE}/documents/${encodeURIComponent(item.id)}/file" download="${escapeHtml(item.fileName)}">${item.contentType === "application/pdf" ? "Tải PDF" : "Tải tệp"}</a></div></td>
+                <td><div class="row-actions"><button class="quiet-button" type="button" data-view-document="${escapeHtml(item.id)}">Xem</button></div></td>
               </tr>`;
             }).join("")
           : '<tr><td colspan="7"><div class="empty-state">Chưa có thực tập sinh nào có hợp đồng phù hợp.</div></td></tr>';
@@ -2355,11 +2289,8 @@
         profiles: "Hồ sơ thực tập",
         applications: "Đơn xin",
         documents: "Tài liệu & hợp đồng",
-        programs: "Chương trình & phân công",
-        attendance: "Báo cáo chuyên cần",
       };
       function showView(view) {
-        if (!Object.hasOwn(viewTitles, view)) view = "profiles";
         document.querySelectorAll(".view-section").forEach((section) => {
           section.hidden = section.id !== `view-${view}`;
         });
@@ -2392,14 +2323,19 @@
             "email",
             "school",
             "major",
+            "startDate",
+            "endDate",
+            "status",
           ])
             profileForm.elements[field].value = profile[field] ?? "";
+        } else {
+          profileForm.elements.status.value = "Đang thực tập";
         }
         document.getElementById("profile-phone").value = profile?.phone || "";
         document.getElementById("profile-date-of-birth").value =
           profile?.dateOfBirth || "";
+        validateInternshipDateRange();
         document.getElementById("profile-dialog").showModal();
-        notifyAdminEmbedDialog(true);
       }
 
       function openDocumentDialog(documentId) {
@@ -2407,6 +2343,7 @@
           (item) => String(item.id) === String(documentId),
         );
         if (!documentItem) return;
+        activeDocumentId = documentId;
         const profile = getProfile(documentItem.profileId);
         document.getElementById("document-dialog-type").textContent =
           documentItem.type;
@@ -2430,13 +2367,48 @@
           `${API_BASE}/documents/${documentItem.id}/file`;
         document.getElementById("document-download").download =
           documentItem.fileName;
+        const isPending =
+          documentItem.status === "Chờ duyệt" &&
+          documentItem.isCurrent &&
+          documentItem.type !== "Hợp đồng thực tập";
+        document.getElementById("document-approve").hidden = !isPending;
+        document.getElementById("document-reject").hidden = !isPending;
         document.getElementById("document-dialog").showModal();
-        notifyAdminEmbedDialog(true);
+      }
+
+      async function decideDocument(documentId, decision) {
+        const status = decision === "approve" ? "Đã duyệt" : "Từ chối";
+        const note = status === "Từ chối" ? await window.sprintReason() : null;
+        if (status === "Từ chối" && !note) return;
+        try {
+          await apiRequest(`/hr/documents/${documentId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status, note }),
+          });
+          await loadState();
+          showToast(
+            decision === "approve"
+              ? "Đã duyệt tài liệu."
+              : "Đã từ chối tài liệu.",
+          );
+          if (document.getElementById("document-dialog").open)
+            document.getElementById("document-dialog").close();
+        } catch (error) {
+          showToast(error.message || "Không cập nhật được tài liệu.", "error");
+        }
       }
 
       navItems.forEach((item) =>
         item.addEventListener("click", () => showView(item.dataset.view)),
       );
+      document
+        .querySelectorAll("[data-open-view]")
+        .forEach((button) =>
+          button.addEventListener("click", () =>
+            showView(button.dataset.openView),
+          ),
+        );
       document
         .getElementById("add-profile")
         .addEventListener("click", () => openProfileDialog());
@@ -2570,6 +2542,37 @@
         input.setAttribute("aria-describedby", error.id);
       }
 
+      function validateInternshipDateRange() {
+        const startInput = profileForm.elements.startDate;
+        const endInput = profileForm.elements.endDate;
+        const status = profileForm.elements.status.value;
+        const requiresDates = [
+          "Đã hoàn thành",
+          "Đang thực tập",
+          "Chờ bắt đầu",
+        ].includes(status);
+        const startDate = startInput.value;
+        const endDate = endInput.value;
+        const missingDates = requiresDates && (!startDate || !endDate);
+        const hasError = !!startDate && !!endDate && endDate < startDate;
+        const message = missingDates
+          ? "Vui lòng nhập ngày bắt đầu và ngày kết thúc."
+          : "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
+
+        startInput.required = requiresDates;
+        endInput.required = requiresDates;
+        startInput.setCustomValidity(missingDates || hasError ? message : "");
+        endInput.setCustomValidity(missingDates || hasError ? message : "");
+        if (missingDates || hasError) {
+          showProfileFieldError(startInput, message);
+          showProfileFieldError(endInput, message);
+        } else {
+          clearProfileFieldError(startInput);
+          clearProfileFieldError(endInput);
+        }
+        return !(missingDates || hasError);
+      }
+
       function validateProfileEmail() {
         const emailInput = profileForm.elements.email;
         const value = emailInput.value.trim();
@@ -2631,6 +2634,26 @@
         return isValid;
       }
 
+      profileForm.elements.startDate.addEventListener(
+        "input",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.startDate.addEventListener(
+        "change",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.endDate.addEventListener(
+        "input",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.endDate.addEventListener(
+        "change",
+        validateInternshipDateRange,
+      );
+      profileForm.elements.status.addEventListener(
+        "change",
+        validateInternshipDateRange,
+      );
       profileForm.elements.email.addEventListener(
         "input",
         validateProfileEmail,
@@ -2658,9 +2681,11 @@
 
       profileForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (!validateInternshipDateRange()) return;
         if (!validateProfileEmail()) return;
         if (!validateProfilePhone()) return;
         if (!validateProfileDateOfBirth()) return;
+        if (!validateInternshipDateRange()) return;
         const values = Object.fromEntries(new FormData(profileForm).entries());
         if (!values.profileId && !values.dateOfBirth) {
           profileForm.elements.dateOfBirth.setCustomValidity(
@@ -2669,6 +2694,7 @@
           profileForm.elements.dateOfBirth.reportValidity();
           return;
         }
+        if (values.endDate < values.startDate) return;
         const existing = values.profileId ? getProfile(values.profileId) : null;
         const profile = {
           name: values.name.trim(),
@@ -2678,12 +2704,12 @@
           email: values.email.trim(),
           school: values.school.trim(),
           major: values.major.trim(),
-          startDate: existing?.startDate || null,
-          endDate: existing?.endDate || null,
-          status: existing?.status || "Chờ hồ sơ",
+          startDate: values.startDate || null,
+          endDate: values.endDate || null,
+          status: values.status,
         };
         try {
-          const savedProfile = await apiRequest(
+          await apiRequest(
             existing ? `/hr/profiles/${existing.id}` : "/hr/profiles",
             {
               method: existing ? "PUT" : "POST",
@@ -2693,13 +2719,10 @@
           );
           await loadState();
           document.getElementById("profile-dialog").close();
-          const emailPending = existing && profile.email.toLowerCase() !== savedProfile.email.toLowerCase();
           showToast(
-            emailPending
-              ? "Đã lưu hồ sơ. Email cũ còn hiệu lực; chủ tài khoản cần mở thư tại email mới và bấm Xác nhận đổi email."
-              : existing
-                ? "Đã cập nhật hồ sơ trong SQL Server."
-                : "Đã tạo hồ sơ và gửi email kích hoạt tài khoản.",
+            existing
+              ? "Đã cập nhật hồ sơ trong SQL Server."
+              : "Đã tạo hồ sơ và gửi email kích hoạt tài khoản.",
           );
         } catch (error) {
           const message = error.message || "Không lưu được hồ sơ.";
@@ -2719,11 +2742,18 @@
         .getElementById("applications-list")
         .addEventListener("click", async (event) => {
           const button = event.target.closest(
-            "[data-application-decision], [data-view-document]",
+            "[data-application-decision], [data-view-document], [data-document-decision]",
           );
           if (!button) return;
           if (button.dataset.viewDocument) {
             openDocumentDialog(button.dataset.viewDocument);
+            return;
+          }
+          if (button.dataset.documentDecision) {
+            decideDocument(
+              button.dataset.documentId,
+              button.dataset.documentDecision,
+            );
             return;
           }
           const application = state.applications.find(
@@ -2753,6 +2783,17 @@
             showToast(error.message || "Không cập nhật được đơn.", "error");
           }
         });
+
+      document
+        .getElementById("document-approve")
+        .addEventListener("click", () =>
+          decideDocument(activeDocumentId, "approve"),
+        );
+      document
+        .getElementById("document-reject")
+        .addEventListener("click", () =>
+          decideDocument(activeDocumentId, "reject"),
+        );
 
       document
         .getElementById("contract-form")
@@ -2814,38 +2855,13 @@
           ),
         );
       document.querySelectorAll("dialog").forEach((dialog) =>
-        dialog.addEventListener("close", () => notifyAdminEmbedDialog(false)),
-      );
-      document.querySelectorAll("dialog").forEach((dialog) =>
         dialog.addEventListener("click", (event) => {
           if (event.target === dialog) dialog.close();
         }),
       );
 
-      const requestedView = new URLSearchParams(location.search).get("view");
-      showView(requestedView);
       loadState();
     </script>
     <script src="sprint1-ui.js?v=20261003-3"></script>
-    <script>
-      if (new URLSearchParams(location.search).get("embedded") === "admin") {
-        const reportEmbeddedHeight = () => {
-          const height = Math.max(
-            document.body.scrollHeight,
-            document.documentElement.scrollHeight,
-          );
-          parent.postMessage({ type: "hr-embed-height", height }, location.origin);
-        };
-        const resizeObserver = new ResizeObserver(reportEmbeddedHeight);
-        resizeObserver.observe(document.documentElement);
-        resizeObserver.observe(document.body);
-        new MutationObserver(reportEmbeddedHeight).observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-        window.addEventListener("load", reportEmbeddedHeight);
-        reportEmbeddedHeight();
-      }
-    </script>
   </body>
 </html>
