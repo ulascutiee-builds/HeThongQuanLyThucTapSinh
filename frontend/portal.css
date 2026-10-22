@@ -1,13 +1,13 @@
 /* Shared visual system. Keep business-page layout hooks and permissions intact. */
 :root {
-  --forest: #2459d6;
-  --forest-light: #1948b7;
+  --forest: #173b78;
+  --forest-light: #122f62;
   --paper: #f4f7fc;
   --surface: #fff;
   --ink: #172b4d;
   --muted: #61728d;
   --line: #e2e8f2;
-  --accent: #2459d6;
+  --accent: #173b78;
   --gold: #85aafa;
   --danger: #c23343;
   --success: #16724d;
@@ -52,7 +52,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--forest); }
 .sidebar .nav-item-text { display: flex; gap: 11px; }
 .sidebar nav a:hover, .sidebar .nav-item:hover, .s2-nav a:hover { color: var(--forest); background: #f3f7fe; }
 .sidebar nav .current, .sidebar .nav-item[aria-current=page], .s2-nav a[aria-current=page] {
-  background: #eaf1ff; color: #2459d6; font-weight: 650; border-color: transparent;
+  background: #eaf1ff; color: #173b78; font-weight: 650; border-color: transparent;
 }
 .sidebar .nav-glyph { display: inline-flex; align-items: center; color: inherit; width: 20px; }
 .sidebar .nav-count { margin-left: auto; color: var(--forest); background: #dce8ff; }
@@ -121,12 +121,12 @@ h2, .s2-card h2 { color: var(--ink); font-weight: 650; letter-spacing: -.3px; }
 .field input[type=checkbox], .field input[type=radio] { min-height: 0; }
 input::placeholder, textarea::placeholder { color: #8997ad; opacity: 1; }
 .field label, .form-field label, .s2-field, .field { font-size: 13px; color: #314461; }
-.control:focus, .form-control:focus, .field input:focus, .form-field input:focus, .form-field select:focus, .s2-field input:focus, .s2-field select:focus { border-color: #6696f7; box-shadow: 0 0 0 3px #2459d610; }
+.control:focus, .form-control:focus, .field input:focus, .form-field input:focus, .form-field select:focus, .s2-field input:focus, .s2-field select:focus { border-color: #8ba6d1; box-shadow: 0 0 0 3px #173b7810; }
 body input[aria-invalid=true], body input[aria-invalid=true]:focus, body textarea[aria-invalid=true] { border: 1.5px solid var(--danger); box-shadow: 0 0 0 3px #c2334310; outline-color: #e48591; }
 .primary-button, .secondary-button, .quiet-button, .danger-button, .button, .btn, .s2-button {
   min-height: 39px; padding: 9px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5; font-weight: 600; transition: background .15s, border-color .15s;
 }
-.primary-button, .button-primary, .btn.primary, .s2-button:not(.secondary):not(.danger) { background: var(--forest); border-color: var(--forest); color: white; box-shadow: 0 2px 3px #2459d618; }
+.primary-button, .button-primary, .btn.primary, .s2-button:not(.secondary):not(.danger) { background: var(--forest); border-color: var(--forest); color: white; box-shadow: 0 2px 3px #173b7818; }
 .primary-button:hover:not(:disabled), .button-primary:hover:not(:disabled), .btn.primary:hover:not(:disabled), .s2-button:not(.secondary):not(.danger):hover:not(:disabled) { background: var(--forest-light); transform: none; }
 .secondary-button, .button-secondary, .btn, .s2-button.secondary { background: white; color: #455a79; border: 1px solid #dce4f0; }
 .secondary-button:hover:not(:disabled), .button-secondary:hover:not(:disabled), .btn:not(.primary):hover:not(:disabled), .s2-button.secondary:hover:not(:disabled) { background: #f3f7fe; border-color: #b6caed; }
@@ -168,7 +168,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .activation-note { background: #f2f6fd; color: #56708f; }
 
 /* Intern journey */
-.welcome-band { background: #2459d6; border-radius: 16px; padding: 30px; border: 0; min-height: 180px; }
+.welcome-band { background: #173b78; border-radius: 16px; padding: 30px; border: 0; min-height: 180px; }
 .welcome-band::after { border-color: #ffffff20; opacity: .5; }
 .welcome-title { color: white; font-size: 29px; font-weight: 700; }
 .welcome-description, .welcome-kicker { color: #e0eaff; }
@@ -262,7 +262,7 @@ body.auth-page { display: block; min-width: 320px; background: #f4f7fc; padding:
 .auth-page .password-toggle { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); border: 0; color: #5d7190; background: transparent; font-size: 12px; padding: 6px 9px; }
 .auth-page .remember-row { font-size: 12px; color: var(--muted); display: flex; gap: 9px; align-items: center; margin: 0; line-height: 1.5; }
 .remember-row input { width: 16px; height: 16px; margin: 0; }
-.auth-page .submit-button { width: 100%; min-height: 47px; border: 1px solid var(--forest); background: var(--forest); color: white; border-radius: 9px; padding: 12px 20px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px #2459d625; cursor: pointer; }
+.auth-page .submit-button { width: 100%; min-height: 47px; border: 1px solid var(--forest); background: var(--forest); color: white; border-radius: 9px; padding: 12px 20px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px #173b7825; cursor: pointer; }
 .auth-page .submit-button:hover:not(:disabled) { background: var(--forest-light); transform: none; }
 .auth-page .submit-button:disabled { opacity: .6; cursor: wait; }
 .auth-page .bottom-links { display: flex; justify-content: space-between; gap: 12px; padding: 0; margin: 2px 0 0; font-size: 12px; }
