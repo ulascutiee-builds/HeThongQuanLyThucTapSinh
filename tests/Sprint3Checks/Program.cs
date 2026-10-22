@@ -360,6 +360,7 @@ try
         await db.SaveChangesAsync();
     }
     var collision = await db.InternProfiles.AsNoTracking().SingleAsync(x => x.Id == mentorUser.Id);
+    var unreadBeforeFixture = (await Get(mentor, "/api/notifications"))!["unread"]!.GetValue<int>();
     var profileNotification = new PortalNotification
     {
         ProfileId = collision.Id, Title = "Role isolation " + tag, Message = "Private profile notification"
@@ -370,11 +371,17 @@ try
     };
     db.PortalNotifications.AddRange(profileNotification, accountNotification);
     await db.SaveChangesAsync();
-    var mentorNotifications = (await Get(mentor, "/api/notifications"))!["items"]!;
+    var notificationResponse = await Get(mentor, "/api/notifications");
+    var mentorNotifications = notificationResponse!["items"]!;
     Check(!HasId(mentorNotifications, profileNotification.Id), "Mentor read another profile's notification by ID collision");
     Check(HasId(mentorNotifications, accountNotification.Id), "Mentor cannot read account notification");
+    Check(notificationResponse["unread"]!.GetValue<int>() == unreadBeforeFixture + 1,
+        "Unread notification count did not include the Mentor's account notification");
     await Patch(mentor, $"/api/notifications/{profileNotification.Id}/read", new { }, 404);
     await Post(mentor, "/api/notifications/read-all", new { });
+    var notificationsAfterReadAll = await Get(mentor, "/api/notifications");
+    Check(notificationsAfterReadAll!["unread"]!.GetValue<int>() == 0,
+        "Marking all notifications as read did not reset the unread count");
     Check(!(await db.PortalNotifications.AsNoTracking().SingleAsync(x => x.Id == profileNotification.Id)).IsRead,
         "Mentor marked another profile's notification read");
     Check((await db.PortalNotifications.AsNoTracking().SingleAsync(x => x.Id == accountNotification.Id)).IsRead,
