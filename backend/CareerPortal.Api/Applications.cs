@@ -10,10 +10,18 @@ public static class Applications
             await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var a=await db.InternApplications.Include(x=>x.Profile).SingleOrDefaultAsync(x=>x.Id==id);if(a is null)return Results.NotFound();if(a.Status!="Chờ duyệt")return Results.Conflict(new{message="Hồ sơ không còn chờ duyệt."});
             if(input.Status=="Đã duyệt")
+            {
+                var requiredDocuments=await db.InternDocuments
+                    .Where(x=>x.ProfileId==a.ProfileId&&x.IsCurrent&&(x.Type=="CV"||x.Type=="Đơn xin thực tập"))
+                    .ToListAsync();
                 foreach(var type in new[]{"CV","Đơn xin thực tập"})
-                    if(!await db.InternDocuments.AnyAsync(x=>x.ProfileId==a.ProfileId&&x.Type==type&&x.IsCurrent&&x.Status=="Đã duyệt"))return Results.BadRequest(new{message="Vui lòng duyệt CV và đơn xin thực tập trước khi duyệt hồ sơ."});
+                    if(!requiredDocuments.Any(x=>x.Type==type&&(x.Status is "Chờ duyệt" or "Đã duyệt")))
+                        return Results.BadRequest(new{message="Không thể duyệt đơn: cần có CV và đơn xin thực tập hiện hành, chưa bị từ chối."});
+                if(requiredDocuments.Any(x=>x.Status=="Chờ duyệt")&&!SprintSecurity.HasPermission(c,"documents.review"))
+                    return Results.Json(new{message="Tài khoản cần quyền duyệt tài liệu để duyệt CV và đơn xin thực tập đang chờ."},statusCode:StatusCodes.Status403Forbidden);
+            }
             a.Status=input.Status;a.Note=input.Note?.Trim();a.ReviewedAt=DateTimeOffset.UtcNow;a.ReviewedBy=c.User.Identity!.Name;
-            a.Profile!.Status=input.Status=="Đã duyệt"?"Đang thực tập":"Từ chối";
+            a.Profile!.Status=input.Status=="Đã duyệt"?"Chờ bắt đầu":"Từ chối";
             if(input.Status=="Đã duyệt")
             {
                 var applicationDocuments=await db.InternDocuments.Where(x=>x.ProfileId==a.ProfileId&&x.IsCurrent&&(x.Type=="CV"||x.Type=="Đơn xin thực tập")&&x.Status=="Chờ duyệt").ToListAsync();

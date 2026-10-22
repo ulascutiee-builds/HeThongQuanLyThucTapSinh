@@ -7,6 +7,7 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):D
     public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
     public DbSet<MailJob> MailJobs => Set<MailJob>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<PendingEmailChange> PendingEmailChanges => Set<PendingEmailChange>();
     public DbSet<AppRole> AppRoles => Set<AppRole>();
     public DbSet<AppPermission> AppPermissions => Set<AppPermission>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -45,6 +46,14 @@ public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):D
         b.Entity<InternReviewHistory>().HasIndex(x=>new{x.ProfileId,x.ReviewedAt});
         b.Entity<MailJob>().HasIndex(x=>x.EventKey).IsUnique();b.Entity<MailJob>().Property(x=>x.EventKey).HasMaxLength(150);
         b.ConfigureAccounts();
+        b.Entity<PendingEmailChange>(e=>{
+            e.ToTable("PENDING_EMAIL_CHANGE");
+            e.HasKey(x=>x.AccountId);
+            e.HasIndex(x=>x.NewEmail).IsUnique();
+            e.Property(x=>x.NewEmail).HasMaxLength(160);
+            e.Property(x=>x.TokenHash).HasMaxLength(64);
+            e.HasOne(x=>x.Account).WithOne().HasForeignKey<PendingEmailChange>(x=>x.AccountId).OnDelete(DeleteBehavior.Cascade);
+        });
         b.ConfigureSprint2();
         b.ConfigureSprint3();
     }

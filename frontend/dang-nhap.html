@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#17473b" />
+    <meta name="theme-color" content="#173b78" />
     <title>Đăng nhập hệ thống | Career Portal</title>
+    <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689" />
+    <link rel="preload" as="image" href="ictu-codegym-logo.png?v=c8d8f689" />
     <style>
       :root {
         color-scheme: light;
-        --forest: #17473b;
+        --forest: #2459d6;
         --forest-deep: #133a31;
         --paper: #f7f6f2;
         --ink: #202e29;
@@ -193,7 +195,7 @@
         padding: 0 17px;
         border: 0;
         border-radius: 12px;
-        background: linear-gradient(135deg, var(--forest) 0%, #1d7a63 100%);
+        background: linear-gradient(135deg, var(--forest) 0%, #3978e9 100%);
         color: white;
         cursor: pointer;
         font-size: 13px;
@@ -310,8 +312,8 @@
 
     </style>
     <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
-    <link rel="stylesheet" href="portal.css?v=20261009-blue" />
-    <script src="portal-ui.js?v=20261009-blue" defer></script>
+    <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right-except-auth" />
+    <script src="portal-ui.js?v=20261022-nav-section-state" defer></script>
   </head>
   <body class="auth-page">
     <main class="login-layout">
@@ -322,7 +324,7 @@
           <p class="form-intro">Đăng nhập để tiếp tục công việc của bạn.<br /></p>
 
           <form id="login-form">
-            <p class="field-error" id="password-error" role="alert" aria-live="polite" hidden></p>
+            <p class="field-error" id="login-error" role="alert" aria-live="polite" hidden></p>
             <div class="field">
               <label for="identity">Email</label>
               <input
@@ -331,7 +333,7 @@
                 type="email"
                 placeholder="email@truong.edu.vn"
                 autocomplete="username"
-                aria-describedby="password-error"
+                aria-describedby="login-error"
                 required
               />
             </div>
@@ -346,7 +348,7 @@
                   type="password"
                   placeholder="Nhập mật khẩu"
                   autocomplete="current-password"
-                  aria-describedby="password-error"
+                  aria-describedby="login-error"
                   required
                 />
                 <button
@@ -391,7 +393,7 @@
       const SESSION_KEY = "sprint1-intern-profile-id";
       const loginForm = document.getElementById("login-form");
       const status = document.getElementById("status-message");
-      const passwordError = document.getElementById("password-error");
+      const loginError = document.getElementById("login-error");
       const passwordInput = document.getElementById("password");
       const rememberedEmail = localStorage.getItem("career-portal-email");
       if (rememberedEmail) {
@@ -400,14 +402,14 @@
       }
 
       function clearPasswordError() {
-        passwordError.hidden = true;
-        passwordError.textContent = "";
+        loginError.hidden = true;
+        loginError.textContent = "";
         passwordInput.removeAttribute("aria-invalid");
       }
 
       function showPasswordError(message) {
-        passwordError.textContent = message;
-        passwordError.hidden = false;
+        loginError.textContent = message;
+        loginError.hidden = false;
         passwordInput.setAttribute("aria-invalid", "true");
       }
 
@@ -514,7 +516,9 @@
             }
           }
 
-          window.location.assign(result?.href || "thuc-tap-sinh.html");
+          const destination = new URL(result?.href || "thuc-tap-sinh.html", location.href);
+          destination.searchParams.set("v", "20261012-brand-refresh");
+          window.location.assign(destination.href);
         } catch (error) {
           status.dataset.state = "error";
           status.textContent =

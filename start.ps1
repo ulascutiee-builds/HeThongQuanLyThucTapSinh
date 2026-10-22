@@ -6,27 +6,25 @@ param(
     [string]$SmtpUsername,
     [string]$SmtpPassword,
     [string]$SmtpFrom,
-    [switch]$SmtpNoSsl
+    [switch]$SmtpNoSsl,
+    [switch]$RepairDemoAccounts,
+    [switch]$SeedDemoData
 )
 $ErrorActionPreference = 'Stop'
 $taskProject = Join-Path $PSScriptRoot 'backend\CareerPortal.Api\CareerPortal.Api.csproj'
 $taskSecrets = Join-Path $PSScriptRoot '.local'
-New-Item -ItemType Directory -Force -Path $taskSecrets | Out-Null
-function Get-TaskPassword([string]$Name) {
-    $taskSecretFile = Join-Path $taskSecrets ($Name + '-password.txt')
-    if (-not (Test-Path -LiteralPath $taskSecretFile)) {
-        $taskBytes = New-Object byte[] 24
-        $taskRng = [Security.Cryptography.RandomNumberGenerator]::Create()
-        $taskRng.GetBytes($taskBytes)
-        $taskRng.Dispose()
-        [IO.File]::WriteAllText($taskSecretFile, [Convert]::ToBase64String($taskBytes))
-    }
-    return [IO.File]::ReadAllText($taskSecretFile).Trim()
-}
-if (-not $env:Sprint1__HrEmail) { $env:Sprint1__HrEmail = 'hr@sprint1.local' }
-if (-not $env:Accounts__AdminEmail) { $env:Accounts__AdminEmail = 'admin@sprint12.local' }
-if (-not $env:Sprint1__HrPassword) { $env:Sprint1__HrPassword = Get-TaskPassword 'hr' }
-if (-not $env:Accounts__AdminPassword) { $env:Accounts__AdminPassword = Get-TaskPassword 'admin' }
+New-Item -ItemType Directory -Force -Path (Join-Path $taskSecrets 'runtime\keys'), (Join-Path $taskSecrets 'runtime\mail') | Out-Null
+$env:Runtime__DataDirectory = Join-Path $taskSecrets 'runtime'
+$env:Sprint1__HrEmail = 'hr@abcxyz.com'
+$env:Sprint1__HrPassword = '0939232002'
+$env:Accounts__AdminEmail = 'admin@abcxyz.com'
+$env:Accounts__AdminPassword = '0939232002'
+$env:Accounts__MentorEmail = 'mentor@abcxyz.com'
+$env:Accounts__MentorPassword = '0939232002'
+$env:Accounts__UserEmail = 'user@abcxyz.com'
+$env:Accounts__UserPassword = '0939232002'
+$env:Accounts__RepairDemoAccounts = [string]$RepairDemoAccounts
+$env:DemoData__Seed = [string]$SeedDemoData
 $env:ASPNETCORE_URLS = 'http://localhost:' + $Port
 $env:PublicUrl = 'http://localhost:' + $Port
 if (-not $env:ConnectionStrings__CareerPortal) {
@@ -37,18 +35,35 @@ if ($SmtpUsername) { $env:Email__Username = $SmtpUsername }
 if ($SmtpPassword) { $env:Email__Password = $SmtpPassword }
 if ($SmtpFrom) { $env:Email__From = $SmtpFrom }
 if ($SmtpNoSsl) { $env:Email__EnableSsl = 'false' }
-Write-Host ('SPRINT 1 + 2 + 3 - Open ' + $env:PublicUrl)
+if ($SmtpHost -and -not $env:Email__Provider) { $env:Email__Provider = 'Smtp' }
+if ($env:Email__Provider -and $env:Email__Provider -notin @('Resend', 'Smtp', 'Pickup')) {
+    throw 'Email__Provider must be Resend, Smtp or Pickup.'
+}
+if ($env:Email__Provider -eq 'Resend') {
+    if (-not $env:Email__ResendApiKey -or -not $env:Email__From) {
+        throw 'Resend needs Email__ResendApiKey and Email__From (sender on a verified domain). Set both in this PowerShell session before running.'
+    }
+}
+Write-Host ('CAREER PORTAL v4.1.0 - Open ' + $env:PublicUrl + '/dang-nhap.html?v=20261012-brand-refresh')
 Write-Host ('HR: ' + $env:Sprint1__HrEmail + ' / ' + $env:Sprint1__HrPassword)
 Write-Host ('Admin: ' + $env:Accounts__AdminEmail + ' / ' + $env:Accounts__AdminPassword)
-Write-Host 'Passwords are generated on this computer; do not share .local or App_Data.'
+Write-Host ('Mentor: ' + $env:Accounts__MentorEmail + ' / ' + $env:Accounts__MentorPassword)
+Write-Host ('User: ' + $env:Accounts__UserEmail + ' / ' + $env:Accounts__UserPassword)
+Write-Host 'All four demo accounts use the same password. Keep this terminal private.'
 Write-Host 'The application applies migrations automatically without deleting existing data.'
-$taskPublishedRoot = Join-Path $PSScriptRoot 'build-sprint3-email'
+if ($SeedDemoData) { Write-Warning 'NAP DU LIEU GIA LAP: chỉ sử dụng trên cơ sở dữ liệu thử nghiệm, không dùng trên môi trường thật.' }
+if ($RepairDemoAccounts) {
+    Write-Warning 'Repairing demo accounts: configured demo passwords will be reset and missing demo accounts created. Other accounts and database data are preserved.'
+}
+$taskPublishedRoot = Join-Path $PSScriptRoot 'build-v4.1'
 $taskPublished = Join-Path $taskPublishedRoot 'CareerPortal.Api.exe'
 $taskEmailPort = $env:Email__Port
 if (-not $taskEmailPort) { $taskEmailPort = '587' }
-if ($env:Email__SmtpHost) { Write-Host ('Email SMTP: ' + $env:Email__SmtpHost + ':' + $taskEmailPort) }
-else { Write-Host ('Email pickup folder (when SMTP is not configured): ' + (Join-Path $taskPublishedRoot 'App_Data\mail')) }
-if ((Test-Path -LiteralPath $taskPublished) -and -not $Source) {
+if ($env:Email__Provider -eq 'Resend') { Write-Host 'Email provider: Resend (API key hidden)' }
+elseif ($env:Email__Provider -eq 'Pickup') { Write-Host ('Email pickup folder: ' + (Join-Path $taskSecrets 'runtime\mail')) }
+elseif ($env:Email__SmtpHost) { Write-Host ('Email SMTP: ' + $env:Email__SmtpHost + ':' + $taskEmailPort) }
+else { Write-Host ('Email pickup folder (when a provider is not configured): ' + (Join-Path $taskSecrets 'runtime\mail')) }
+if ((Test-Path -LiteralPath $taskPublished) -and -not $Source -and -not $RepairDemoAccounts -and -not $SeedDemoData) {
     Push-Location $taskPublishedRoot
     try { & $taskPublished } finally { Pop-Location }
 } else {

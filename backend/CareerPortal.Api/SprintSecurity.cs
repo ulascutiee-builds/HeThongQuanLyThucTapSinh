@@ -59,7 +59,7 @@ public sealed class SprintSecurity(RequestDelegate next)
         if (!path.StartsWith("/api/")) { await next(context); return; }
         var origin = context.Request.Headers.Origin.ToString();
         if (context.Request.Method is not ("GET" or "HEAD" or "OPTIONS") && origin.Length > 0 && origin != $"{context.Request.Scheme}://{context.Request.Host}") { context.Response.StatusCode = 403; return; }
-        var open = path is "/api/auth/login" or "/api/interns/login" or "/api/interns/register" or "/api/auth/verify-email" or "/api/auth/activate" or "/api/health/database";
+        var open = path is "/api/auth/login" or "/api/interns/login" or "/api/interns/register" or "/api/auth/verify-email" or "/api/auth/activate" or "/api/auth/email-change/confirm" or "/api/health/database";
         if (!open)
         {
             if (context.User.Identity?.IsAuthenticated != true) { context.Response.StatusCode = 401; return; }
