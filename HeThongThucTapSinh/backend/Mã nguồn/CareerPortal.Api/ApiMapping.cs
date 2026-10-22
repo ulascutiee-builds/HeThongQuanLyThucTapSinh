@@ -10,7 +10,7 @@ public static class ApiMapping
         profile.Status,
         profile.StartDate,
         profile.EndDate,
-        profile.CreatedAt);
+        profile.CreatedAt, profile.Phone, profile.EmailVerified, profile.DateOfBirth);
 
     public static InternDocumentResponse ToResponse(this InternDocument document) => new(
         document.Id,
@@ -22,13 +22,13 @@ public static class ApiMapping
         document.Status,
         document.Note,
         document.UploadedAt,
-        document.ConfirmedAt);
+        document.ConfirmedAt, document.Version, document.IsCurrent, document.UploadedBy, document.ReviewedBy, document.ReviewedAt, document.StartsAt, document.ExpiresAt);
 
     public static InternApplicationResponse ToResponse(this InternApplication application) => new(
         application.Id,
         application.ProfileId,
         application.Status,
-        application.AppliedAt);
+        application.AppliedAt, application.ReviewedBy, application.ReviewedAt, application.Note);
 
     public static InternReviewHistoryResponse ToResponse(this InternReviewHistory history) => new(
         history.Id,
@@ -38,5 +38,5 @@ public static class ApiMapping
         history.TargetLabel,
         history.Status,
         history.Note,
-        history.ReviewedAt);
+        history.ReviewedAt, history.ReviewedBy);
 }

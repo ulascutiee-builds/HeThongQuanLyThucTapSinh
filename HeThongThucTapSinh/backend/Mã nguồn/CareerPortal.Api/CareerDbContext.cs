@@ -1,112 +1,60 @@
 using Microsoft.EntityFrameworkCore;
-
-public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options) : DbContext(options)
+public sealed class CareerDbContext(DbContextOptions<CareerDbContext> options):DbContext(options)
 {
-    public DbSet<PortalAccount> PortalAccounts => Set<PortalAccount>();
-    public DbSet<WorkItem> WorkItems => Set<WorkItem>();
-    public DbSet<PortalAudit> PortalAudits => Set<PortalAudit>();
+    public DbSet<InternProfile> InternProfiles => Set<InternProfile>();
+    public DbSet<InternDocument> InternDocuments => Set<InternDocument>();
+    public DbSet<InternApplication> InternApplications => Set<InternApplication>();
+    public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
     public DbSet<MailJob> MailJobs => Set<MailJob>();
-	public DbSet<InternProfile> InternProfiles => Set<InternProfile>();
-	public DbSet<InternDocument> InternDocuments => Set<InternDocument>();
-	public DbSet<InternApplication> InternApplications => Set<InternApplication>();
-	public DbSet<InternReviewHistory> InternReviewHistories => Set<InternReviewHistory>();
-	public DbSet<EvaluationCriterion> EvaluationCriteria => Set<EvaluationCriterion>();
-	public DbSet<EvaluationScore> EvaluationScores => Set<EvaluationScore>();
-	public DbSet<Allowance> Allowances => Set<Allowance>();
-	public DbSet<AllowanceHistory> AllowanceHistories => Set<AllowanceHistory>();
-
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
-	{
-        modelBuilder.Entity<PortalAccount>().HasIndex(x => x.Email).IsUnique();
-        modelBuilder.Entity<PortalAccount>().HasIndex(x => x.InternProfileId).IsUnique().HasFilter("[InternProfileId] IS NOT NULL");
-        modelBuilder.Entity<PortalAccount>().HasIndex(x => x.ActivationTokenHash).IsUnique().HasFilter("[ActivationTokenHash] IS NOT NULL");
-        modelBuilder.Entity<PortalAccount>()
-            .HasOne(x => x.InternProfile)
-            .WithOne()
-            .HasForeignKey<PortalAccount>(x => x.InternProfileId)
-            .OnDelete(DeleteBehavior.SetNull);
-        modelBuilder.Entity<WorkItem>().Property(x => x.Amount).HasPrecision(18, 2);
-        modelBuilder.Entity<WorkItem>().Property(x => x.ProcessedBy).HasMaxLength(120);
-        modelBuilder.Entity<WorkItem>().HasIndex(x => new { x.Kind, x.ProfileId });
-        modelBuilder.Entity<WorkItem>().HasIndex(x => x.UniqueKey).IsUnique().HasFilter("[UniqueKey] IS NOT NULL");
-        modelBuilder.Entity<WorkItem>().Property(x => x.Version).IsRowVersion();
-        modelBuilder.Entity<EvaluationCriterion>().Property(x => x.MaxScore).HasPrecision(6, 2);
-        modelBuilder.Entity<EvaluationCriterion>().HasIndex(x => x.Name).IsUnique();
-        modelBuilder.Entity<EvaluationScore>().Property(x => x.Score).HasPrecision(6, 2);
-        modelBuilder.Entity<EvaluationScore>().HasIndex(x => new { x.EvaluationId, x.CriterionId }).IsUnique();
-        modelBuilder.Entity<EvaluationScore>()
-            .HasOne(x => x.Evaluation).WithMany(x => x.EvaluationScores)
-            .HasForeignKey(x => x.EvaluationId).OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<EvaluationScore>()
-            .HasOne(x => x.Criterion).WithMany(x => x.Scores)
-            .HasForeignKey(x => x.CriterionId).OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<EvaluationCriterion>().HasData(
-            new EvaluationCriterion { Id = 1, Name = "Kỹ năng chuyên môn", Description = "Mức độ hoàn thành và vận dụng kỹ năng chuyên môn.", MaxScore = 10, SortOrder = 1 },
-            new EvaluationCriterion { Id = 2, Name = "Thái độ và kỷ luật", Description = "Tinh thần trách nhiệm, chủ động và chấp hành nội quy.", MaxScore = 10, SortOrder = 2 });
-		modelBuilder.Entity<Allowance>(entity =>
-		{
-			entity.Property(x => x.Amount).HasPrecision(18, 2);
-			entity.Property(x => x.Currency).HasMaxLength(3).IsUnicode(false);
-			entity.Property(x => x.PeriodStart).HasColumnType("date");
-			entity.Property(x => x.PeriodEnd).HasColumnType("date");
-			entity.Property(x => x.Version).IsRowVersion();
-			entity.HasIndex(x => new { x.ProfileId, x.PeriodStart, x.PaymentStatus });
-			entity.HasOne(x => x.Profile).WithMany(x => x.Allowances)
-				.HasForeignKey(x => x.ProfileId).OnDelete(DeleteBehavior.Cascade);
-		});
-		modelBuilder.Entity<AllowanceHistory>(entity =>
-		{
-			entity.HasIndex(x => new { x.AllowanceId, x.ChangedAt });
-			entity.HasOne(x => x.Allowance).WithMany(x => x.History)
-				.HasForeignKey(x => x.AllowanceId).OnDelete(DeleteBehavior.Cascade);
-		});
-		modelBuilder.Entity<InternProfile>(entity =>
-		{
-			entity.HasIndex(profile => profile.StudentId).IsUnique();
-			entity.HasIndex(profile => profile.Email).IsUnique();
-			entity.Property(profile => profile.Name).HasMaxLength(120);
-			entity.Property(profile => profile.StudentId).HasMaxLength(40);
-			entity.Property(profile => profile.Email).HasMaxLength(160);
-			entity.Property(profile => profile.School).HasMaxLength(160);
-			entity.Property(profile => profile.Major).HasMaxLength(120);
-			entity.Property(profile => profile.PasswordHash).HasMaxLength(500);
-			entity.Property(profile => profile.Status).HasMaxLength(40);
-		});
-
-		modelBuilder.Entity<InternApplication>(entity =>
-		{
-			entity.HasIndex(application => application.ProfileId).IsUnique();
-			entity.Property(application => application.Status).HasMaxLength(40);
-			entity.HasOne(application => application.Profile)
-				.WithOne(profile => profile.Application)
-				.HasForeignKey<InternApplication>(application => application.ProfileId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
-
-		modelBuilder.Entity<InternDocument>(entity =>
-		{
-			entity.Property(document => document.Type).HasMaxLength(60);
-			entity.Property(document => document.FileName).HasMaxLength(255);
-			entity.Property(document => document.ContentType).HasMaxLength(120);
-			entity.Property(document => document.Status).HasMaxLength(40);
-			entity.Property(document => document.Note).HasMaxLength(1000);
-			entity.HasOne(document => document.Profile)
-				.WithMany(profile => profile.Documents)
-				.HasForeignKey(document => document.ProfileId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
-
-		modelBuilder.Entity<InternReviewHistory>(entity =>
-		{
-			entity.HasIndex(history => new { history.ProfileId, history.ReviewedAt });
-			entity.Property(history => history.TargetType).HasMaxLength(40);
-			entity.Property(history => history.TargetLabel).HasMaxLength(120);
-			entity.Property(history => history.Status).HasMaxLength(40);
-			entity.Property(history => history.Note).HasMaxLength(1000);
-			entity.HasOne(history => history.Profile)
-				.WithMany()
-				.HasForeignKey(history => history.ProfileId)
-				.OnDelete(DeleteBehavior.Cascade);
-		});
-	}
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<PendingEmailChange> PendingEmailChanges => Set<PendingEmailChange>();
+    public DbSet<AppRole> AppRoles => Set<AppRole>();
+    public DbSet<AppPermission> AppPermissions => Set<AppPermission>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<InternshipProgram> InternshipPrograms => Set<InternshipProgram>();
+    public DbSet<Mentor> Mentors => Set<Mentor>();
+    public DbSet<InternAssignment> InternAssignments => Set<InternAssignment>();
+    public DbSet<ProgramSchedule> ProgramSchedules => Set<ProgramSchedule>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<InternshipTask> InternshipTasks => Set<InternshipTask>();
+    public DbSet<TaskProgressHistory> TaskProgressHistories => Set<TaskProgressHistory>();
+    public DbSet<WeeklyReport> WeeklyReports => Set<WeeklyReport>();
+    public DbSet<PortalNotification> PortalNotifications => Set<PortalNotification>();
+    public DbSet<InternshipEvaluation> InternshipEvaluations => Set<InternshipEvaluation>();
+    protected override void OnModelCreating(ModelBuilder b)
+    {
+        b.Entity<InternProfile>(e=>{
+            e.ToTable("IN_TERN");e.HasIndex(x=>x.StudentId);e.HasIndex(x=>x.Email).IsUnique();
+            e.HasIndex(x=>x.Phone).IsUnique().HasFilter("[Phone] IS NOT NULL");
+            e.HasIndex(x=>x.School);e.HasIndex(x=>x.Major);e.HasIndex(x=>x.Status);
+            e.Property(x=>x.Name).HasMaxLength(120);e.Property(x=>x.StudentId).HasMaxLength(40);e.Property(x=>x.Email).HasMaxLength(160);
+            e.Property(x=>x.Phone).HasMaxLength(16);e.Property(x=>x.School).HasMaxLength(160);e.Property(x=>x.Major).HasMaxLength(120);
+            e.Property(x=>x.Status).HasMaxLength(40);e.Property(x=>x.PasswordHash).HasMaxLength(500);
+            e.ToTable(t=>t.HasCheckConstraint("CK_Intern_Dates","[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]"));
+        });
+        b.Entity<InternApplication>(e=>{e.HasIndex(x=>x.ProfileId).IsUnique();e.HasOne(x=>x.Profile).WithOne(x=>x.Application).HasForeignKey<InternApplication>(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);});
+        b.Entity<InternDocument>(e=>{
+            e.HasOne(x=>x.Profile).WithMany(x=>x.Documents).HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);
+            e.Property(x=>x.Type).HasMaxLength(60);e.Property(x=>x.FileName).HasMaxLength(255);e.Property(x=>x.ContentType).HasMaxLength(120);
+            e.HasIndex(x=>new{x.ProfileId,x.Type,x.Version}).IsUnique();
+        });
+        b.Entity<InternReviewHistory>().HasOne(x=>x.Profile).WithMany().HasForeignKey(x=>x.ProfileId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<InternReviewHistory>().HasIndex(x=>new{x.ProfileId,x.ReviewedAt});
+        b.Entity<MailJob>().HasIndex(x=>x.EventKey).IsUnique();b.Entity<MailJob>().Property(x=>x.EventKey).HasMaxLength(150);
+        b.ConfigureAccounts();
+        b.Entity<PendingEmailChange>(e=>{
+            e.ToTable("PENDING_EMAIL_CHANGE");
+            e.HasKey(x=>x.AccountId);
+            e.HasIndex(x=>x.NewEmail).IsUnique();
+            e.Property(x=>x.NewEmail).HasMaxLength(160);
+            e.Property(x=>x.TokenHash).HasMaxLength(64);
+            e.HasOne(x=>x.Account).WithOne().HasForeignKey<PendingEmailChange>(x=>x.AccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+        b.ConfigureSprint2();
+        b.ConfigureSprint3();
+    }
 }
