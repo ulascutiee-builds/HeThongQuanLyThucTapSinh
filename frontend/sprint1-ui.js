@@ -7,6 +7,12 @@
   const hr = location.pathname.endsWith("hr.html");
   const intern = location.pathname.endsWith("thuc-tap-sinh.html");
   if (hr) {
+    const statusSelect = document.getElementById("profile-status");
+    for (const value of ["Chờ hồ sơ", "Chờ duyệt", "Từ chối"]) {
+      const option = el("option", value);
+      option.value = value;
+      statusSelect.append(option);
+    }
     const reason = el("dialog");
     reason.style.cssText =
       "max-width:480px;width:90%;padding:24px;border:1px solid #ddd;border-radius:16px";
@@ -86,9 +92,7 @@
           if (!a) return;
           const button = el("button", "Chi tiết ứng viên");
           button.className = "secondary-button";
-          const actions = card.querySelector(".application-actions");
-          if (!actions) return;
-          actions.prepend(button);
+          card.append(button);
           button.onclick = () => {
             const p = getProfile(a.profileId);
             detail.replaceChildren(el("h2", p.name));
