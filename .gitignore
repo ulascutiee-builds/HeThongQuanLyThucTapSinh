@@ -1,4 +1,4 @@
-# Node.js / TypeScript
+﻿# Node.js / TypeScript
 node_modules/
 dist/
 coverage/
@@ -23,3 +23,4 @@ Thumbs.db
 **/App_Data/
 **/appsettings.Development.json
 **/.local/
+*.user
