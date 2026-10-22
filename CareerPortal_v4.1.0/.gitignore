@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/App_Data/
+**/__pycache__/
+.vs/
+.vscode/
+*.user
+.local/
+/build*/
+/publish/
