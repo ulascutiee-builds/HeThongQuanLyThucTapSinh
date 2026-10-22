@@ -77,6 +77,7 @@ public static class Profiles
     static async Task<IResult> Create(CreateHrProfileRequest input, HttpContext context, CareerDbContext db, IConfiguration config)
     {
         if (!SprintSecurity.HasPermission(context, "profiles.write")) return Results.Forbid();
+        if (input.Status == "Đang thực tập") return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         if (ValidateDates(input.Status, input.StartDate, input.EndDate, input.DateOfBirth) is string error) return Results.BadRequest(new { message = error });
         if (input.DateOfBirth is null) return Results.BadRequest(new { message = "Vui lòng nhập ngày tháng năm sinh." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
@@ -100,38 +101,46 @@ public static class Profiles
         if (input.Status is not null || input.StartDate is not null || input.EndDate is not null) return Results.Forbid();
         if (input.DateOfBirth is DateOnly dob && dob > InternshipStatusSync.Today) return Results.ValidationProblem(new Dictionary<string, string[]> { ["DateOfBirth"] = ["Ngày sinh không hợp lệ."] });
         var profile = await db.InternProfiles.FindAsync(id); if (profile is null) return Results.NotFound();
+        if (profile.Status != input.Status && input.Status == "Đang thực tập" &&
+            !await db.InternDocuments.AnyAsync(x => x.ProfileId == id && x.Type == "Hợp đồng thực tập" && x.IsCurrent && x.Status == "Đã xác nhận"))
+            return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
         if (await db.InternProfiles.AnyAsync(x => x.Id != id && x.Email == email) || await Accounts.EmailExists(db, email, profileId: id) || await PhoneExistsAsync(db, phone, id)) return Results.Conflict(new { message = "Email hoặc số điện thoại đã tồn tại." });
-        ChangeEmail(db, profile, email, config);
+        await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        if (await QueueProfileEmail(db, profile, email, config) is string emailError) return Results.Conflict(new { message = emailError });
         profile.Name = input.Name.Trim(); profile.StudentId = input.StudentId.Trim(); profile.Phone = phone; profile.DateOfBirth = input.DateOfBirth; profile.School = input.School.Trim(); profile.Major = input.Major.Trim();
-        await SyncAccount(db, profile, config); await db.SaveChangesAsync(); return Results.Ok(profile.ToResponse());
+        await SyncAccount(db, profile); await db.SaveChangesAsync(); await tx.CommitAsync(); return Results.Ok(profile.ToResponse());
     }
-    static void ChangeEmail(CareerDbContext db, InternProfile profile, string email, IConfiguration config)
+    static async Task<string?> QueueProfileEmail(CareerDbContext db, InternProfile profile, string email, IConfiguration config)
     {
-        if (profile.Email == email) return;
-        profile.Email = email; profile.EmailVerified = !AuthEndpoints.RequireEmailVerification(config);
-        if (AuthEndpoints.RequireEmailVerification(config)) AuthEndpoints.Verification(db, profile, config);
+        if (profile.Email == email) return null;
+        var account = await db.AppUsers.SingleOrDefaultAsync(x => x.ProfileId == profile.Id);
+        if (account is null) return "Hồ sơ chưa liên kết với tài khoản. Hãy liên hệ quản trị viên để cập nhật email.";
+        return await EmailChange.QueueAsync(db, account, email, config);
     }
-    static async Task SyncAccount(CareerDbContext db, InternProfile profile, IConfiguration config)
+    static async Task SyncAccount(CareerDbContext db, InternProfile profile)
     {
         var account = await db.AppUsers.SingleOrDefaultAsync(x => x.ProfileId == profile.Id);
         if (account is null) return;
-        var changedEmail = account.Email != profile.Email;
-        account.Name = profile.Name; account.Email = profile.Email;
-        if (changedEmail && account.RequiresActivation) Accounts.QueueActivation(db, account, config);
+        account.Name = profile.Name;
     }
     static async Task<IResult> UpdateHR(int id, UpdateHrProfileRequest input, HttpContext context, CareerDbContext db, IConfiguration config)
     {
         if (!SprintSecurity.HasPermission(context, "profiles.write")) return Results.Forbid();
         if (ValidateDates(input.Status, input.StartDate, input.EndDate, input.DateOfBirth) is string error) return Results.BadRequest(new { message = error });
         var profile = await db.InternProfiles.FindAsync(id); if (profile is null) return Results.NotFound();
+        if (input.Status == "Đang thực tập" &&
+            !await db.InternDocuments.AnyAsync(x => x.ProfileId == id && x.Type == "Hợp đồng thực tập" && x.IsCurrent &&
+                x.Status == "Đã xác nhận"))
+            return Results.BadRequest(new { message = "Chỉ chuyển sang Đang thực tập sau khi thực tập sinh xác nhận hợp đồng." });
         var email = input.Email.Trim().ToLowerInvariant(); var phone = NormalizePhone(input.Phone);
         if (await db.InternProfiles.AnyAsync(x => x.Id != id && x.Email == email) || await Accounts.EmailExists(db, email, profileId: id) || await PhoneExistsAsync(db, phone, id)) return Results.Conflict(new { message = "Email hoặc số điện thoại đã tồn tại." });
         if (input.StudentId is not null && string.IsNullOrWhiteSpace(input.StudentId)) return Results.BadRequest(new { message = "Mã sinh viên không được để trống." });
         if (profile.Status != input.Status && input.Status is "Từ chối" or "Đang thực tập" && await db.InternApplications.AnyAsync(x => x.ProfileId == id)) return Results.BadRequest(new { message = "Duyệt/từ chối qua màn hình Đơn xin để ghi lịch sử và gửi email." });
         var assignment = await db.InternAssignments.Include(x => x.Program).SingleOrDefaultAsync(x => x.ProfileId == id);
         if (assignment?.Program is not null && (input.StartDate != assignment.Program.StartDate || input.EndDate != assignment.Program.EndDate)) return Results.BadRequest(new { message = "Hồ sơ đã phân công vào chương trình. Vui lòng sửa thời gian tại chương trình thực tập." });
-        ChangeEmail(db, profile, email, config);
+        await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        if (await QueueProfileEmail(db, profile, email, config) is string emailError) return Results.Conflict(new { message = emailError });
         profile.Name = input.Name.Trim(); if (input.StudentId is not null) profile.StudentId = input.StudentId.Trim();
         profile.DateOfBirth = input.DateOfBirth ?? profile.DateOfBirth; profile.Phone = phone; profile.School = input.School.Trim(); profile.Major = input.Major.Trim(); profile.StartDate = input.StartDate; profile.EndDate = input.EndDate; profile.Status = input.Status;
         if (assignment is null)
@@ -139,6 +148,6 @@ public static class Profiles
             var contract = await db.InternDocuments.SingleOrDefaultAsync(x => x.ProfileId == id && x.Type == "Hợp đồng thực tập" && x.IsCurrent);
             if (contract is not null) { contract.StartsAt = input.StartDate is DateOnly start ? InternshipStatusSync.StartOfDay(start) : null; contract.ExpiresAt = input.EndDate is DateOnly end ? InternshipStatusSync.EndOfDay(end) : null; }
         }
-        await SyncAccount(db, profile, config); await db.SaveChangesAsync(); return Results.Ok(profile.ToResponse());
+        await SyncAccount(db, profile); await db.SaveChangesAsync(); await tx.CommitAsync(); return Results.Ok(profile.ToResponse());
     }
 }
