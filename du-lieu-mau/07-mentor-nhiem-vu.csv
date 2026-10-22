@@ -1,0 +1,5 @@
+﻿Tên nhiệm vụ,Ưu tiên,Trạng thái,Tiến độ
+[DEMO] Xây dựng giao diện dashboard,High,InProgress,75
+[DEMO] Thiết kế REST API và kết nối SQL,Normal,InProgress,30
+[DEMO] Viết test case và kiểm thử,Normal,Todo,0
+[DEMO] Tổng hợp tài liệu báo cáo,Low,Done,100

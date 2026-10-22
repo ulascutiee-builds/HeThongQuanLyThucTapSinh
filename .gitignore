@@ -1,0 +1,26 @@
+﻿# Node.js / TypeScript
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local configuration and uploaded files
+.env
+.env.*
+!.env.example
+uploads/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ASP.NET Core build/runtime state and local configuration
+**/bin/
+**/obj/
+**/App_Data/
+**/appsettings.Development.json
+**/.local/
+*.user

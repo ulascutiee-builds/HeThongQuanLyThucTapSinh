@@ -1,0 +1,7 @@
+/* Use one consistent font across every system page and all controls. */
+html,
+html *,
+html *::before,
+html *::after {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
