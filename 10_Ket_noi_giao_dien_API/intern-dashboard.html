@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8f5" />
+    <title>Hồ sơ thực tập | Career Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f7f8f5;
+        --surface: #fff;
+        --ink: #24332f;
+        --muted: #73817b;
+        --green: #194c40;
+        --green-soft: #eaf2ee;
+        --orange: #dd6948;
+        --line: #e1e6e2;
+        --red: #b54b3b;
+        --sans: "Segoe UI", "Helvetica Neue", sans-serif;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .app {
+        min-height: 100vh;
+      }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        display: flex;
+        width: 238px;
+        flex-direction: column;
+        padding: 24px 16px 18px;
+        border-right: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .brand {
+        padding: 0 10px 27px;
+        color: var(--green);
+        font-weight: 750;
+        letter-spacing: 0.08em;
+      }
+      .brand small {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+      .nav-label {
+        margin: 0 10px 9px;
+        color: #929c97;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .nav-list {
+        display: grid;
+        gap: 4px;
+      }
+      .nav-item {
+        display: flex;
+        min-height: 40px;
+        align-items: center;
+        gap: 11px;
+        padding: 0 11px;
+        border: 0;
+        border-radius: 3px;
+        background: transparent;
+        color: #596861;
+        text-align: left;
+        font-size: 12px;
+      }
+      .nav-item:hover {
+        background: #f4f6f3;
+        color: var(--ink);
+      }
+      .nav-item[aria-current="page"] {
+        background: var(--green-soft);
+        color: var(--green);
+        font-weight: 700;
+      }
+      .nav-index {
+        width: 16px;
+        color: var(--orange);
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .sidebar-bottom {
+        margin-top: auto;
+        padding: 16px 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .profile-mini {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .avatar {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 50%;
+        background: #e8eee9;
+        color: var(--green);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .profile-mini strong,
+      .profile-mini span {
+        display: block;
+      }
+      .profile-mini strong {
+        font-size: 11px;
+      }
+      .profile-mini span {
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .workspace {
+        min-height: 100vh;
+        margin-left: 238px;
+      }
+      .topbar {
+        display: flex;
+        min-height: 62px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 34px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .breadcrumb {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .top-actions a {
+        color: var(--muted);
+        font-size: 11px;
+        text-decoration: none;
+      }
+      .top-actions a:hover {
+        color: var(--green);
+      }
+      .top-actions .logout-link {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        padding: 0 10px;
+        border: 1px solid #ead5cf;
+        border-radius: 3px;
+        background: #f8ece8;
+        color: #a04b3e;
+        font-weight: 650;
+      }
+      .top-actions .logout-link:hover {
+        border-color: #d9b3a9;
+        background: #f2dfda;
+        color: #833a30;
+      }
+      .content {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 30px 34px 52px;
+      }
+      .page-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+      .page-heading h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 650;
+        letter-spacing: 0;
+      }
+      .page-heading p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .button {
+        display: inline-flex;
+        min-height: 36px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 13px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 650;
+      }
+      .button:hover {
+        border-color: #b9c7bf;
+        background: #fafcf9;
+      }
+      .button-primary {
+        border-color: var(--green);
+        background: var(--green);
+        color: #fff;
+      }
+      .button-primary:hover {
+        border-color: #123d33;
+        background: #123d33;
+      }
+      .button:disabled {
+        cursor: default;
+        opacity: 0.48;
+      }
+      .status-strip {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 20px;
+        padding: 18px 20px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .status-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .status-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 50%;
+        background: #fbf0e8;
+        color: var(--orange);
+        font-size: 16px;
+      }
+      .status-title strong,
+      .status-title span {
+        display: block;
+      }
+      .status-title strong {
+        font-size: 12px;
+      }
+      .status-title span {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 9px;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        color: #58665f;
+        font-size: 10px;
+        white-space: nowrap;
+      }
+      .status-pill::before {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d99a3d;
+        content: "";
+      }
+      .status-pill[data-state="approved"] {
+        color: var(--green);
+      }
+      .status-pill[data-state="approved"]::before {
+        background: #4b8a6b;
+      }
+      .status-pill[data-state="rejected"] {
+        color: var(--red);
+      }
+      .status-pill[data-state="rejected"]::before {
+        background: #bd6253;
+      }
+      .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 31px 0 12px;
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .section-head p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 15px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .step {
+        min-height: 74px;
+        padding: 14px 15px;
+        border-right: 1px solid var(--line);
+      }
+      .step:last-child {
+        border-right: 0;
+      }
+      .step-number {
+        display: block;
+        color: var(--orange);
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .step strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 10px;
+      }
+      .step span:last-child {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .application-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 250px;
+        gap: 30px;
+        align-items: start;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px 13px;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+      .field-wide {
+        grid-column: 1/-1;
+      }
+      .field label {
+        font-size: 10px;
+        font-weight: 650;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        min-height: 37px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 11px;
+      }
+      .field textarea {
+        min-height: 86px;
+        resize: vertical;
+      }
+      .field input[type="file"] {
+        padding: 6px;
+      }
+      .helper {
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .form-message {
+        min-height: 18px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .form-message[data-state="success"] {
+        color: var(--green);
+      }
+      .form-message[data-state="error"] {
+        color: var(--red);
+      }
+      .aside-note {
+        padding: 0 0 0 16px;
+        border-left: 2px solid #e6a184;
+      }
+      .aside-note h3 {
+        margin: 0 0 8px;
+        font-size: 12px;
+      }
+      .aside-note p,
+      .aside-note li {
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .aside-note p {
+        margin: 0 0 9px;
+      }
+      .aside-note ul {
+        margin: 0;
+        padding-left: 15px;
+      }
+      .document-list {
+        border-top: 1px solid var(--line);
+      }
+      .document-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .document-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+      .file-mark {
+        display: grid;
+        width: 36px;
+        height: 42px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        color: var(--orange);
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .document-info strong,
+      .document-info span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .document-info strong {
+        font-size: 11px;
+      }
+      .document-info span {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .document-upload {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .document-upload input {
+        width: min(245px, 38vw);
+        font-size: 10px;
+      }
+      .document-upload input::file-selector-button {
+        min-height: 29px;
+        margin-right: 7px;
+        padding: 0 8px;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        background: var(--surface);
+        color: var(--ink);
+        font: inherit;
+        font-size: 9px;
+        cursor: pointer;
+      }
+      .contract-box {
+        max-width: 760px;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .contract-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .contract-item:last-child {
+        border-bottom: 0;
+      }
+      .contract-item strong,
+      .contract-item span {
+        display: block;
+      }
+      .contract-item strong {
+        font-size: 11px;
+      }
+      .contract-item span {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .contract-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 7px;
+      }
+      .contract-preview-dialog {
+        width: min(960px, calc(100% - 28px));
+        max-width: none;
+        max-height: 90vh;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 20px 70px #162b2230;
+      }
+      .contract-preview-dialog::backdrop {
+        background: #1b2d2780;
+      }
+      .contract-preview-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+      .contract-preview-head h2 {
+        margin: 0;
+        font-size: 14px;
+      }
+      .contract-preview-head p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .contract-preview-content {
+        display: grid;
+        min-height: 220px;
+        place-items: center;
+        padding: 16px;
+      }
+      .contract-preview-content iframe {
+        width: 100%;
+        height: min(68vh, 760px);
+        border: 0;
+      }
+      .contract-preview-content img {
+        max-width: 100%;
+        max-height: 68vh;
+        object-fit: contain;
+      }
+      .contract-preview-note {
+        color: var(--muted);
+        font-size: 11px;
+        text-align: center;
+      }
+      .confirm-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin: 18px 0 13px;
+        color: #52615a;
+        font-size: 10px;
+      }
+      .confirm-row input {
+        margin: 2px 0 0;
+        accent-color: var(--green);
+      }
+      .empty-state {
+        padding: 23px 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 20px;
+        z-index: 5;
+        max-width: min(390px, calc(100vw - 32px));
+        padding: 11px 15px;
+        border: 1px solid #b8d0c2;
+        border-radius: 3px;
+        background: #f3faf5;
+        color: var(--green);
+        font-size: 11px;
+        box-shadow: 0 8px 26px #1a35231c;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      :focus-visible {
+        outline: 2px solid var(--orange);
+        outline-offset: 2px;
+      }
+      @media (max-width: 900px) {
+        .sidebar {
+          width: 195px;
+        }
+        .workspace {
+          margin-left: 195px;
+        }
+        .content {
+          padding-right: 22px;
+          padding-left: 22px;
+        }
+        .topbar {
+          padding: 0 22px;
+        }
+        .application-layout {
+          grid-template-columns: minmax(0, 1fr) 205px;
+          gap: 20px;
+        }
+      }
+      @media (max-width: 640px) {
+        .sidebar {
+          position: static;
+          width: auto;
+          padding: 12px 14px;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        .brand {
+          padding: 0 4px 11px;
+        }
+        .brand small,
+        .nav-label,
+        .sidebar-bottom {
+          display: none;
+        }
+        .nav-list {
+          display: flex;
+          overflow-x: auto;
+          gap: 5px;
+        }
+        .nav-item {
+          min-height: 34px;
+          flex: 0 0 auto;
+          padding: 0 9px;
+          font-size: 10px;
+        }
+        .nav-index {
+          display: none;
+        }
+        .workspace {
+          margin-left: 0;
+        }
+        .topbar {
+          min-height: 47px;
+          padding: 0 16px;
+        }
+        .content {
+          padding: 22px 16px 40px;
+        }
+        .page-heading {
+          align-items: flex-start;
+        }
+        .page-heading h1 {
+          font-size: 19px;
+        }
+        .status-strip {
+          grid-template-columns: 1fr;
+          gap: 12px;
+          padding: 14px;
+        }
+        .status-pill {
+          width: fit-content;
+          margin-left: 50px;
+        }
+        .steps {
+          grid-template-columns: 1fr;
+        }
+        .step {
+          min-height: 0;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        .step:last-child {
+          border-bottom: 0;
+        }
+        .application-layout {
+          grid-template-columns: 1fr;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+        .field-wide {
+          grid-column: auto;
+        }
+        .document-row {
+          grid-template-columns: 1fr;
+        }
+        .document-upload {
+          flex-wrap: wrap;
+        }
+        .document-upload input {
+          width: 100%;
+        }
+        .contract-item {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="Điều hướng thực tập sinh">
+        <div class="brand">CAREER PORTAL<small>HỒ SƠ THỰC TẬP</small></div>
+        <p class="nav-label">Không gian của bạn</p>
+        <nav class="nav-list" aria-label="Chức năng">
+          <button class="nav-item" data-view="overview" aria-current="page">
+            <span class="nav-index">01</span>Tổng quan
+          </button>
+          <button class="nav-item" data-view="application">
+            <span class="nav-index">02</span>Hồ sơ trực tuyến
+          </button>
+          <button class="nav-item" data-view="documents">
+            <span class="nav-index">03</span>CV &amp; đơn thực tập
+          </button>
+          <button class="nav-item" data-view="contracts">
+            <span class="nav-index">04</span>Hợp đồng
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="profile-mini">
+            <div class="avatar" id="sidebar-avatar">MA</div>
+            <div>
+              <strong id="sidebar-name">Nguyễn Minh Anh</strong
+              ><span>Thực tập sinh</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar">
+          <span class="breadcrumb"
+            >Career Portal <span aria-hidden="true">/</span> Khu vực thực tập
+            sinh</span
+          >
+          <div class="top-actions">
+            <span class="breadcrumb" id="header-student">Nguyễn Minh Anh</span
+            ><a class="logout-link" href="intern-login.html">Đăng xuất</a>
+          </div>
+        </header>
+        <main class="content">
+          <section id="view-overview" data-panel>
+            <div class="page-heading">
+              <div>
+                <h1>Xin chào, <span id="welcome-name">Minh Anh</span></h1>
+                <p>Quản lý hồ sơ và theo dõi quá trình ứng tuyển của bạn.</p>
+              </div>
+              <button class="button button-primary" data-go="application">
+                Nộp hồ sơ trực tuyến
+              </button>
+            </div>
+            <div class="status-strip">
+              <div class="status-title">
+                <div class="status-mark" aria-hidden="true">01</div>
+                <div>
+                  <strong>Hồ sơ ứng tuyển</strong
+                  ><span id="application-summary"
+                    >Hoàn thiện thông tin để bắt đầu ứng tuyển.</span
+                  >
+                </div>
+              </div>
+              <span class="status-pill" id="application-status"
+                >Chưa nộp hồ sơ</span
+              >
+            </div>
+            <div class="section-head">
+              <div>
+                <h2>Lộ trình của bạn</h2>
+                <p>Các bước trong quy trình thực tập</p>
+              </div>
+            </div>
+            <div class="steps">
+              <div class="step">
+                <span class="step-number">BƯỚC 01</span
+                ><strong>Tạo tài khoản &amp; hoàn thiện hồ sơ</strong
+                ><span>Thông tin cá nhân và học vấn</span>
+              </div>
+              <div class="step">
+                <span class="step-number">BƯỚC 02</span
+                ><strong>Nộp hồ sơ trực tuyến</strong
+                ><span>CV và đơn xin thực tập</span>
+              </div>
+              <div class="step">
+                <span class="step-number">BƯỚC 03</span
+                ><strong>Xác nhận hợp đồng</strong
+                ><span>Thực hiện sau khi được tiếp nhận</span>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <h2>Hợp đồng gần nhất</h2>
+                <p>Theo dõi phản hồi từ bộ phận nhân sự.</p>
+              </div>
+              <button class="button" data-go="contracts">Xem hợp đồng</button>
+            </div>
+            <div class="contract-box" id="overview-contract"></div>
+          </section>
+
+          <section id="view-application" data-panel hidden>
+            <div class="page-heading">
+              <div>
+                <h1>Hồ sơ trực tuyến</h1>
+                <p>Điền thông tin một lần, sau đó gửi đơn ứng tuyển đến HR.</p>
+              </div>
+            </div>
+            <div class="application-layout">
+              <div>
+                <div class="section-head" style="margin-top: 0">
+                  <div>
+                    <h2>Thông tin ứng tuyển</h2>
+                    <p>Các trường có dấu * là bắt buộc.</p>
+                  </div>
+                </div>
+                <form id="application-form">
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="app-name">Họ và tên *</label
+                      ><input
+                        id="app-name"
+                        name="name"
+                        required
+                        autocomplete="name"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="app-email">Email *</label
+                      ><input
+                        id="app-email"
+                        name="email"
+                        type="email"
+                        required
+                        autocomplete="email"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="app-phone">Số điện thoại *</label
+                      ><input
+                        id="app-phone"
+                        name="phone"
+                        type="tel"
+                        required
+                        autocomplete="tel"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="app-school">Trường *</label
+                      ><input
+                        id="app-school"
+                        name="school"
+                        required
+                        placeholder="Tên trường đại học/cao đẳng"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="app-major">Ngành học *</label
+                      ><input
+                        id="app-major"
+                        name="major"
+                        required
+                        placeholder="Ví dụ: Marketing"
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="app-position">Vị trí mong muốn *</label
+                      ><select id="app-position" name="position" required>
+                        <option value="">Chọn vị trí</option>
+                        <option>Marketing Intern</option>
+                        <option>Business Analyst Intern</option>
+                        <option>Software Engineer Intern</option>
+                        <option>Human Resources Intern</option>
+                      </select>
+                    </div>
+                    <div class="field field-wide">
+                      <label for="app-message">Giới thiệu ngắn</label
+                      ><textarea
+                        id="app-message"
+                        name="message"
+                        placeholder="Chia sẻ mục tiêu và thời gian thực tập của bạn"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <span
+                      class="form-message"
+                      id="application-message"
+                      role="status"
+                      aria-live="polite"
+                    ></span
+                    ><button class="button button-primary" type="submit">
+                      Gửi hồ sơ ứng tuyển
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <aside class="aside-note">
+                <h3>Trước khi gửi hồ sơ</h3>
+                <p>
+                  Hãy tải CV và đơn xin thực tập ở mục “CV &amp; đơn thực tập”.
+                </p>
+                <ul>
+                  <li>Thông tin liên hệ cần chính xác.</li>
+                  <li>Kiểm tra vị trí ứng tuyển trước khi gửi.</li>
+                  <li>Bạn có thể theo dõi trạng thái ở trang tổng quan.</li>
+                </ul>
+              </aside>
+            </div>
+          </section>
+
+          <section id="view-documents" data-panel hidden>
+            <div class="page-heading">
+              <div>
+                <h1>CV &amp; đơn xin thực tập</h1>
+                <p>Tải tài liệu lên hồ sơ để HR xem xét.</p>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <h2>Tài liệu cần nộp</h2>
+                <p>
+                  Chọn tệp từ thiết bị; bản demo lưu tên tệp để hiển thị trạng
+                  thái.
+                </p>
+              </div>
+            </div>
+            <div class="document-list">
+              <div class="document-row">
+                <div class="document-info">
+                  <span class="file-mark">CV</span>
+                  <div>
+                    <strong>CV cá nhân</strong
+                    ><span id="cv-status">Chưa tải lên</span>
+                  </div>
+                </div>
+                <form class="document-upload" data-document="CV">
+                  <input
+                    id="cv-file"
+                    name="file"
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf"
+                    required
+                    aria-label="Chọn tệp CV"
+                  /><button class="button button-primary" type="submit">
+                    Tải CV lên
+                  </button>
+                </form>
+              </div>
+              <div class="document-row">
+                <div class="document-info">
+                  <span class="file-mark">ĐƠN</span>
+                  <div>
+                    <strong>Đơn xin thực tập</strong
+                    ><span id="letter-status">Chưa tải lên</span>
+                  </div>
+                </div>
+                <form class="document-upload" data-document="Đơn xin thực tập">
+                  <input
+                    id="letter-file"
+                    name="file"
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf"
+                    required
+                    aria-label="Chọn đơn xin thực tập"
+                  /><button class="button button-primary" type="submit">
+                    Tải đơn lên
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="section-head">
+              <div>
+                <h2>Trạng thái xét duyệt</h2>
+                <p>HR sẽ cập nhật kết quả sau khi xem tài liệu.</p>
+              </div>
+            </div>
+            <div class="document-list" id="document-status-list"></div>
+          </section>
+
+          <section id="view-contracts" data-panel hidden>
+            <div class="page-heading">
+              <div>
+                <h1>Hợp đồng thực tập</h1>
+                <p>Xem hợp đồng HR gửi và xác nhận trực tuyến.</p>
+              </div>
+            </div>
+            <div class="contract-box" id="contract-list"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <dialog
+      class="contract-preview-dialog"
+      id="contract-preview-dialog"
+      aria-labelledby="contract-preview-title"
+    >
+      <div class="contract-preview-head">
+        <div>
+          <h2 id="contract-preview-title">Hợp đồng thực tập</h2>
+          <p id="contract-preview-detail"></p>
+        </div>
+        <button
+          class="button button-small"
+          id="contract-preview-close"
+          type="button"
+        >
+          Đóng
+        </button>
+      </div>
+      <div class="contract-preview-content" id="contract-preview-content"></div>
+    </dialog>
+    <output class="toast" id="toast" role="status" hidden></output>
+
+    <script>
+      const storageKey = "careerPortal.demo.v1";
+      const roleSessionKey = "careerPortal.demo.session.v1";
+      // >>> PHẦN CẬP NHẬT: Chặn truy cập dashboard và thao tác ngoài vai trò TTS.
+      function hasRole(role) {
+        try {
+          return JSON.parse(sessionStorage.getItem(roleSessionKey) || "null")
+            ?.role === role;
+        } catch {
+          return false;
+        }
+      }
+      if (!hasRole("intern")) {
+        document.body.hidden = true;
+        window.location.replace("intern-login.html");
+      }
+      document
+        .querySelector(".logout-link")
+        .addEventListener("click", () => sessionStorage.removeItem(roleSessionKey));
+      // <<< KẾT THÚC PHẦN CẬP NHẬT PHÂN QUYỀN TTS.
+      const fallbackProfile = {
+        id: "SV001",
+        name: "Nguyễn Minh Anh",
+        email: "minhanh@gmail.com",
+        phone: "",
+        school: "ĐH Kinh tế TP.HCM",
+        major: "Marketing",
+      };
+      const blankData = {
+        students: [],
+        requests: [],
+        documents: [],
+        contracts: [],
+        accounts: [],
+      };
+      // >>> PHẦN CẬP NHẬT: Giữ dữ liệu cũ và bổ sung collection còn thiếu.
+      function normalizeData(savedData = {}) {
+        return {
+          ...blankData,
+          ...savedData,
+          students: Array.isArray(savedData.students) ? savedData.students : [],
+          requests: Array.isArray(savedData.requests) ? savedData.requests : [],
+          documents: Array.isArray(savedData.documents) ? savedData.documents : [],
+          contracts: Array.isArray(savedData.contracts) ? savedData.contracts : [],
+          accounts: Array.isArray(savedData.accounts) ? savedData.accounts : [],
+        };
+      }
+      let data;
+      try {
+        data = normalizeData(
+          JSON.parse(localStorage.getItem(storageKey) || "{}"),
+        );
+      } catch {
+        data = normalizeData();
+      }
+      // <<< KẾT THÚC PHẦN CẬP NHẬT: Chuẩn hóa dữ liệu khi khởi tạo.
+      let profile = data.internProfile || fallbackProfile;
+      const toast = document.querySelector("#toast");
+      let toastTimer;
+      function persist() {
+        if (!hasRole("intern")) return false;
+        data.internProfile = profile;
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        render();
+        return true;
+      }
+      function notify(text) {
+        toast.textContent = text;
+        toast.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.hidden = true;
+        }, 2800);
+      }
+      // >>> PHẦN CẬP NHẬT: Đồng bộ dữ liệu và thông báo khi tab khác thay đổi.
+      window.addEventListener("storage", (event) => {
+        if (event.key !== storageKey) return;
+        try {
+          data = normalizeData(JSON.parse(event.newValue || "{}"));
+          profile = data.internProfile || fallbackProfile;
+          render();
+          notify("Dữ liệu hồ sơ vừa được cập nhật từ tab khác.");
+        } catch {
+          notify("Không thể đọc dữ liệu cập nhật.");
+        }
+      });
+      // <<< KẾT THÚC PHẦN CẬP NHẬT: Đồng bộ giữa các tab.
+      function formatDate() {
+        return new Intl.DateTimeFormat("vi-VN").format(new Date());
+      }
+      function setProfileIdentity() {
+        const shortName = profile.name.trim().split(/\s+/).at(-1) || "bạn";
+        document.querySelector("#welcome-name").textContent = shortName;
+        document.querySelector("#sidebar-name").textContent = profile.name;
+        document.querySelector("#header-student").textContent = profile.name;
+        document.querySelector("#sidebar-avatar").textContent = profile.name
+          .split(/\s+/)
+          .slice(-2)
+          .map((part) => part[0])
+          .join("")
+          .toUpperCase();
+      }
+      function currentRequest() {
+        return (data.requests || []).find(
+          (item) => item.email === profile.email,
+        );
+      }
+      function currentDocuments() {
+        return (data.documents || []).filter(
+          (item) => item.email === profile.email || item.name === profile.name,
+        );
+      }
+      function statusState(status) {
+        return status === "Đã duyệt"
+          ? "approved"
+          : status === "Từ chối"
+            ? "rejected"
+            : "pending";
+      }
+      function renderApplicationStatus() {
+        const request = currentRequest();
+        const pill = document.querySelector("#application-status");
+        if (!request) {
+          pill.textContent = "Chưa nộp hồ sơ";
+          pill.dataset.state = "pending";
+          document.querySelector("#application-summary").textContent =
+            "Hoàn thiện thông tin để bắt đầu ứng tuyển.";
+          return;
+        }
+        pill.textContent = request.status;
+        pill.dataset.state = statusState(request.status);
+        document.querySelector("#application-summary").textContent =
+          request.status === "Đã duyệt"
+            ? `Đơn ${request.id} đã được HR chấp thuận.`
+            : request.status === "Từ chối"
+              ? `Đơn ${request.id} chưa được chấp thuận.`
+              : `Đơn ${request.id} đang được HR xem xét.`;
+      }
+      function renderDocumentStatuses() {
+        const entries = currentDocuments();
+        const list = document.querySelector("#document-status-list");
+        list.replaceChildren();
+        if (!entries.length) {
+          const empty = document.createElement("p");
+          empty.className = "empty-state";
+          empty.textContent = "Bạn chưa tải tài liệu nào lên.";
+          list.append(empty);
+          return;
+        }
+        entries.forEach((doc) => {
+          const row = document.createElement("div");
+          row.className = "document-row";
+          const info = document.createElement("div");
+          info.className = "document-info";
+          const mark = document.createElement("span");
+          mark.className = "file-mark";
+          mark.textContent = doc.kind === "CV" ? "CV" : "ĐƠN";
+          const text = document.createElement("div");
+          const name = document.createElement("strong");
+          name.textContent = doc.filename;
+          const sub = document.createElement("span");
+          sub.textContent = `${doc.kind} · ${doc.date}`;
+          text.append(name, sub);
+          info.append(mark, text);
+          const state = document.createElement("span");
+          state.className = "status-pill";
+          state.textContent = doc.status || "Chờ duyệt";
+          state.dataset.state = statusState(state.textContent);
+          row.append(info, state);
+          list.append(row);
+        });
+      }
+      function buildContractItem(contract) {
+        const row = document.createElement("div");
+        row.className = "contract-item";
+        const text = document.createElement("div");
+        const name = document.createElement("strong");
+        name.textContent = contract.filename;
+        const detail = document.createElement("span");
+        detail.textContent = `Tải lên ${contract.date} · ${contract.confirmed ? `Đã xác nhận ${contract.confirmedDate || ""}` : "Chờ bạn xác nhận"}`;
+        text.append(name, detail);
+        const actions = document.createElement("div");
+        actions.className = "contract-actions";
+        const viewButton = document.createElement("button");
+        viewButton.className = "button";
+        viewButton.type = "button";
+        viewButton.textContent = "Xem hợp đồng";
+        viewButton.addEventListener("click", () => previewContract(contract));
+        actions.append(viewButton);
+        if (contract.confirmed) {
+          const pill = document.createElement("span");
+          pill.className = "status-pill";
+          pill.dataset.state = "approved";
+          pill.textContent = "Đã xác nhận";
+          actions.append(pill);
+        } else {
+          const confirmButton = document.createElement("button");
+          confirmButton.className = "button button-primary";
+          confirmButton.type = "button";
+          confirmButton.textContent = "Xác nhận hợp đồng";
+          confirmButton.addEventListener("click", () =>
+            confirmContract(contract.id),
+          );
+          actions.append(confirmButton);
+        }
+        row.append(text, actions);
+        return row;
+      }
+      function previewContract(contract) {
+        document.querySelector("#contract-preview-title").textContent =
+          contract.filename;
+        document.querySelector("#contract-preview-detail").textContent =
+          `Tải lên ${contract.date}`;
+        const content = document.querySelector("#contract-preview-content");
+        content.replaceChildren();
+        if (!contract.fileData) {
+          const note = document.createElement("p");
+          note.className = "contract-preview-note";
+          note.textContent =
+            "Hợp đồng này chỉ có tên tệp. Nhờ HR tải lại file để xem nội dung.";
+          content.append(note);
+        } else if (
+          contract.fileType === "application/pdf" ||
+          contract.filename.toLowerCase().endsWith(".pdf")
+        ) {
+          const frame = document.createElement("iframe");
+          frame.src = contract.fileData;
+          frame.title = `Nội dung ${contract.filename}`;
+          content.append(frame);
+        } else if (contract.fileType?.startsWith("image/")) {
+          const image = document.createElement("img");
+          image.src = contract.fileData;
+          image.alt = `Ảnh hợp đồng ${contract.filename}`;
+          content.append(image);
+        } else {
+          const note = document.createElement("p");
+          note.className = "contract-preview-note";
+          note.textContent = "Định dạng file này chưa hỗ trợ xem trước.";
+          content.append(note);
+        }
+        document.querySelector("#contract-preview-dialog").showModal();
+      }
+      function renderContracts() {
+        const list = document.querySelector("#contract-list");
+        const overview = document.querySelector("#overview-contract");
+        const contracts = (data.contracts || []).filter(
+          (item) =>
+            item.studentId === profile.id || item.studentName === profile.name,
+        );
+        list.replaceChildren();
+        overview.replaceChildren();
+        if (!contracts.length) {
+          const empty = document.createElement("p");
+          empty.className = "empty-state";
+          empty.textContent =
+            "HR chưa tải hợp đồng lên. Trạng thái sẽ cập nhật tại đây sau khi có hợp đồng.";
+          list.append(empty);
+          overview.append(empty.cloneNode(true));
+          return;
+        }
+        contracts.forEach((contract) => {
+          list.append(buildContractItem(contract));
+          overview.append(buildContractItem(contract));
+        });
+      }
+      function render() {
+        setProfileIdentity();
+        renderApplicationStatus();
+        renderDocumentStatuses();
+        renderContracts();
+        const documents = currentDocuments();
+        document.querySelector("#cv-status").textContent =
+          documents.find((doc) => doc.kind === "CV")?.filename ||
+          "Chưa tải lên";
+        document.querySelector("#letter-status").textContent =
+          documents.find((doc) => doc.kind === "Đơn xin thực tập")?.filename ||
+          "Chưa tải lên";
+      }
+      function confirmContract(id) {
+        if (!hasRole("intern")) return;
+        const contract = data.contracts.find((item) => item.id === id);
+        if (!contract) return;
+        if (
+          !confirm("Bạn xác nhận đã đọc và đồng ý với nội dung hợp đồng này?")
+        )
+          return;
+        contract.confirmed = true;
+        contract.confirmedDate = formatDate();
+        persist();
+        notify("Đã ghi nhận xác nhận hợp đồng.");
+      }
+      document
+        .querySelector("#contract-preview-close")
+        .addEventListener("click", () =>
+          document.querySelector("#contract-preview-dialog").close(),
+        );
+      document.querySelectorAll(".nav-item").forEach((button) =>
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".nav-item")
+            .forEach((item) => item.removeAttribute("aria-current"));
+          button.setAttribute("aria-current", "page");
+          document.querySelectorAll("[data-panel]").forEach((panel) => {
+            panel.hidden = panel.id !== `view-${button.dataset.view}`;
+          });
+        }),
+      );
+      document
+        .querySelectorAll("[data-go]")
+        .forEach((button) =>
+          button.addEventListener("click", () =>
+            document
+              .querySelector(`[data-view="${button.dataset.go}"]`)
+              .click(),
+          ),
+        );
+      document
+        .querySelector("#application-form")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!hasRole("intern")) return;
+          const form = event.currentTarget;
+          if (!form.reportValidity()) return;
+          profile = {
+            ...profile,
+            name: form.elements.name.value.trim(),
+            email: form.elements.email.value.trim(),
+            phone: form.elements.phone.value.trim(),
+            school: form.elements.school.value.trim(),
+            major: form.elements.major.value.trim(),
+          };
+          data.internProfile = profile;
+          const student = {
+            ...profile,
+            status: "Chờ tiếp nhận",
+            updated: formatDate(),
+          };
+          data.students = data.students || [];
+          data.students = data.students.some((item) => item.id === profile.id)
+            ? data.students.map((item) =>
+                item.id === profile.id ? { ...item, ...student } : item,
+              )
+            : [student, ...data.students];
+          const request = {
+            id: `REQ-${String(Date.now()).slice(-6)}`,
+            name: profile.name,
+            email: profile.email,
+            school: profile.school,
+            major: form.elements.position.value,
+            date: formatDate(),
+            status: "Chờ duyệt",
+          };
+          // >>> THÔNG BÁO CẬP NHẬT: Nhận diện đơn đang chờ trước khi thay thế.
+          const isUpdatingApplication = (data.requests || []).some(
+            (item) =>
+              item.email === profile.email && item.status === "Chờ duyệt",
+          );
+          data.requests = [
+            request,
+            ...(data.requests || []).filter(
+              (item) =>
+                item.email !== profile.email || item.status !== "Chờ duyệt",
+            ),
+          ];
+          data.position = form.elements.position.value;
+          data.applicationMessage = form.elements.message.value.trim();
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          // Thông báo rõ đơn vừa gửi là mới hay được cập nhật.
+          document.querySelector("#application-message").textContent =
+            isUpdatingApplication
+              ? `Đã cập nhật hồ sơ ${request.id}. HR sẽ xem xét lại.`
+              : `Đã gửi hồ sơ ${request.id}. HR sẽ phản hồi sau khi xem xét.`;
+          document.querySelector("#application-message").dataset.state =
+            "success";
+          render();
+          notify(
+            isUpdatingApplication
+              ? "Đã cập nhật hồ sơ ứng tuyển."
+              : "Hồ sơ ứng tuyển đã được gửi.",
+          );
+          // <<< KẾT THÚC THÔNG BÁO CẬP NHẬT.
+        });
+      document.querySelectorAll(".document-upload").forEach((form) =>
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!hasRole("intern")) return;
+          if (!form.reportValidity()) return;
+          const file = form.elements.file.files[0];
+          const kind = form.dataset.document;
+          // >>> THÔNG BÁO CẬP NHẬT: Kiểm tra tài liệu đang được thay thế.
+          const isReplacingDocument = (data.documents || []).some(
+            (item) => item.email === profile.email && item.kind === kind,
+          );
+          const doc = {
+            id: `DOC-${Date.now()}`,
+            name: profile.name,
+            email: profile.email,
+            filename: file.name,
+            kind,
+            date: formatDate(),
+            status: "Chờ duyệt",
+          };
+          data.documents = data.documents || [];
+          data.documents = [
+            doc,
+            ...data.documents.filter(
+              (item) => !(item.email === profile.email && item.kind === kind),
+            ),
+          ];
+          data.internProfile = profile;
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          form.reset();
+          render();
+          notify(
+            isReplacingDocument
+              ? `Đã cập nhật ${kind.toLocaleLowerCase("vi")} trên hồ sơ.`
+              : `Đã tải ${kind.toLocaleLowerCase("vi")} lên hồ sơ.`,
+          );
+          // <<< KẾT THÚC THÔNG BÁO CẬP NHẬT.
+        }),
+      );
+      const appForm = document.querySelector("#application-form");
+      appForm.elements.name.value = profile.name;
+      appForm.elements.email.value = profile.email;
+      appForm.elements.phone.value = profile.phone || "";
+      appForm.elements.school.value = profile.school || "";
+      appForm.elements.major.value = profile.major || "";
+      render();
+    </script>
+  </body>
+</html>
