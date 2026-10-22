@@ -125,15 +125,16 @@
     const showInterns = section === "interns";
     const showPrograms = section === "programs";
     const showAttendance = section === "attendance";
-    if (showInterns && !state.me?.permissions?.includes("profiles.read")) {
+    const permissions = state.me?.permissions || [];
+    if (showInterns && !permissions.includes("profiles.read")) {
       notice("Bạn không có quyền quản lý hồ sơ thực tập sinh.", true);
       return;
     }
-    if (showPrograms && !state.me?.permissions?.some(permission => ["programs.manage", "assignments.manage"].includes(permission))) {
+    if (showPrograms && !permissions.some(permission => ["programs.manage", "assignments.manage"].includes(permission))) {
       notice("Bạn không có quyền quản lý chương trình và phân công.", true);
       return;
     }
-    if (showAttendance && !state.me?.permissions?.includes("attendance.report")) {
+    if (showAttendance && !permissions.includes("attendance.report")) {
       notice("Bạn không có quyền xem báo cáo chuyên cần.", true);
       return;
     }
@@ -142,18 +143,14 @@
     byId("programs-module").hidden = !showPrograms;
     byId("attendance-module").hidden = !showAttendance;
     byId("admin-section-title").textContent = showInterns ? "Quản lý thực tập sinh" : showPrograms ? "Chương trình và phân công" : showAttendance ? "Báo cáo chuyên cần" : "Quản trị tài khoản";
-    byId("portal-content").setAttribute("aria-labelledby", showInterns ? "interns-module" : showPrograms ? "programs-module" : showAttendance ? "attendance-module" : "page-title");
     byId("nav-accounts").classList.toggle("current", !showInterns && !showPrograms && !showAttendance);
-    byId("nav-accounts").toggleAttribute("aria-current", !showInterns && !showPrograms && !showAttendance);
-    byId("nav-hr").classList.toggle("current", showInterns);
-    if (showInterns) byId("nav-hr").setAttribute("aria-current", "page");
-    else byId("nav-hr").removeAttribute("aria-current");
-    byId("nav-programs").classList.toggle("current", showPrograms);
-    if (showPrograms) byId("nav-programs").setAttribute("aria-current", "page");
-    else byId("nav-programs").removeAttribute("aria-current");
-    byId("nav-attendance").classList.toggle("current", showAttendance);
-    if (showAttendance) byId("nav-attendance").setAttribute("aria-current", "page");
-    else byId("nav-attendance").removeAttribute("aria-current");
+    if (!showInterns && !showPrograms && !showAttendance) byId("nav-accounts").setAttribute("aria-current", "page");
+    else byId("nav-accounts").removeAttribute("aria-current");
+    for (const [id, active] of [["nav-hr", showInterns], ["nav-programs", showPrograms], ["nav-attendance", showAttendance]]) {
+      byId(id).classList.toggle("current", active);
+      if (active) byId(id).setAttribute("aria-current", "page");
+      else byId(id).removeAttribute("aria-current");
+    }
     if (showInterns && !byId("interns-frame").dataset.loaded) {
       byId("interns-frame").src = "hr.html?embedded=admin";
       byId("interns-frame").dataset.loaded = "true";
@@ -173,25 +170,11 @@
       history.pushState({}, "", url);
     }
   }
-  byId("nav-accounts").addEventListener("click", event => {
-    event.preventDefault();
-    setAdminSection("accounts", true);
-  });
-  byId("nav-hr").addEventListener("click", event => {
-    event.preventDefault();
-    setAdminSection("interns", true);
-  });
-  byId("nav-programs").addEventListener("click", event => {
-    event.preventDefault();
-    setAdminSection("programs", true);
-  });
-  byId("nav-attendance").addEventListener("click", event => {
-    event.preventDefault();
-    setAdminSection("attendance", true);
-  });
-  window.addEventListener("popstate", () => {
-    setAdminSection(new URLSearchParams(location.search).get("section"));
-  });
+  byId("nav-accounts").addEventListener("click", event => { event.preventDefault(); setAdminSection("accounts", true); });
+  byId("nav-hr").addEventListener("click", event => { event.preventDefault(); setAdminSection("interns", true); });
+  byId("nav-programs").addEventListener("click", event => { event.preventDefault(); setAdminSection("programs", true); });
+  byId("nav-attendance").addEventListener("click", event => { event.preventDefault(); setAdminSection("attendance", true); });
+  window.addEventListener("popstate", () => setAdminSection(new URLSearchParams(location.search).get("section")));
   let internsDialogOpen = false;
   window.addEventListener("message", event => {
     if (event.origin !== location.origin) return;
@@ -208,16 +191,10 @@
       }
       return;
     }
-    if (event.data?.type === "programs-embed-height" && isProgramsFrame && Number.isFinite(event.data.height)) {
-      byId("programs-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
-      return;
-    }
-    if (event.data?.type === "attendance-embed-height" && isAttendanceFrame && Number.isFinite(event.data.height)) {
-      byId("attendance-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
-      return;
-    }
-    if (event.data?.type !== "hr-embed-height" || !isInternsFrame || !Number.isFinite(event.data.height) || internsDialogOpen) return;
-    byId("interns-frame").style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
+    const heights = { "hr-embed-height": [isInternsFrame, "interns-frame"], "programs-embed-height": [isProgramsFrame, "programs-frame"], "attendance-embed-height": [isAttendanceFrame, "attendance-frame"] };
+    const height = heights[event.data?.type];
+    if (!height || !height[0] || !Number.isFinite(event.data.height) || (event.data.type === "hr-embed-height" && internsDialogOpen)) return;
+    byId(height[1]).style.height = `${Math.max(700, Math.ceil(event.data.height))}px`;
   });
   async function activateTab(name) {
     if (name !== "account-permissions" && state.activeTab === "account-permissions" && permissionDirty()) {

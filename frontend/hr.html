@@ -7,9 +7,7 @@
     <title>Quản lý nhân sự | Career Portal</title>
     <link rel="icon" type="image/png" href="ictu-codegym-logo.png?v=c8d8f689" />
     <script>
-      if (new URLSearchParams(location.search).get("embedded") === "admin") {
-        document.documentElement.classList.add("embedded-admin");
-      }
+      if (new URLSearchParams(location.search).get("embedded") === "admin") document.documentElement.classList.add("embedded-admin");
     </script>
     <style>
       :root {
@@ -1151,31 +1149,17 @@
           transition-duration: 0.01ms !important;
         }
       }
-      html.embedded-admin,
-      html.embedded-admin body {
-        min-height: 0;
-      }
-      html.embedded-admin .app-shell {
-        display: block !important;
-        min-height: 0;
-      }
-      html.embedded-admin .sidebar,
-      html.embedded-admin .topbar {
-        display: none !important;
-      }
-      html.embedded-admin .main-area {
-        width: 100%;
-        min-width: 0;
-      }
-      html.embedded-admin .content {
-        width: 100%;
-        max-width: none;
-        padding: 0;
-      }
+    </style>
+    <style>
+      html.embedded-admin, html.embedded-admin body { min-height: 0; }
+      html.embedded-admin .app-shell { display: block !important; min-height: 0; }
+      html.embedded-admin .sidebar, html.embedded-admin .topbar { display: none !important; }
+      html.embedded-admin .main-area { width: 100%; min-width: 0; }
+      html.embedded-admin .content { width: 100%; max-width: none; padding: 0; }
     </style>
     <link rel="stylesheet" href="system-font.css?v=20261009-blue" />
     <link rel="stylesheet" href="portal.css?v=20261016-toast-top-right" />
-    <script src="portal-ui.js?v=20261022-nav-section-state" defer></script>
+    <script src="portal-ui.js?v=20261012-brand-refresh" defer></script>
   </head>
   <body class="portal-page">
     <div class="app-shell">
@@ -2830,19 +2814,12 @@
     <script>
       if (new URLSearchParams(location.search).get("embedded") === "admin") {
         const reportEmbeddedHeight = () => {
-          const height = Math.max(
-            document.body.scrollHeight,
-            document.documentElement.scrollHeight,
-          );
+          const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
           parent.postMessage({ type: "hr-embed-height", height }, location.origin);
         };
-        const resizeObserver = new ResizeObserver(reportEmbeddedHeight);
-        resizeObserver.observe(document.documentElement);
-        resizeObserver.observe(document.body);
-        new MutationObserver(reportEmbeddedHeight).observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
+        new ResizeObserver(reportEmbeddedHeight).observe(document.documentElement);
+        new ResizeObserver(reportEmbeddedHeight).observe(document.body);
+        new MutationObserver(reportEmbeddedHeight).observe(document.body, { childList: true, subtree: true });
         window.addEventListener("load", reportEmbeddedHeight);
         reportEmbeddedHeight();
       }
